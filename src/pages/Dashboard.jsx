@@ -29,7 +29,7 @@ export default function Dashboard() {
     navigate('/')
   }
 
-  const nomeUsuario = usuario.split('@')[0]
+  const nomeUsuario = usuario.split('@')[0].split('.')[0]
   const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
   const mesNome = meses[new Date().getMonth()]
 
