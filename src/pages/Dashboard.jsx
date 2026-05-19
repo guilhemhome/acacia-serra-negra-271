@@ -35,7 +35,10 @@ export default function Dashboard() {
 
   return (
     <div style={{ minHeight:'100vh', background:'linear-gradient(135deg,#1a237e 0%,#283593 50%,#1565c0 100%)', padding:'24px 16px' }}>
-      <div style={{ display:'flex', alignItems:'center', gap:'12px', marginBottom:'24px' }}>
+      <div style={{ textAlign:'center', marginBottom:'8px' }}>
+          <img src="/logo-acacia.png" alt="Logo Acácia" style={{ width:64, height:64, borderRadius:'50%', border:'3px solid rgba(255,255,255,0.5)', objectFit:'cover', display:'block', margin:'0 auto' }} />
+        </div>
+        <div style={{ display:'flex', alignItems:'center', gap:'12px', marginBottom:'24px' }}>
         <div style={{ width:'44px', height:'44px', borderRadius:'50%', background:'rgba(255,255,255,0.2)', display:'flex', alignItems:'center', justifyContent:'center', color:'white', fontWeight:'500', fontSize:'16px' }}>
           {nomeUsuario[0]?.toUpperCase()}
         </div>
