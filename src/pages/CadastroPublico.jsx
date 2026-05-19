@@ -1,5 +1,8 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+
+const navigate = useNavigate()
 
 const graus = ['Aprendiz', 'Companheiro', 'Mestre']
 const ritos = ['REAA', 'York', 'Emulação', 'Schröder', 'Escocês Retificado', 'Brasileiro']
