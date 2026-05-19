@@ -6,6 +6,7 @@ import CadastroPublico from './pages/CadastroPublico'
 import Aprovacoes from './pages/Aprovacoes'
 import Membros from './pages/Membros'
 import PerfilIrmao from './pages/PerfilIrmao'
+import EditarPerfil from './pages/EditarPerfil'
 import Dashboard from './pages/Dashboard'
 
 function RotaProtegida({ children }) {
@@ -33,6 +34,7 @@ function App() {
         <Route path="/aprovacoes" element={<RotaProtegida><Aprovacoes /></RotaProtegida>} />
         <Route path="/membros" element={<RotaProtegida><Membros /></RotaProtegida>} />
         <Route path="/perfil/:id" element={<RotaProtegida><PerfilIrmao /></RotaProtegida>} />
+        <Route path="/editar-perfil" element={<RotaProtegida><EditarPerfil /></RotaProtegida>} />
       </Routes>
     </BrowserRouter>
   )
