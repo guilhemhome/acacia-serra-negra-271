@@ -101,7 +101,7 @@ export default function Membros() {
                   const st = STATUS_LABELS[m.status_cadastro] || STATUS_LABELS['pendente']
                   return (
                     <div key={m.id}
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderRadius: 10, border: '1.5px solid #e2e8f0', background: '#f8fafc', cursor: 'pointer' }}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderRadius: 10, border: '1.5px solid #e2e8f0', background: '#f8fafc', cursor: 'pointer' }} onClick={() => navigate(`/perfil/${m.id}`)}
                       onMouseEnter={e => e.currentTarget.style.boxShadow = '0 2px 12px rgba(79,70,229,0.15)'}
                       onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}
                     >
