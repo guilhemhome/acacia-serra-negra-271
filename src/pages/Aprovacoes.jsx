@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 export default function Aprovacoes() {
+  const navigate = useNavigate()
   const [cadastros, setCadastros] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [aba, setAba] = useState('Pendente')
@@ -38,6 +40,8 @@ export default function Aprovacoes() {
 
   return (
     <div style={{ minHeight:'100vh', background:'linear-gradient(135deg,#1a237e 0%,#283593 50%,#1565c0 100%)', padding:'24px 16px' }}>
+      <div style={{ maxWidth:'700px', margin:'0 auto' }}>
+      <button onClick={() => navigate('/dashboard')} style={{ background:'rgba(255,255,255,0.15)', border:'none', borderRadius:'8px', color:'#fff', padding:'8px 14px', cursor:'pointer', fontSize:'18px', marginBottom:'16px' }}>← Voltar</button>
       <div style={{ textAlign:'center', marginBottom:'32px' }}>
         <img src="/logo-acacia.png" alt="Acácia" style={{ width:'72px', height:'72px', objectFit:'contain', marginBottom:'12px' }} />
         <h1 style={{ color:'white', fontSize:'1.8rem', fontWeight:'bold', margin:0 }}>Aprovações de Cadastro</h1>

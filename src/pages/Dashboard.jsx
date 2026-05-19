@@ -87,8 +87,8 @@ export default function Dashboard() {
                 {[
                   { icon:'👥', label:'Aprovações', bg:'#eff6ff', action: () => navigate('/aprovacoes') },
                   { icon:'➕', label:'Novo cadastro', bg:'#f0fdf4', action: () => navigate('/cadastro') },
-                  { icon:'📋', label:'Ver membros', bg:'#fefce8', action: () => {} },
-                  { icon:'⚙️', label:'Configurações', bg:'#fdf4ff', action: () => {} },
+        { icon:'👥', label:'Ver membros', bg:'#eff6ff', action: () => navigate('/membros') },
+        { icon:'⚙️', label:'Configurações', bg:'#fdf4ff', action: () => navigate('/configuracoes') },
                 ].map(b => (
                   <div key={b.label} onClick={b.action} style={{ padding:'12px', border:'0.5px solid #e5e7eb', borderRadius:'10px', display:'flex', alignItems:'center', gap:'8px', cursor:'pointer' }}>
                     <div style={{ width:'32px', height:'32px', background:b.bg, borderRadius:'8px', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'16px' }}>{b.icon}</div>
