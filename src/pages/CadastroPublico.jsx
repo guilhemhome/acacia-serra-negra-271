@@ -215,6 +215,7 @@ export default function CadastroPublico() {
         </div>
 
         <p className="text-center text-blue-200/60 text-xs mt-6">Fundada em 15/11/1983 · Serra Negra, SP</p>
+            <p onClick={() => navigate('/')} style={{ color:'rgba(255,255,255,0.7)', fontSize:13, cursor:'pointer', marginTop:8 }}>Já tem cadastro? <span style={{ color:'#fff', fontWeight:600, textDecoration:'underline' }}>Entrar</span></p>
       </div>
     </div>
   )
