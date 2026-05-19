@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
-const navigate = useNavigate()
+
 
 const graus = ['Aprendiz', 'Companheiro', 'Mestre']
 const ritos = ['REAA', 'York', 'Emulação', 'Schröder', 'Escocês Retificado', 'Brasileiro']
@@ -21,6 +21,7 @@ function Campo({label, children}) {
 }
 
 export default function CadastroPublico() {
+  const navigate = useNavigate()
   const [etapa, setEtapa] = useState(1)
   const [enviado, setEnviado] = useState(false)
   const [carregando, setCarregando] = useState(false)
