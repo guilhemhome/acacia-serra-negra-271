@@ -30,7 +30,7 @@ export default function CadastroPublico() {
     cim:'', grau_atual:'Mestre', rito:'REAA', data_filiacao:'',
     nome_completo:'', data_nascimento:'', cpf:'', rg:'', rg_orgao:'',
     estado_civil:'', religiao:'', tipo_sanguineo:'',
-    email:'', tel_celular:'', tel_residencial:'',
+    email:'', tel_celular:'',
     profissao:'', formacao:'', local_trabalho:'',
   })
 
@@ -132,14 +132,10 @@ export default function CadastroPublico() {
                   <Campo label="CPF">
                     <input className={inp} placeholder="000.000.000-00" value={form.cpf} onChange={e => set('cpf', e.target.value)}/>
                   </Campo>
-                  <Campo label="RG">
-                    <input className={inp} placeholder="00.000.000-0" value={form.rg} onChange={e => set('rg', e.target.value)}/>
-                  </Campo>
+                  
                 </div>
 
-                <Campo label="Órgão Expedidor">
-                  <input className={inp} placeholder="Ex: SSP-SP" value={form.rg_orgao} onChange={e => set('rg_orgao', e.target.value)}/>
-                </Campo>
+                
 
                 <div className="grid grid-cols-2 gap-3">
                   <Campo label="Estado Civil">
@@ -156,9 +152,7 @@ export default function CadastroPublico() {
                   </Campo>
                 </div>
 
-                <Campo label="Religião">
-                  <input className={inp} placeholder="Ex: Católico" value={form.religiao} onChange={e => set('religiao', e.target.value)}/>
-                </Campo>
+                
 
                 <div className="flex gap-3 mt-2">
                   <button onClick={() => setEtapa(1)} className="flex-1 border-2 border-gray-200 text-gray-600 py-4 rounded-2xl font-bold hover:bg-gray-50 transition">← Voltar</button>
@@ -182,10 +176,7 @@ export default function CadastroPublico() {
                     value={form.tel_celular} onChange={e => set('tel_celular', e.target.value)}/>
                 </Campo>
 
-                <Campo label="Telefone residencial">
-                  <input type="tel" className={inp} placeholder="(19) 3333-3333"
-                    value={form.tel_residencial} onChange={e => set('tel_residencial', e.target.value)}/>
-                </Campo>
+                
 
                 <Campo label="Profissão">
                   <input className={inp} placeholder="Ex: Engenheiro"
