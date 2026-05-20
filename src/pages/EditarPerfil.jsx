@@ -71,13 +71,17 @@ export default function EditarPerfil() {
   }
 
   async function salvarEndereco() {
-    if (!associadoId) { msg('Erro: associado não identificado. ID: ' + associadoId); return }
-    msg('Salvando endereço para ID: ' + associadoId)
+    if (!associadoId) { msg('Erro: associado não identificado.'); return }
     setSalvando(true)
-    const { error: e1 } = await supabase.from('enderecos').upsert({ ...endereco, tipo:'residencial', associado_id: associadoId }, { onConflict: 'associado_id,tipo' })
-    const { error: e2 } = await supabase.from('enderecos').upsert({ ...enderecoComercial, tipo:'comercial', associado_id: associadoId }, { onConflict: 'associado_id,tipo' })
-    if (e1 || e2) msg('Erro ao salvar endereço: ' + (e1||e2).message)
-    else msg('Endereços salvos! ✅')
+    await supabase.from('enderecos').delete().eq('associado_id', associadoId)
+    const inserts = []
+    if (endereco.logradouro) inserts.push({ ...endereco, tipo:'residencial', associado_id: associadoId })
+    if (enderecoComercial.logradouro) inserts.push({ ...enderecoComercial, tipo:'comercial', associado_id: associadoId })
+    if (inserts.length > 0) {
+      const { error } = await supabase.from('enderecos').insert(inserts)
+      if (error) { msg('Erro: ' + error.message); setSalvando(false); return }
+    }
+    msg('Endereços salvos! ✅')
     setSalvando(false)
   }
 
