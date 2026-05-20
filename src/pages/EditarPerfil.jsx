@@ -4,6 +4,14 @@ import { supabase } from '../lib/supabase'
 
 const ABAS = ['👤 Pessoal', '👨‍👩‍👧 Familiares', '🏠 Endereço', '⚒️ Maçônico', '📜 Filosófico']
 
+const Input = ({ label, value, onChange, type='text' }) => (
+  <div style={{ marginBottom: 14 }}>
+    <label style={{ display:'block', fontSize:12, fontWeight:600, color:'#64748b', marginBottom:4, textTransform:'uppercase', letterSpacing:0.5 }}>{label}</label>
+    <input type={type} value={value} onChange={e => onChange(e.target.value)}
+      style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box', outline:'none' }} />
+  </div>
+)
+
 export default function EditarPerfil() {
   const navigate = useNavigate()
   const [aba, setAba] = useState(0)
@@ -101,13 +109,7 @@ export default function EditarPerfil() {
     setFilosoficos(filosoficos.filter(f => f.id !== id))
   }
 
-  const Input = ({ label, value, onChange, type='text' }) => (
-    <div style={{ marginBottom: 14 }}>
-      <label style={{ display:'block', fontSize:12, fontWeight:600, color:'#64748b', marginBottom:4, textTransform:'uppercase', letterSpacing:0.5 }}>{label}</label>
-      <input type={type} value={value} onChange={e => onChange(e.target.value)}
-        style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box', outline:'none' }} />
-    </div>
-  )
+
 
   const Secao = ({ titulo }) => (
     <p style={{ fontWeight:700, color:'#4f46e5', fontSize:12, textTransform:'uppercase', letterSpacing:1, margin:'20px 0 12px' }}>{titulo}</p>
