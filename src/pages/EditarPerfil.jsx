@@ -71,7 +71,8 @@ export default function EditarPerfil() {
   }
 
   async function salvarEndereco() {
-    if (!associadoId) { msg('Erro: associado não identificado.'); return }
+    if (!associadoId) { msg('Erro: associado não identificado. ID: ' + associadoId); return }
+    msg('Salvando endereço para ID: ' + associadoId)
     setSalvando(true)
     const { error: e1 } = await supabase.from('enderecos').upsert({ ...endereco, tipo:'residencial', associado_id: associadoId }, { onConflict: 'associado_id,tipo' })
     const { error: e2 } = await supabase.from('enderecos').upsert({ ...enderecoComercial, tipo:'comercial', associado_id: associadoId }, { onConflict: 'associado_id,tipo' })
