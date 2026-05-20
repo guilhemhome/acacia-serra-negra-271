@@ -53,7 +53,8 @@ export default function Aprovacoes() {
     if (resp.ok) {
       setMensagem('✅ Aprovado! Convite enviado para ' + c.email)
     } else {
-      setMensagem('✅ Aprovado! (e-mail de convite pode já ter sido enviado)')
+      const errBody = await resp.json()
+      setMensagem('❌ Erro no invite: ' + JSON.stringify(errBody))
     }
     buscarCadastros()
     setProcessando(null)
