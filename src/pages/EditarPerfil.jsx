@@ -19,7 +19,7 @@ export default function EditarPerfil() {
   const [mensagem, setMensagem] = useState('')
   const [associadoId, setAssociadoId] = useState(null)
 
-  const [pessoal, setPessoal] = useState({ nome_completo:'', email:'', telefone:'', data_nascimento:'', nome_pai:'', nome_mae:'', profissao:'', empresa:'' })
+  const [pessoal, setPessoal] = useState({ nome_completo:'', email:'', tel_celular:'', data_nascimento:'', nome_pai:'', nome_mae:'', profissao:'', empresa:'' })
   const [endereco, setEndereco] = useState({ tipo:'residencial', logradouro:'', numero:'', complemento:'', bairro:'', cidade:'', estado:'', cep:'' })
   const [enderecoComercial, setEnderecoComercial] = useState({ logradouro:'', numero:'', complemento:'', bairro:'', cidade:'', estado:'', cep:'' })
   const [familiares, setFamiliares] = useState([])
@@ -36,7 +36,7 @@ export default function EditarPerfil() {
       const { data: assoc } = await supabase.from('associados').select('*').eq('user_id', uid).single()
       if (assoc) {
         setAssociadoId(assoc.id)
-        setPessoal({ nome_completo: assoc.nome_completo||'', email: assoc.email||'', telefone: assoc.telefone||'', data_nascimento: assoc.data_nascimento||'', nome_pai: assoc.nome_pai||'', nome_mae: assoc.nome_mae||'', profissao: assoc.profissao||'', empresa: assoc.empresa||'' })
+        setPessoal({ nome_completo: assoc.nome_completo||'', email: assoc.email||'', tel_celular: assoc.tel_celular||'', data_nascimento: assoc.data_nascimento||'', nome_pai: assoc.nome_pai||'', nome_mae: assoc.nome_mae||'', profissao: assoc.profissao||'', empresa: assoc.empresa||'' })
         const { data: fams } = await supabase.from('familiares').select('*').eq('associado_id', assoc.id)
         if (fams) setFamiliares(fams)
         const { data: ends } = await supabase.from('enderecos').select('*').eq('associado_id', assoc.id)
@@ -81,7 +81,7 @@ export default function EditarPerfil() {
   async function adicionarFamiliar() {
     if (!novoFamiliar.nome) return
     const { data, error } = await supabase.from('familiares').insert([{ ...novoFamiliar, associado_id: associadoId }]).select()
-    if (!error && data) { setFamiliares([...familiares, data[0]]); setNovoFamiliar({ nome:'', parentesco:'', data_nascimento:'' }) }
+    if (error) { msg('Erro ao adicionar familiar: ' + error.message) } else if (data) { setFamiliares([...familiares, data[0]]); setNovoFamiliar({ nome:'', parentesco:'', data_nascimento:'' }); msg('Familiar adicionado! ✅') }
   }
 
   async function removerFamiliar(id) {
@@ -155,7 +155,7 @@ export default function EditarPerfil() {
                 <Secao titulo="Dados Pessoais" />
                 <Input label="Nome completo" value={pessoal.nome_completo} onChange={v => setPessoal({...pessoal, nome_completo:v})} />
                 <Input label="E-mail" value={pessoal.email} onChange={v => setPessoal({...pessoal, email:v})} />
-                <Input label="Telefone" value={pessoal.telefone} onChange={v => setPessoal({...pessoal, telefone:v})} />
+                <Input label="Telefone" value={pessoal.tel_celular} onChange={v => setPessoal({...pessoal, tel_celular:v})} />
                 <Input label="Data de nascimento" type="date" value={pessoal.data_nascimento} onChange={v => setPessoal({...pessoal, data_nascimento:v})} />
                 <Input label="Nome do pai" value={pessoal.nome_pai} onChange={v => setPessoal({...pessoal, nome_pai:v})} />
                 <Input label="Nome da mãe" value={pessoal.nome_mae} onChange={v => setPessoal({...pessoal, nome_mae:v})} />
