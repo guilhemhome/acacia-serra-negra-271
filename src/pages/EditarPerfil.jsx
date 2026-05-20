@@ -71,10 +71,12 @@ export default function EditarPerfil() {
   }
 
   async function salvarEndereco() {
+    if (!associadoId) { msg('Erro: associado não identificado.'); return }
     setSalvando(true)
-    await supabase.from('enderecos').upsert({ ...endereco, tipo:'residencial', associado_id: associadoId }, { onConflict: 'associado_id,tipo' })
-    await supabase.from('enderecos').upsert({ ...enderecoComercial, tipo:'comercial', associado_id: associadoId }, { onConflict: 'associado_id,tipo' })
-    msg('Endereços salvos! ✅')
+    const { error: e1 } = await supabase.from('enderecos').upsert({ ...endereco, tipo:'residencial', associado_id: associadoId }, { onConflict: 'associado_id,tipo' })
+    const { error: e2 } = await supabase.from('enderecos').upsert({ ...enderecoComercial, tipo:'comercial', associado_id: associadoId }, { onConflict: 'associado_id,tipo' })
+    if (e1 || e2) msg('Erro ao salvar endereço: ' + (e1||e2).message)
+    else msg('Endereços salvos! ✅')
     setSalvando(false)
   }
 
@@ -91,11 +93,15 @@ export default function EditarPerfil() {
   }
 
   async function salvarGraus() {
+    if (!associadoId) { msg('Erro: associado não identificado.'); return }
     setSalvando(true)
+    let erroGrau = null
     for (const [grau, val] of Object.entries(graus)) {
-      await supabase.from('historico_graus').upsert({ associado_id: associadoId, grau, data_concessao: val.data||null, loja: val.loja }, { onConflict: 'associado_id,grau' })
+      const { error } = await supabase.from('historico_graus').upsert({ associado_id: associadoId, grau, data_concessao: val.data||null, loja: val.loja }, { onConflict: 'associado_id,grau' })
+      if (error) erroGrau = error
     }
-    msg('Graus salvos! ✅')
+    if (erroGrau) msg('Erro ao salvar graus: ' + erroGrau.message)
+    else msg('Graus salvos! ✅')
     setSalvando(false)
   }
 
