@@ -79,7 +79,8 @@ export default function EditarPerfil() {
   }
 
   async function adicionarFamiliar() {
-    if (!novoFamiliar.nome) return
+    if (!novoFamiliar.nome) { msg('Preencha o nome do familiar.'); return }
+    if (!associadoId) { msg('Erro: associado não identificado.'); return }
     const { data, error } = await supabase.from('familiares').insert([{ ...novoFamiliar, associado_id: associadoId }]).select()
     if (error) { msg('Erro ao adicionar familiar: ' + error.message) } else if (data) { setFamiliares([...familiares, data[0]]); setNovoFamiliar({ nome:'', parentesco:'', data_nascimento:'' }); msg('Familiar adicionado! ✅') }
   }
@@ -178,7 +179,6 @@ export default function EditarPerfil() {
                     <option value="esposa">Esposa</option>
                     <option value="filho">Filho</option>
                     <option value="filha">Filha</option>
-                    <option value="outro">Outro</option>
                   </select>
                 </div>
                 <Input label="Data de nascimento" type="date" value={novoFamiliar.data_nascimento} onChange={v => setNovoFamiliar({...novoFamiliar, data_nascimento:v})} />
