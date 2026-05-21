@@ -39,7 +39,7 @@ export default function PerfilIrmao() {
 
   function fmt(data) {
     if (!data) return '—'
-    return new Date(data).toLocaleDateString('pt-BR')
+    const [y,m,d] = data.split('T')[0].split('-'); return `${d}/${m}/${y}`
   }
   function Campo({ label, valor }) {
     return (
