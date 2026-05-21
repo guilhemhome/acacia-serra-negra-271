@@ -44,7 +44,7 @@ export default function CadastroPublico() {
     setCarregando(true)
     await supabase.auth.signInAnonymously();
     const {error} = await supabase.from('associados').insert([{
-      ...form, loja_atual: 'Acácia de Serra Negra', status_cadastro: 'Pendente'
+      ...form, loja_atual: 'Acácia de Serra Negra', status_cadastro: 'pendente'
     }])
     setCarregando(false)
     if (error) { setErro(error.code === '23505' ? 'E-mail ou CIM já cadastrado.' : 'Erro ao enviar.') }
