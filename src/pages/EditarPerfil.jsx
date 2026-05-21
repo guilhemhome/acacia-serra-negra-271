@@ -20,8 +20,8 @@ export default function EditarPerfil() {
   const [associadoId, setAssociadoId] = useState(null)
 
   const [pessoal, setPessoal] = useState({ nome_completo:'', email:'', tel_celular:'', data_nascimento:'', nome_pai:'', nome_mae:'', profissao:'', empresa:'' })
-  const [endereco, setEndereco] = useState({ tipo:'residencial', logradouro:'', numero:'', complemento:'', bairro:'', cidade:'', estado:'', cep:'' })
-  const [enderecoComercial, setEnderecoComercial] = useState({ logradouro:'', numero:'', complemento:'', bairro:'', cidade:'', estado:'', cep:'' })
+  const [endereco, setEndereco] = useState({ tipo:'residencial', logradouro:'', numero:'', complemento:'', bairro:'', cidade:'', uf:'', cep:'' })
+  const [enderecoComercial, setEnderecoComercial] = useState({ logradouro:'', numero:'', complemento:'', bairro:'', cidade:'', uf:'', cep:'' })
   const [familiares, setFamiliares] = useState([])
   const [novoFamiliar, setNovoFamiliar] = useState({ nome:'', parentesco:'', data_nascimento:'' })
   const [graus, setGraus] = useState({ aprendiz:{ data:'', loja:'' }, companheiro:{ data:'', loja:'' }, mestre:{ data:'', loja:'' } })
@@ -222,7 +222,7 @@ export default function EditarPerfil() {
                 <Input label="Bairro" value={endereco.bairro} onChange={v => setEndereco({...endereco, bairro:v})} />
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0 16px' }}>
                   <Input label="Cidade" value={endereco.cidade} onChange={v => setEndereco({...endereco, cidade:v})} />
-                  <Input label="Estado" value={endereco.estado} onChange={v => setEndereco({...endereco, estado:v})} />
+                  <Input label="Estado" value={endereco.uf} onChange={v => setEndereco({...endereco, uf:v})} />
                 </div>
                 <Secao titulo="Endereço Comercial" />
                 <Input label="CEP" value={enderecoComercial.cep} onChange={v => setEnderecoComercial({...enderecoComercial, cep:v})} />
@@ -234,7 +234,7 @@ export default function EditarPerfil() {
                 <Input label="Bairro" value={enderecoComercial.bairro} onChange={v => setEnderecoComercial({...enderecoComercial, bairro:v})} />
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0 16px' }}>
                   <Input label="Cidade" value={enderecoComercial.cidade} onChange={v => setEnderecoComercial({...enderecoComercial, cidade:v})} />
-                  <Input label="Estado" value={enderecoComercial.estado} onChange={v => setEnderecoComercial({...enderecoComercial, estado:v})} />
+                  <Input label="Estado" value={enderecoComercial.uf} onChange={v => setEnderecoComercial({...enderecoComercial, uf:v})} />
                 </div>
                 <BtnSalvar onClick={salvarEndereco} />
               </div>
