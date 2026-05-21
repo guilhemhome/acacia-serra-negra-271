@@ -88,7 +88,7 @@ export default function PerfilIrmao() {
             <div style={{ padding: 24 }}>
               <p style={{ margin: '0 0 16px', fontWeight: 700, color: '#4f46e5', fontSize: 13, textTransform: 'uppercase', letterSpacing: 1 }}>Dados Pessoais</p>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 24px' }}>
-                <Campo label="Telefone" valor={irmao.telefone} />
+                <Campo label="Telefone" valor={irmao.tel_celular} />
                 <Campo label="Data de Nascimento" valor={formatarData(irmao.data_nascimento)} />
               </div>
 
