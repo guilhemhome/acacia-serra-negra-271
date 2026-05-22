@@ -16,8 +16,20 @@ export default function Login() {
     e.preventDefault()
     setCarregando(true)
     setErro('')
-    const { error } = await supabase.auth.signInWithPassword({ email, password: senha })
-    if (error) { setErro('E-mail ou senha incorretos.') } else { navigate('/dashboard') }
+    const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password: senha })
+    if (error) { setErro('E-mail ou senha incorretos.') } else {
+      // Vincular user_id automaticamente se ainda não estiver vinculado
+      const uid = authData.user.id
+      const { data: assoc } = await supabase
+        .from('associados')
+        .select('id, user_id')
+        .eq('email', email)
+        .single()
+      if (assoc && !assoc.user_id) {
+        await supabase.from('associados').update({ user_id: uid }).eq('id', assoc.id)
+      }
+      navigate('/dashboard')
+    }
     setCarregando(false)
   }
 
