@@ -51,10 +51,18 @@ export default function Configuracoes() {
       }
 
       // Carregar perfis de acesso
-      const { data: ps } = await supabase
-        .from('perfis_acesso')
-        .select('*, associados(nome_completo, email)')
-      if (ps) setPerfis(ps)
+      const { data: ps } = await supabase.from('perfis_acesso').select('*')
+      if (ps && ps.length > 0) {
+        const { data: assocs } = await supabase
+          .from('associados')
+          .select('user_id, nome_completo, email')
+          .in('user_id', ps.map(p => p.user_id))
+        const perfisComNome = ps.map(p => ({
+          ...p,
+          associados: assocs?.find(a => a.user_id === p.user_id) || null
+        }))
+        setPerfis(perfisComNome)
+      }
     }
     carregar()
   }, [])
