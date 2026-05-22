@@ -36,6 +36,7 @@ function App() {
         <Route path="/membros" element={<RotaProtegida><Membros /></RotaProtegida>} />
         <Route path="/perfil/:id" element={<RotaProtegida><PerfilIrmao /></RotaProtegida>} />
         <Route path="/editar-perfil" element={<RotaProtegida><EditarPerfil /></RotaProtegida>} />
+        <Route path="/configuracoes" element={<RotaProtegida><Configuracoes /></RotaProtegida>} />
       </Routes>
     </BrowserRouter>
   )
