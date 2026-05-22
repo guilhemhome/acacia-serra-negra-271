@@ -5,6 +5,8 @@ import Login from './pages/Login'
 import CadastroPublico from './pages/CadastroPublico'
 import Aprovacoes from './pages/Aprovacoes'
 import Configuracoes from './pages/Configuracoes'
+import RecuperarSenha from './pages/RecuperarSenha'
+import RedefinirSenha from './pages/RedefinirSenha'
 import Membros from './pages/Membros'
 import PerfilIrmao from './pages/PerfilIrmao'
 import EditarPerfil from './pages/EditarPerfil'
@@ -31,6 +33,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/cadastro" element={<CadastroPublico />} />
+        <Route path="/recuperar-senha" element={<RecuperarSenha />} />
+        <Route path="/redefinir-senha" element={<RedefinirSenha />} />
         <Route path="/dashboard" element={<RotaProtegida><Dashboard /></RotaProtegida>} />
         <Route path="/aprovacoes" element={<RotaProtegida><Aprovacoes /></RotaProtegida>} />
         <Route path="/membros" element={<RotaProtegida><Membros /></RotaProtegida>} />

@@ -77,7 +77,7 @@ export default function Login() {
             </form>
 
             <p className="text-center text-sm text-gray-400 mt-4 cursor-pointer hover:text-gray-600">
-              Esqueci minha senha
+              <span onClick={() => navigate('/recuperar-senha')} style={{ cursor:'pointer', color:'#6366f1' }}>Esqueci minha senha</span>
             </p>
 
           </div>
