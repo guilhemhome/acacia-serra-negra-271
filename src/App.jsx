@@ -43,7 +43,7 @@ function App() {
         <Route path="/perfil/:id" element={<RotaProtegida><PerfilIrmao /></RotaProtegida>} />
         <Route path="/editar-perfil" element={<RotaProtegida><EditarPerfil /></RotaProtegida>} />
         <Route path="/configuracoes" element={<RotaProtegida><Configuracoes /></RotaProtegida>} />
-        <Route path="/templates-mensagens" element={<TemplatesMensagens />} />
+        <Route path="/templates-mensagens" element={<RotaProtegida><TemplatesMensagens /></RotaProtegida>} />
           <Route path="/calendario" element={<RotaProtegida><Calendario /></RotaProtegida>} />
       </Routes>
     </BrowserRouter>
