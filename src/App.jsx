@@ -1,3 +1,4 @@
+import MonitorContexto from './components/MonitorContexto'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
@@ -42,6 +43,7 @@ function App() {
         <Route path="/editar-perfil" element={<RotaProtegida><EditarPerfil /></RotaProtegida>} />
         <Route path="/configuracoes" element={<RotaProtegida><Configuracoes /></RotaProtegida>} />
       </Routes>
+      <MonitorContexto />
     </BrowserRouter>
   )
 }
