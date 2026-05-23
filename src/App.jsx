@@ -1,3 +1,4 @@
+import TemplatesMensagens from './pages/TemplatesMensagens'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
@@ -42,7 +43,8 @@ function App() {
         <Route path="/perfil/:id" element={<RotaProtegida><PerfilIrmao /></RotaProtegida>} />
         <Route path="/editar-perfil" element={<RotaProtegida><EditarPerfil /></RotaProtegida>} />
         <Route path="/configuracoes" element={<RotaProtegida><Configuracoes /></RotaProtegida>} />
-        <Route path="/calendario" element={<RotaProtegida><Calendario /></RotaProtegida>} />
+        <Route path="/templates-mensagens" element={<TemplatesMensagens />} />
+          <Route path="/calendario" element={<RotaProtegida><Calendario /></RotaProtegida>} />
       </Routes>
     </BrowserRouter>
   )
