@@ -91,7 +91,8 @@ export default function Dashboard() {
                   { icon:'👥', label:'Aprovações', bg:'#eff6ff', action: () => navigate('/aprovacoes') },
                   { icon:'➕', label:'Novo cadastro', bg:'#f0fdf4', action: () => navigate('/cadastro') },
         { icon:'👥', label:'Ver membros', bg:'#eff6ff', action: () => navigate('/membros') },
-        { icon:'⚙️', label:'Configurações', bg:'#fdf4ff', action: () => navigate('/configuracoes') },
+        { icon:'📅', label:'Calendário', bg:'#fdf4ff', action: () => navigate('/calendario') },
+        { icon:'⚙️', label:'Configurações', bg:'#f0f9ff', action: () => navigate('/configuracoes') },
         { icon:'✏️', label:'Meu perfil', bg:'#f0f9ff', action: () => navigate('/editar-perfil') },
                 ].map(b => (
                   <div key={b.label} onClick={b.action} style={{ padding:'12px', border:'0.5px solid #e5e7eb', borderRadius:'10px', display:'flex', alignItems:'center', gap:'8px', cursor:'pointer' }}>
