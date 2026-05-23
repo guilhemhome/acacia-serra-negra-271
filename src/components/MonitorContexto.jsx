@@ -80,7 +80,7 @@ export default function MonitorContexto() {
   }
 
   return (
-    <div style={{ position:'fixed', bottom:16, right:16, zIndex:9999, fontFamily:'Arial,sans-serif' }}>
+    <div style={{ position:'fixed', bottom:16, right:16, zIndex:99999, fontFamily:'Arial,sans-serif' }}>
       {aberto && (
         <div style={{ background:'#1e293b', color:'#fff', borderRadius:12, padding:16, marginBottom:8, width:230, boxShadow:'0 8px 32px rgba(0,0,0,0.4)' }}>
           <p style={{ margin:'0 0 4px', fontWeight:700, fontSize:13 }}>📊 Contexto da Sessão</p>
