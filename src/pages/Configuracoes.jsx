@@ -175,7 +175,7 @@ export default function Configuracoes() {
         </div>
 
       </div>
+      <MonitorContexto />
     </div>
-    <MonitorContexto />
   )
 }
