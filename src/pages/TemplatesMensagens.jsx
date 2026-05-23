@@ -51,8 +51,9 @@ export default function TemplatesMensagens() {
   }
 
   const variaveis = [
-    { var: '{nome}', desc: 'Nome do aniversariante' },
-    { var: '{data}', desc: 'Data de nascimento' },
+    { var: '{nome_irmao}', desc: 'Nome do irmão' },
+    { var: '{nome_dependente}', desc: 'Nome do dependente' },
+    { var: '{parentesco}', desc: 'Parentesco (ex: filho, esposa)' },
     { var: '{loja}', desc: 'Nome da loja' },
   ]
 
