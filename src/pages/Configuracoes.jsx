@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import MonitorContexto from '../components/MonitorContexto'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
@@ -175,5 +176,6 @@ export default function Configuracoes() {
 
       </div>
     </div>
+    <MonitorContexto />
   )
 }
