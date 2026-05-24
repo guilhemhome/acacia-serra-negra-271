@@ -111,11 +111,10 @@ export default function Calendario() {
     
     // Filtrar por visibilidade
     const filtrados = (data||[]).filter(ev => {
-      if (perfil === 'adm' || perfil === 'secretario') return true
+      if (!perfil || perfil === 'adm' || perfil === 'secretario') return true
       if (ev.visibilidade === 'todos') return true
       if (ev.visibilidade === 'mestres' && grauUsuario === 'mestre') return true
       if (ev.visibilidade === 'companheiros' && (grauUsuario === 'mestre' || grauUsuario === 'companheiro')) return true
-      if (ev.visibilidade === 'diretoria' && (perfil === 'adm' || perfil === 'secretario')) return true
       return false
     })
 
