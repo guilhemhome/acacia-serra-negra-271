@@ -174,6 +174,17 @@ export default function Configuracoes() {
           </div>
         </div>
 
+        {/* Templates de Mensagens */}
+        <div style={{ background:'#fff', borderRadius:16, overflow:'hidden', boxShadow:'0 8px 32px rgba(0,0,0,0.2)', marginBottom:16 }}>
+          <div style={{ height:4, background:'linear-gradient(90deg,#1e40af,#4f46e5,#7c3aed)' }} />
+          <div style={{ padding:24 }}>
+            <p style={{ margin:'0 0 16px', fontWeight:700, color:'#4f46e5', fontSize:13, textTransform:'uppercase', letterSpacing:1 }}>Mensagens</p>
+            <button onClick={() => navigate('/templates-mensagens')}
+              style={{ width:'100%', padding:'12px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#1e40af,#4f46e5)', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
+              ✉️ Editar Templates de Aniversário
+            </button>
+          </div>
+        </div>
       </div>
       <MonitorContexto />
     </div>
