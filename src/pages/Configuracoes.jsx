@@ -185,6 +185,7 @@ export default function Configuracoes() {
             </button>
           </div>
         </div>
+        </div>
       </div>
       <MonitorContexto />
     </div>
