@@ -195,12 +195,13 @@ export default function Dashboard() {
           {aniversarios.length === 0 ? (
             <p style={{ color:'#94a3b8', textAlign:'center', fontSize:14 }}>Nenhum aniversário neste período.</p>
           ) : aniversarios.map((a,i) => (
-            <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 14px', background:'#f8fafc', borderRadius:10, marginBottom:8 }}>
-              <div>
-                <p style={{ margin:0, fontWeight:700, color:'#1e293b', fontSize:14 }}>🎂 {a.nome}</p>
-                <p style={{ margin:0, fontSize:12, color:'#64748b' }}>{a.detalhe}</p>
+            <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'8px 14px', background:'#f8fafc', borderRadius:10, marginBottom:6 }}>
+              <div style={{ display:'flex', alignItems:'center', gap:8, flex:1, minWidth:0 }}>
+                <span>🎂</span>
+                <span style={{ fontWeight:700, color:'#1e293b', fontSize:13, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{a.nome}</span>
+                <span style={{ fontSize:12, color:'#94a3b8', whiteSpace:'nowrap' }}>· {a.detalhe}</span>
               </div>
-              <span style={{ fontWeight:700, color:'#1a237e', fontSize:14 }}>{a.dia}</span>
+              <span style={{ fontWeight:700, color:'#1a237e', fontSize:13, whiteSpace:'nowrap', marginLeft:8 }}>{a.dia}</span>
             </div>
           ))}
         </div>
