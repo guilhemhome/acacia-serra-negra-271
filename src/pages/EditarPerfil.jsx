@@ -24,6 +24,8 @@ export default function EditarPerfil() {
   const [enderecoComercial, setEnderecoComercial] = useState({ logradouro:'', numero:'', complemento:'', bairro:'', cidade:'', uf:'', cep:'' })
   const [familiares, setFamiliares] = useState([])
   const [novoFamiliar, setNovoFamiliar] = useState({ nome:'', parentesco:'', data_nascimento:'' })
+  const [editandoFamiliar, setEditandoFamiliar] = useState(null)
+  const [editFamiliarForm, setEditFamiliarForm] = useState({ nome:'', parentesco:'', data_nascimento:'' })
   const [graus, setGraus] = useState({ aprendiz:{ data:'', loja:'' }, companheiro:{ data:'', loja:'' }, mestre:{ data:'', loja:'' } })
   const [filosoficos, setFilosoficos] = useState([])
   const [novoFilosofico, setNovoFilosofico] = useState({ grau:'', loja:'', data_concessao:'', observacoes:'' })
@@ -92,6 +94,19 @@ export default function EditarPerfil() {
     if (error) { msg('Erro ao adicionar familiar: ' + error.message) } else if (data) { setFamiliares([...familiares, data[0]]); setNovoFamiliar({ nome:'', parentesco:'', data_nascimento:'' }); msg('Familiar adicionado! ✅') }
   }
 
+  async function salvarEdicaoFamiliar() {
+    if (!editandoFamiliar) return
+    const { error } = await supabase.from('dependentes')
+      .update({ nome: editFamiliarForm.nome, parentesco: editFamiliarForm.parentesco, data_nascimento: editFamiliarForm.data_nascimento || null })
+      .eq('id', editandoFamiliar)
+    if (error) setMensagem('Erro ao salvar: ' + error.message)
+    else {
+      setMensagem('Familiar atualizado! ✅')
+      setEditandoFamiliar(null)
+      const { data } = await supabase.from('dependentes').select('*').eq('associado_id', associadoId)
+      setFamiliares(data || [])
+    }
+  }
   async function removerFamiliar(id) {
     await supabase.from('familiares').delete().eq('id', id)
     setFamiliares(familiares.filter(f => f.id !== id))
@@ -199,12 +214,44 @@ export default function EditarPerfil() {
                 </button>
                 <Secao titulo="Familiares cadastrados" />
                 {familiares.length === 0 ? <p style={{ color:'#94a3b8', textAlign:'center' }}>Nenhum familiar cadastrado.</p> : familiares.map(f => (
-                  <div key={f.id} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 14px', background:'#f8fafc', borderRadius:8, marginBottom:8, border:'1px solid #e2e8f0' }}>
-                    <div>
-                      <p style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{f.nome}</p>
-                      <p style={{ margin:0, fontSize:12, color:'#64748b' }}>{f.parentesco} {f.data_nascimento ? '· '+new Date(f.data_nascimento).toLocaleDateString('pt-BR') : ''}</p>
-                    </div>
-                    <button onClick={() => removerFamiliar(f.id)} style={{ background:'none', border:'none', color:'#dc2626', cursor:'pointer', fontSize:18 }}>✕</button>
+                  <div key={f.id} style={{ background:'#f8fafc', borderRadius:8, marginBottom:8, border:'1px solid #e2e8f0', overflow:'hidden' }}>
+                    {editandoFamiliar === f.id ? (
+                      <div style={{ padding:'12px 14px' }}>
+                        <input value={editFamiliarForm.nome} onChange={e => setEditFamiliarForm({...editFamiliarForm, nome:e.target.value})}
+                          placeholder="Nome" style={{ width:'100%', padding:'8px 10px', borderRadius:6, border:'1px solid #cbd5e1', fontSize:14, marginBottom:8, boxSizing:'border-box' }} />
+                        <select value={editFamiliarForm.parentesco} onChange={e => setEditFamiliarForm({...editFamiliarForm, parentesco:e.target.value})}
+                          style={{ width:'100%', padding:'8px 10px', borderRadius:6, border:'1px solid #cbd5e1', fontSize:14, marginBottom:8, boxSizing:'border-box' }}>
+                          <option value="">Selecione...</option>
+                          <option value="esposa">Esposa</option>
+                          <option value="esposo">Esposo</option>
+                          <option value="filho">Filho</option>
+                          <option value="filha">Filha</option>
+                          <option value="pai">Pai</option>
+                          <option value="mãe">Mãe</option>
+                          <option value="outro">Outro</option>
+                        </select>
+                        <input type="date" value={editFamiliarForm.data_nascimento} onChange={e => setEditFamiliarForm({...editFamiliarForm, data_nascimento:e.target.value})}
+                          style={{ width:'100%', padding:'8px 10px', borderRadius:6, border:'1px solid #cbd5e1', fontSize:14, marginBottom:10, boxSizing:'border-box' }} />
+                        <div style={{ display:'flex', gap:8 }}>
+                          <button onClick={salvarEdicaoFamiliar}
+                            style={{ flex:1, padding:'8px', borderRadius:6, border:'none', background:'#1a237e', color:'#fff', fontWeight:700, fontSize:13, cursor:'pointer' }}>💾 Salvar</button>
+                          <button onClick={() => setEditandoFamiliar(null)}
+                            style={{ flex:1, padding:'8px', borderRadius:6, border:'1px solid #e2e8f0', background:'#fff', color:'#64748b', fontWeight:700, fontSize:13, cursor:'pointer' }}>Cancelar</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 14px' }}>
+                        <div>
+                          <p style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{f.nome}</p>
+                          <p style={{ margin:0, fontSize:12, color:'#64748b' }}>{f.parentesco} {f.data_nascimento ? '· '+f.data_nascimento.split('T')[0].split('-').reverse().join('/') : ''}</p>
+                        </div>
+                        <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+                          <button onClick={() => { setEditandoFamiliar(f.id); setEditFamiliarForm({ nome:f.nome, parentesco:f.parentesco, data_nascimento:f.data_nascimento ? f.data_nascimento.split('T')[0] : '' }) }}
+                            style={{ background:'#e0f2fe', border:'none', borderRadius:6, color:'#0369a1', padding:'4px 10px', cursor:'pointer', fontSize:12, fontWeight:600 }}>✏️</button>
+                          <button onClick={() => removerFamiliar(f.id)} style={{ background:'none', border:'none', color:'#dc2626', cursor:'pointer', fontSize:18 }}>✕</button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
