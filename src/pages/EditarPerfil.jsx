@@ -96,14 +96,14 @@ export default function EditarPerfil() {
 
   async function salvarEdicaoFamiliar() {
     if (!editandoFamiliar) return
-    const { error } = await supabase.from('dependentes')
+    const { error } = await supabase.from('familiares')
       .update({ nome: editFamiliarForm.nome, parentesco: editFamiliarForm.parentesco, data_nascimento: editFamiliarForm.data_nascimento || null })
       .eq('id', editandoFamiliar)
     if (error) setMensagem('Erro ao salvar: ' + error.message)
     else {
       setMensagem('Familiar atualizado! ✅')
       setEditandoFamiliar(null)
-      const { data } = await supabase.from('dependentes').select('*').eq('associado_id', associadoId)
+      const { data } = await supabase.from('familiares').select('*').eq('associado_id', associadoId)
       setFamiliares(data || [])
     }
   }
