@@ -28,6 +28,7 @@ export default function EditarPerfil() {
   const [editandoFamiliar, setEditandoFamiliar] = useState(null)
   const [editFamiliarForm, setEditFamiliarForm] = useState({ nome:'', parentesco:'', data_nascimento:'' })
   const [graus, setGraus] = useState({ aprendiz:{ data:'', loja:'' }, companheiro:{ data:'', loja:'' }, mestre:{ data:'', loja:'' } })
+  const [bodes, setBodes] = useState({ bodes_asfalto:false, bodes_asfalto_numero:'', bodes_asfalto_data_admissao:'' })
   const [filosoficos, setFilosoficos] = useState([])
   const [novoFilosofico, setNovoFilosofico] = useState({ grau:'', loja:'', data_concessao:'', observacoes:'' })
   const [editandoFilosofico, setEditandoFilosofico] = useState(null)
@@ -42,6 +43,7 @@ export default function EditarPerfil() {
       if (assoc) {
         setAssociadoId(assoc.id)
         setPessoal({ nome_completo: assoc.nome_completo||'', email: assoc.email||'', tel_celular: assoc.tel_celular||'', data_nascimento: assoc.data_nascimento||'', nome_pai: assoc.nome_pai||'', nome_mae: assoc.nome_mae||'', profissao: assoc.profissao||'', empresa: assoc.empresa||'' })
+        setBodes({ bodes_asfalto: assoc.bodes_asfalto||false, bodes_asfalto_numero: assoc.bodes_asfalto_numero||'', bodes_asfalto_data_admissao: assoc.bodes_asfalto_data_admissao||'' })
         const { data: fams } = await supabase.from('familiares').select('*').eq('associado_id', assoc.id)
         if (fams) setFamiliares(fams)
         const { data: ends } = await supabase.from('enderecos').select('*').eq('associado_id', assoc.id)
@@ -128,6 +130,17 @@ export default function EditarPerfil() {
     setSalvando(false)
   }
 
+  async function salvarBodes() {
+    setSalvando(true)
+    const { error } = await supabase.from('associados').update({
+      bodes_asfalto: bodes.bodes_asfalto,
+      bodes_asfalto_numero: bodes.bodes_asfalto_numero || null,
+      bodes_asfalto_data_admissao: bodes.bodes_asfalto_data_admissao || null
+    }).eq('id', associadoId)
+    if (error) msg('Erro ao salvar: ' + error.message)
+    else msg('Dados dos Bodes salvos! ✅')
+    setSalvando(false)
+  }
   async function adicionarFilosofico() {
     if (!novoFilosofico.grau) return
     const { data, error } = await supabase.from('graus_filosoficos').insert([{ ...novoFilosofico, associado_id: associadoId }]).select()
@@ -313,6 +326,24 @@ export default function EditarPerfil() {
                   </div>
                 ))}
                 <BtnSalvar onClick={salvarGraus} />
+
+                {/* Bodes do Asfalto */}
+                <Secao titulo="🐐 Bodes do Asfalto" />
+                <div style={{ marginBottom:14 }}>
+                  <label style={{ display:'flex', alignItems:'center', gap:10, cursor:'pointer' }}>
+                    <input type="checkbox" checked={bodes.bodes_asfalto} onChange={e => setBodes({...bodes, bodes_asfalto:e.target.checked})}
+                      style={{ width:20, height:20, cursor:'pointer' }} />
+                    <span style={{ fontSize:14, fontWeight:600, color:'#1e293b' }}>Sou membro do Moto Clube Bodes do Asfalto</span>
+                  </label>
+                  <p style={{ margin:'4px 0 0 30px', fontSize:12, color:'#64748b' }}>Entidade paramaçônica reconhecida pela GLESP</p>
+                </div>
+                {bodes.bodes_asfalto && (
+                  <div>
+                    <Input label="Número de sócio" value={bodes.bodes_asfalto_numero} onChange={v => setBodes({...bodes, bodes_asfalto_numero:v})} />
+                    <DateInput label="Data de admissão" value={bodes.bodes_asfalto_data_admissao} onChange={v => setBodes({...bodes, bodes_asfalto_data_admissao:v})} />
+                  </div>
+                )}
+                <BtnSalvar onClick={salvarBodes} />
               </div>
             )}
 
