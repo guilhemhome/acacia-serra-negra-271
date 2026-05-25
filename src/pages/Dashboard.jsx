@@ -9,10 +9,14 @@ export default function Dashboard() {
   const [usuario, setUsuario] = useState({ email:'', perfil:'membro', nome:'' })
   const [grauUsuario, setGrauUsuario] = useState(null)
   const [carregando, setCarregando] = useState(true)
-  const [filtroEventos, setFiltroEventos] = useState('proximos') // 'proximos' | 'passados' | 'todos'
+  const [dataInicio, setDataInicio] = useState(hoje)
+  const [dataFim, setDataFim] = useState(() => {
+    const d = new Date(); d.setMonth(d.getMonth()+1);
+    return d.toISOString().split('T')[0]
+  })
 
   useEffect(() => { buscarDados() }, [])
-  useEffect(() => { if (grauUsuario !== null) buscarEventos() }, [filtroEventos, grauUsuario, usuario.perfil])
+  useEffect(() => { if (grauUsuario !== null) buscarEventos() }, [dataInicio, dataFim, grauUsuario, usuario.perfil])
 
   function hoje() { return new Date().toISOString().split('T')[0] }
   function mesAtual() { return String(new Date().getMonth()+1).padStart(2,'0') }
@@ -56,10 +60,9 @@ export default function Dashboard() {
   }
 
   async function buscarEventos() {
-    const hj = hoje()
     let query = supabase.from('eventos').select('*').eq('status','agendado').order('data_evento')
-    if (filtroEventos === 'proximos') query = query.gte('data_evento', hj)
-    else if (filtroEventos === 'passados') query = query.lt('data_evento', hj)
+    if (dataInicio) query = query.gte('data_evento', dataInicio)
+    if (dataFim) query = query.lte('data_evento', dataFim)
     const { data } = await query
     // Filtrar por visibilidade
     const filtrados = (data||[]).filter(ev => {
@@ -126,21 +129,23 @@ export default function Dashboard() {
 
         {/* Próximos Eventos */}
         <div style={{ background:'rgba(255,255,255,0.95)', borderRadius:16, padding:20, marginBottom:20 }}>
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14, flexWrap:'wrap', gap:8 }}>
-            <p style={{ margin:0, fontWeight:700, color:'#1a237e', fontSize:15 }}>📅 Eventos</p>
-            <div style={{ display:'flex', gap:6 }}>
-              {[{v:'proximos',l:'Próximos'},{v:'passados',l:'Passados'},{v:'todos',l:'Todos'}].map(f => (
-                <button key={f.v} onClick={() => setFiltroEventos(f.v)}
-                  style={{ padding:'4px 10px', borderRadius:6, border:'none', fontSize:12, fontWeight:700, cursor:'pointer',
-                    background: filtroEventos===f.v ? '#1a237e' : '#f1f5f9',
-                    color: filtroEventos===f.v ? '#fff' : '#64748b' }}>
-                  {f.l}
-                </button>
-              ))}
+          <div style={{ marginBottom:14 }}>
+            <p style={{ margin:'0 0 10px', fontWeight:700, color:'#1a237e', fontSize:15 }}>📅 Eventos</p>
+            <div style={{ display:'flex', gap:8, alignItems:'center', flexWrap:'wrap' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:6, flex:1 }}>
+                <label style={{ fontSize:12, color:'#64748b', whiteSpace:'nowrap' }}>De:</label>
+                <input type="date" value={dataInicio} onChange={e => setDataInicio(e.target.value)}
+                  style={{ flex:1, padding:'6px 8px', borderRadius:6, border:'1px solid #e2e8f0', fontSize:12 }} />
+              </div>
+              <div style={{ display:'flex', alignItems:'center', gap:6, flex:1 }}>
+                <label style={{ fontSize:12, color:'#64748b', whiteSpace:'nowrap' }}>Até:</label>
+                <input type="date" value={dataFim} onChange={e => setDataFim(e.target.value)}
+                  style={{ flex:1, padding:'6px 8px', borderRadius:6, border:'1px solid #e2e8f0', fontSize:12 }} />
+              </div>
             </div>
           </div>
           {eventos.length === 0 ? (
-            <p style={{ color:'#94a3b8', textAlign:'center', fontSize:14 }}>Nenhum evento {filtroEventos === 'proximos' ? 'próximo' : filtroEventos === 'passados' ? 'passado' : ''} encontrado.</p>
+            <p style={{ color:'#94a3b8', textAlign:'center', fontSize:14 }}>Nenhum evento encontrado neste período.</p>
           ) : eventos.map(ev => (
             <div key={ev.id} onClick={() => navigate('/calendario')}
               style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', background:'#f8fafc', borderRadius:10, marginBottom:8, cursor:'pointer', borderLeft:'4px solid #1a237e' }}>
