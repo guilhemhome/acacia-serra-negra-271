@@ -29,6 +29,8 @@ export default function EditarPerfil() {
   const [graus, setGraus] = useState({ aprendiz:{ data:'', loja:'' }, companheiro:{ data:'', loja:'' }, mestre:{ data:'', loja:'' } })
   const [filosoficos, setFilosoficos] = useState([])
   const [novoFilosofico, setNovoFilosofico] = useState({ grau:'', loja:'', data_concessao:'', observacoes:'' })
+  const [editandoFilosofico, setEditandoFilosofico] = useState(null)
+  const [editFilosoficoForm, setEditFilosoficoForm] = useState({ grau:'', loja:'', data_concessao:'', observacoes:'' })
 
   useEffect(() => {
     async function carregar() {
@@ -131,6 +133,19 @@ export default function EditarPerfil() {
     if (!error && data) { setFilosoficos([...filosoficos, data[0]]); setNovoFilosofico({ grau:'', loja:'', data_concessao:'', observacoes:'' }) }
   }
 
+  async function salvarEdicaoFilosofico() {
+    if (!editandoFilosofico) return
+    const { error } = await supabase.from('graus_filosoficos')
+      .update({ grau: editFilosoficoForm.grau, loja: editFilosoficoForm.loja, data_concessao: editFilosoficoForm.data_concessao || null, observacoes: editFilosoficoForm.observacoes })
+      .eq('id', editandoFilosofico)
+    if (error) setMensagem('Erro ao salvar: ' + error.message)
+    else {
+      setMensagem('Grau filosófico atualizado! ✅')
+      setEditandoFilosofico(null)
+      const { data } = await supabase.from('graus_filosoficos').select('*').eq('associado_id', associadoId)
+      setFilosoficos(data || [])
+    }
+  }
   async function removerFilosofico(id) {
     await supabase.from('graus_filosoficos').delete().eq('id', id)
     setFilosoficos(filosoficos.filter(f => f.id !== id))
@@ -322,12 +337,44 @@ export default function EditarPerfil() {
                 </button>
                 <Secao titulo="Graus filosóficos cadastrados" />
                 {filosoficos.length === 0 ? <p style={{ color:'#94a3b8', textAlign:'center' }}>Nenhum grau filosófico cadastrado.</p> : filosoficos.map(f => (
-                  <div key={f.id} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 14px', background:'#f8fafc', borderRadius:8, marginBottom:8, border:'1px solid #e2e8f0' }}>
-                    <div>
-                      <p style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{f.grau}</p>
-                      <p style={{ margin:0, fontSize:12, color:'#64748b' }}>{f.loja} {f.data_concessao ? '· '+new Date(f.data_concessao).toLocaleDateString('pt-BR') : ''}</p>
-                    </div>
-                    <button onClick={() => removerFilosofico(f.id)} style={{ background:'none', border:'none', color:'#dc2626', cursor:'pointer', fontSize:18 }}>✕</button>
+                  <div key={f.id} style={{ background:'#f8fafc', borderRadius:8, marginBottom:8, border:'1px solid #e2e8f0', overflow:'hidden' }}>
+                    {editandoFilosofico === f.id ? (
+                      <div style={{ padding:'12px 14px' }}>
+                        <select value={editFilosoficoForm.grau} onChange={e => setEditFilosoficoForm({...editFilosoficoForm, grau:e.target.value})}
+                          style={{ width:'100%', padding:'8px 10px', borderRadius:6, border:'1px solid #cbd5e1', fontSize:14, marginBottom:8, boxSizing:'border-box' }}>
+                          <option value="">Selecione...</option>
+                          <option value="Capitular">Capitular</option>
+                          <option value="Criptográfico">Criptográfico</option>
+                          <option value="Filosófico">Filosófico</option>
+                          <option value="REAA">REAA</option>
+                          <option value="Outro">Outro</option>
+                        </select>
+                        <input value={editFilosoficoForm.loja} onChange={e => setEditFilosoficoForm({...editFilosoficoForm, loja:e.target.value})}
+                          placeholder="Loja/Capítulo" style={{ width:'100%', padding:'8px 10px', borderRadius:6, border:'1px solid #cbd5e1', fontSize:14, marginBottom:8, boxSizing:'border-box' }} />
+                        <input type="date" value={editFilosoficoForm.data_concessao} onChange={e => setEditFilosoficoForm({...editFilosoficoForm, data_concessao:e.target.value})}
+                          style={{ width:'100%', padding:'8px 10px', borderRadius:6, border:'1px solid #cbd5e1', fontSize:14, marginBottom:8, boxSizing:'border-box' }} />
+                        <input value={editFilosoficoForm.observacoes} onChange={e => setEditFilosoficoForm({...editFilosoficoForm, observacoes:e.target.value})}
+                          placeholder="Observações" style={{ width:'100%', padding:'8px 10px', borderRadius:6, border:'1px solid #cbd5e1', fontSize:14, marginBottom:10, boxSizing:'border-box' }} />
+                        <div style={{ display:'flex', gap:8 }}>
+                          <button onClick={salvarEdicaoFilosofico}
+                            style={{ flex:1, padding:'8px', borderRadius:6, border:'none', background:'#1a237e', color:'#fff', fontWeight:700, fontSize:13, cursor:'pointer' }}>💾 Salvar</button>
+                          <button onClick={() => setEditandoFilosofico(null)}
+                            style={{ flex:1, padding:'8px', borderRadius:6, border:'1px solid #e2e8f0', background:'#fff', color:'#64748b', fontWeight:700, fontSize:13, cursor:'pointer' }}>Cancelar</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 14px' }}>
+                        <div>
+                          <p style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{f.grau}</p>
+                          <p style={{ margin:0, fontSize:12, color:'#64748b' }}>{f.loja} {f.data_concessao ? '· '+f.data_concessao.split('T')[0].split('-').reverse().join('/') : ''}</p>
+                        </div>
+                        <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+                          <button onClick={() => { setEditandoFilosofico(f.id); setEditFilosoficoForm({ grau:f.grau||'', loja:f.loja||'', data_concessao:f.data_concessao ? f.data_concessao.split('T')[0] : '', observacoes:f.observacoes||'' }) }}
+                            style={{ background:'#e0f2fe', border:'none', borderRadius:6, color:'#0369a1', padding:'4px 10px', cursor:'pointer', fontSize:12, fontWeight:600 }}>✏️</button>
+                          <button onClick={() => removerFilosofico(f.id)} style={{ background:'none', border:'none', color:'#dc2626', cursor:'pointer', fontSize:18 }}>✕</button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
