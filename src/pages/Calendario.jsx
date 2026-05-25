@@ -66,14 +66,14 @@ export default function Calendario() {
   const [aba, setAba] = useState('eventos') // 'eventos' | 'aniversarios'
 
   useEffect(() => { init() }, [])
-  useEffect(() => { if (associadoId !== null) carregarEventos() }, [filtroMes, associadoId, grauUsuario])
+  useEffect(() => { carregarEventos() }, [filtroMes])
 
   async function init() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) return
     const { data: p } = await supabase.from('perfis_acesso').select('perfil').eq('user_id', session.user.id).single()
     setPerfil(p?.perfil || 'membro')
-    const { data: assoc } = await supabase.from('associados').select('id, grau:historico_graus(grau)').eq('email', session.user.email).single()
+    const { data: assoc } = await supabase.from('associados').select('id, grau:historico_graus(grau)').eq('user_id', session.user.id).single()
     if (assoc) {
       setAssociadoId(assoc.id)
       const graus = assoc.grau || []
