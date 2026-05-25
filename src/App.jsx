@@ -7,6 +7,7 @@ import CadastroPublico from './pages/CadastroPublico'
 import Aprovacoes from './pages/Aprovacoes'
 import Configuracoes from './pages/Configuracoes'
 import Calendario from './pages/Calendario'
+import GestaoCargos from './pages/GestaoCargos'
 import RecuperarSenha from './pages/RecuperarSenha'
 import RedefinirSenha from './pages/RedefinirSenha'
 import Membros from './pages/Membros'
@@ -45,6 +46,7 @@ function App() {
         <Route path="/configuracoes" element={<RotaProtegida><Configuracoes /></RotaProtegida>} />
         <Route path="/templates-mensagens" element={<RotaProtegida><TemplatesMensagens /></RotaProtegida>} />
           <Route path="/calendario" element={<RotaProtegida><Calendario /></RotaProtegida>} />
+          <Route path="/gestao-cargos" element={<RotaProtegida><GestaoCargos /></RotaProtegida>} />
       </Routes>
     </BrowserRouter>
   )
