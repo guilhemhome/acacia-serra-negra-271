@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { DateInput } from '../components/DateInput'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
@@ -156,12 +157,12 @@ export default function Dashboard() {
           <span style={{ color:'rgba(255,255,255,0.8)', fontSize:13, whiteSpace:'nowrap' }}>📆 Período:</span>
           <div style={{ display:'flex', alignItems:'center', gap:6, flex:1 }}>
             <label style={{ fontSize:12, color:'rgba(255,255,255,0.7)', whiteSpace:'nowrap' }}>De:</label>
-            <input type="date" value={dataInicio} onChange={e => setDataInicio(e.target.value)}
+            <DateInput value={dataInicio} onChange={v => setDataInicio(v)}
               style={{ flex:1, padding:'6px 8px', borderRadius:6, border:'none', fontSize:12 }} />
           </div>
           <div style={{ display:'flex', alignItems:'center', gap:6, flex:1 }}>
             <label style={{ fontSize:12, color:'rgba(255,255,255,0.7)', whiteSpace:'nowrap' }}>Até:</label>
-            <input type="date" value={dataFim} onChange={e => setDataFim(e.target.value)}
+            <DateInput value={dataFim} onChange={v => setDataFim(v)}
               style={{ flex:1, padding:'6px 8px', borderRadius:6, border:'none', fontSize:12 }} />
           </div>
         </div>

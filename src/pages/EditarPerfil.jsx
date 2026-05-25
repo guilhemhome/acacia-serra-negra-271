@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { DateInput } from '../components/DateInput'
 
 const ABAS = ['👤 Pessoal', '👨‍👩‍👧 Familiares', '🏠 Endereço', '⚒️ Maçônico', '📜 Filosófico']
 
@@ -198,7 +199,7 @@ export default function EditarPerfil() {
                 <Input label="Nome completo" value={pessoal.nome_completo} onChange={v => setPessoal({...pessoal, nome_completo:v})} />
                 <Input label="E-mail" value={pessoal.email} onChange={v => setPessoal({...pessoal, email:v})} />
                 <Input label="Telefone" value={pessoal.tel_celular} onChange={v => setPessoal({...pessoal, tel_celular:v})} />
-                <Input label="Data de nascimento" type="date" value={pessoal.data_nascimento} onChange={v => setPessoal({...pessoal, data_nascimento:v})} />
+                <DateInput label="Data de nascimento" value={pessoal.data_nascimento} onChange={v => setPessoal({...pessoal, data_nascimento:v})} />
                 <Input label="Nome do pai" value={pessoal.nome_pai} onChange={v => setPessoal({...pessoal, nome_pai:v})} />
                 <Input label="Nome da mãe" value={pessoal.nome_mae} onChange={v => setPessoal({...pessoal, nome_mae:v})} />
                 <Secao titulo="Profissão" />
@@ -222,7 +223,7 @@ export default function EditarPerfil() {
                     <option value="filha">Filha</option>
                   </select>
                 </div>
-                <Input label="Data de nascimento" type="date" value={novoFamiliar.data_nascimento} onChange={v => setNovoFamiliar({...novoFamiliar, data_nascimento:v})} />
+                <DateInput label="Data de nascimento" value={novoFamiliar.data_nascimento} onChange={v => setNovoFamiliar({...novoFamiliar, data_nascimento:v})} />
                 <button onClick={adicionarFamiliar}
                   style={{ width:'100%', padding:'10px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#16a34a,#15803d)', color:'#fff', fontWeight:700, cursor:'pointer', marginBottom:20 }}>
                   + Adicionar familiar
@@ -245,7 +246,7 @@ export default function EditarPerfil() {
                           <option value="mãe">Mãe</option>
                           <option value="outro">Outro</option>
                         </select>
-                        <input type="date" value={editFamiliarForm.data_nascimento} onChange={e => setEditFamiliarForm({...editFamiliarForm, data_nascimento:e.target.value})}
+                        <DateInput value={editFamiliarForm.data_nascimento} onChange={v => setEditFamiliarForm({...editFamiliarForm, data_nascimento:v})}
                           style={{ width:'100%', padding:'8px 10px', borderRadius:6, border:'1px solid #cbd5e1', fontSize:14, marginBottom:10, boxSizing:'border-box' }} />
                         <div style={{ display:'flex', gap:8 }}>
                           <button onClick={salvarEdicaoFamiliar}
@@ -307,7 +308,7 @@ export default function EditarPerfil() {
                 {[['aprendiz','⚒️ Aprendiz'],['companheiro','⚒️⚒️ Companheiro'],['mestre','⚒️⚒️⚒️ Mestre Maçom']].map(([g, label]) => (
                   <div key={g}>
                     <Secao titulo={label} />
-                    <Input label="Data de iniciação/elevação/exaltação" type="date" value={graus[g].data} onChange={v => setGraus({...graus, [g]:{...graus[g], data:v}})} />
+                    <DateInput label="Data de iniciação/elevação/exaltação" value={graus[g].data} onChange={v => setGraus({...graus, [g]:{...graus[g], data:v}})} />
                     <Input label="Loja onde recebeu o grau" value={graus[g].loja} onChange={v => setGraus({...graus, [g]:{...graus[g], loja:v}})} />
                   </div>
                 ))}
@@ -329,7 +330,7 @@ export default function EditarPerfil() {
                   </select>
                 </div>
                 <Input label="Loja/Capítulo onde recebeu" value={novoFilosofico.loja} onChange={v => setNovoFilosofico({...novoFilosofico, loja:v})} />
-                <Input label="Data de concessão" type="date" value={novoFilosofico.data_concessao} onChange={v => setNovoFilosofico({...novoFilosofico, data_concessao:v})} />
+                <DateInput label="Data de concessão" value={novoFilosofico.data_concessao} onChange={v => setNovoFilosofico({...novoFilosofico, data_concessao:v})} />
                 <Input label="Observações" value={novoFilosofico.observacoes} onChange={v => setNovoFilosofico({...novoFilosofico, observacoes:v})} />
                 <button onClick={adicionarFilosofico}
                   style={{ width:'100%', padding:'10px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#16a34a,#15803d)', color:'#fff', fontWeight:700, cursor:'pointer', marginBottom:20 }}>
@@ -351,7 +352,7 @@ export default function EditarPerfil() {
                         </select>
                         <input value={editFilosoficoForm.loja} onChange={e => setEditFilosoficoForm({...editFilosoficoForm, loja:e.target.value})}
                           placeholder="Loja/Capítulo" style={{ width:'100%', padding:'8px 10px', borderRadius:6, border:'1px solid #cbd5e1', fontSize:14, marginBottom:8, boxSizing:'border-box' }} />
-                        <input type="date" value={editFilosoficoForm.data_concessao} onChange={e => setEditFilosoficoForm({...editFilosoficoForm, data_concessao:e.target.value})}
+                        <DateInput value={editFilosoficoForm.data_concessao} onChange={v => setEditFilosoficoForm({...editFilosoficoForm, data_concessao:v})}
                           style={{ width:'100%', padding:'8px 10px', borderRadius:6, border:'1px solid #cbd5e1', fontSize:14, marginBottom:8, boxSizing:'border-box' }} />
                         <input value={editFilosoficoForm.observacoes} onChange={e => setEditFilosoficoForm({...editFilosoficoForm, observacoes:e.target.value})}
                           placeholder="Observações" style={{ width:'100%', padding:'8px 10px', borderRadius:6, border:'1px solid #cbd5e1', fontSize:14, marginBottom:10, boxSizing:'border-box' }} />

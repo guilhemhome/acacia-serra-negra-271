@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { DateInput } from '../components/DateInput'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
@@ -105,7 +106,7 @@ export default function CadastroPublico() {
                 </Campo>
 
                 <Campo label="Data de filiação à Acácia">
-                  <input type="date" className={inp} value={form.data_filiacao} onChange={e => set('data_filiacao', e.target.value)}/>
+                  <DateInput className={inp} value={form.data_filiacao} onChange={v => set('data_filiacao', v)}/>
                 </Campo>
 
                 <button onClick={() => setEtapa(2)} className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-2xl font-bold hover:from-blue-700 hover:to-indigo-700 transition shadow-lg mt-2">
@@ -125,7 +126,7 @@ export default function CadastroPublico() {
                 </Campo>
 
                 <Campo label="Data de nascimento">
-                  <input type="date" className={inp} value={form.data_nascimento} onChange={e => set('data_nascimento', e.target.value)}/>
+                  <DateInput className={inp} value={form.data_nascimento} onChange={v => set('data_nascimento', v)}/>
                 </Campo>
 
                 <div className="grid grid-cols-2 gap-3">
