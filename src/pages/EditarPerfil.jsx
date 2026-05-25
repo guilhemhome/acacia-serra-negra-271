@@ -261,10 +261,10 @@ export default function EditarPerfil() {
                           <p style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{f.nome}</p>
                           <p style={{ margin:0, fontSize:12, color:'#64748b' }}>{f.parentesco} {f.data_nascimento ? '· '+f.data_nascimento.split('T')[0].split('-').reverse().join('/') : ''}</p>
                         </div>
-                        <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+                        <div style={{ display:'flex', gap:8, alignItems:'center', flexShrink:0 }}>
                           <button onClick={() => { setEditandoFamiliar(f.id); setEditFamiliarForm({ nome:f.nome, parentesco:f.parentesco, data_nascimento:f.data_nascimento ? f.data_nascimento.split('T')[0] : '' }) }}
-                            style={{ background:'#e0f2fe', border:'none', borderRadius:6, color:'#0369a1', padding:'4px 10px', cursor:'pointer', fontSize:12, fontWeight:600 }}>✏️</button>
-                          <button onClick={() => removerFamiliar(f.id)} style={{ background:'none', border:'none', color:'#dc2626', cursor:'pointer', fontSize:18 }}>✕</button>
+                            style={{ background:'#e0f2fe', border:'none', borderRadius:8, color:'#0369a1', padding:'8px 14px', cursor:'pointer', fontSize:16, fontWeight:600, minWidth:44, minHeight:44 }}>✏️</button>
+                          <button onClick={() => removerFamiliar(f.id)} style={{ background:'none', border:'none', color:'#dc2626', cursor:'pointer', fontSize:22, minWidth:44, minHeight:44 }}>✕</button>
                         </div>
                       </div>
                     )}
