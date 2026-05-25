@@ -4,32 +4,30 @@ import { supabase } from '../lib/supabase'
 
 export default function Dashboard() {
   const navigate = useNavigate()
-  const [stats, setStats] = useState({ ativos:0, pendentes:0, aniversarios:[] })
+  const [stats, setStats] = useState({ ativos:0, pendentes:0 })
   const [eventos, setEventos] = useState([])
+  const [aniversarios, setAniversarios] = useState([])
   const [usuario, setUsuario] = useState({ email:'', perfil:'membro', nome:'' })
   const [grauUsuario, setGrauUsuario] = useState(null)
   const [carregando, setCarregando] = useState(true)
-  const [dataInicio, setDataInicio] = useState(hoje)
-  const [dataFim, setDataFim] = useState(() => {
-    const d = new Date(); d.setMonth(d.getMonth()+1);
+
+  function hojeStr() { return new Date().toISOString().split('T')[0] }
+  function daqui30() {
+    const d = new Date(); d.setDate(d.getDate()+30)
     return d.toISOString().split('T')[0]
-  })
+  }
+
+  const [dataInicio, setDataInicio] = useState(hojeStr)
+  const [dataFim, setDataFim] = useState(daqui30)
 
   useEffect(() => { buscarDados() }, [])
-  useEffect(() => { if (grauUsuario !== null) buscarEventos() }, [dataInicio, dataFim, grauUsuario, usuario.perfil])
-
-  function hoje() { return new Date().toISOString().split('T')[0] }
-  function mesAtual() { return String(new Date().getMonth()+1).padStart(2,'0') }
+  useEffect(() => { if (grauUsuario !== null) buscarEventosEAniv() }, [dataInicio, dataFim, grauUsuario, usuario.perfil])
 
   async function buscarDados() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-
-    // Perfil de acesso
     const { data: p } = await supabase.from('perfis_acesso').select('perfil').eq('user_id', user.id).single()
     const perfil = p?.perfil || 'membro'
-
-    // Nome do associado
     const { data: assoc } = await supabase.from('associados')
       .select('id, nome_completo, grau:historico_graus(grau)')
       .eq('user_id', user.id).single()
@@ -37,48 +35,75 @@ export default function Dashboard() {
     const graus = assoc?.grau || []
     const temMestre = graus.some(g => g.grau === 'mestre')
     const temCompanheiro = graus.some(g => g.grau === 'companheiro')
-    const grau = temMestre ? 'mestre' : temCompanheiro ? 'companheiro' : 'aprendiz'
-    setGrauUsuario(grau)
+    setGrauUsuario(temMestre ? 'mestre' : temCompanheiro ? 'companheiro' : 'aprendiz')
     setUsuario({ email: user.email, perfil, nome })
-
-    // Stats
-    const mes = mesAtual()
-    const [{ count: ativos }, { count: pendentes }, { data: irmãos }, { data: famAniv }] = await Promise.all([
+    const [{ count: ativos }, { count: pendentes }] = await Promise.all([
       supabase.from('associados').select('*',{count:'exact',head:true}).eq('status_cadastro','aprovado'),
       supabase.from('associados').select('*',{count:'exact',head:true}).eq('status_cadastro','pendente'),
-      supabase.from('associados').select('nome_completo, data_nascimento').eq('status_cadastro','aprovado'),
-      supabase.from('familiares').select('nome, data_nascimento').not('data_nascimento','is',null)
     ])
-
-    // Aniversariantes do mês — usando split, nunca new Date()
-    const anivIrmaos = (irmãos||[]).filter(a => a.data_nascimento && a.data_nascimento.split('-')[1] === mes)
-    const anivFam = (famAniv||[]).filter(f => f.data_nascimento && f.data_nascimento.split('-')[1] === mes)
-    const totalAniv = anivIrmaos.length + anivFam.length
-
-    setStats({ ativos: ativos||0, pendentes: pendentes||0, aniversarios: totalAniv })
+    setStats({ ativos: ativos||0, pendentes: pendentes||0 })
     setCarregando(false)
   }
 
-  async function buscarEventos() {
-    let query = supabase.from('eventos').select('*').eq('status','agendado').order('data_evento')
-    if (dataInicio) query = query.gte('data_evento', dataInicio)
-    if (dataFim) query = query.lte('data_evento', dataFim)
-    const { data } = await query
-    // Filtrar por visibilidade
-    const filtrados = (data||[]).filter(ev => {
+  async function buscarEventosEAniv() {
+    if (!dataInicio || !dataFim) return
+
+    // Eventos no período
+    let query = supabase.from('eventos').select('*').eq('status','agendado')
+      .gte('data_evento', dataInicio).lte('data_evento', dataFim).order('data_evento')
+    const { data: evData } = await query
+    const filtrados = (evData||[]).filter(ev => {
       if (usuario.perfil === 'adm' || usuario.perfil === 'secretario') return true
       if (ev.visibilidade === 'todos') return true
       if (ev.visibilidade === 'mestres' && grauUsuario === 'mestre') return true
       if (ev.visibilidade === 'companheiros' && (grauUsuario === 'mestre' || grauUsuario === 'companheiro')) return true
       return false
     })
-    setEventos(filtrados.slice(0, 5))
-  }
+    setEventos(filtrados)
 
-  function formatarData(str) {
-    if (!str) return ''
-    const [a,m,d] = str.split('-')
-    return d+'/'+m+'/'+a
+    // Aniversários no período — comparar só mês e dia
+    const [anoI, mesI, diaI] = dataInicio.split('-').map(Number)
+    const [anoF, mesF, diaF] = dataFim.split('-').map(Number)
+    const { data: irmãos } = await supabase.from('associados')
+      .select('nome_completo, data_nascimento').eq('status_cadastro','aprovado')
+    const { data: fams } = await supabase.from('familiares')
+      .select('nome, data_nascimento, parentesco, associado_id, associados(nome_completo)')
+      .not('data_nascimento','is',null)
+
+    function dentroDoIntervalo(dataNasc) {
+      if (!dataNasc) return false
+      const [,mesN, diaN] = dataNasc.split('T')[0].split('-').map(Number)
+      // Verificar para cada ano no período (caso período cruze anos)
+      for (let ano = anoI; ano <= anoF; ano++) {
+        const dataAniv = new Date(ano, mesN-1, diaN)
+        const inicio = new Date(anoI, mesI-1, diaI)
+        const fim = new Date(anoF, mesF-1, diaF)
+        if (dataAniv >= inicio && dataAniv <= fim) return true
+      }
+      return false
+    }
+
+    function diaAniv(dataNasc) {
+      if (!dataNasc) return ''
+      const [,m,d] = dataNasc.split('T')[0].split('-')
+      return d+'/'+m
+    }
+
+    const listAniv = []
+    ;(irmãos||[]).forEach(a => {
+      if (dentroDoIntervalo(a.data_nascimento))
+        listAniv.push({ nome: a.nome_completo, detalhe: 'Irmão', dia: diaAniv(a.data_nascimento), data_nascimento: a.data_nascimento })
+    })
+    ;(fams||[]).forEach(f => {
+      if (dentroDoIntervalo(f.data_nascimento))
+        listAniv.push({ nome: f.nome, detalhe: f.parentesco+' do Ir. '+(f.associados?.nome_completo||''), dia: diaAniv(f.data_nascimento), data_nascimento: f.data_nascimento })
+    })
+    listAniv.sort((a,b) => {
+      const [,mA,dA] = (a.data_nascimento||'').split('T')[0].split('-').map(Number)
+      const [,mB,dB] = (b.data_nascimento||'').split('T')[0].split('-').map(Number)
+      return mA !== mB ? mA-mB : dA-dB
+    })
+    setAniversarios(listAniv)
   }
 
   const TIPOS_EMOJI = {
@@ -86,9 +111,8 @@ export default function Dashboard() {
     grande_loja:'📜', festa:'🎉', diretoria:'📋', visita:'🤝', outro:'📌'
   }
 
-  const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
-  const mesNome = meses[new Date().getMonth()]
   const primeiroNome = usuario.nome.split(' ')[0] || usuario.email.split('@')[0].split('.')[0]
+  const mesNome = new Date().toLocaleString('pt-BR',{month:'long'})
 
   return (
     <div style={{ minHeight:'100vh', background:'linear-gradient(135deg,#1a237e 0%,#283593 50%,#1565c0 100%)', padding:'24px 16px' }}>
@@ -117,9 +141,9 @@ export default function Dashboard() {
           {[
             { label:'Membros Ativos', valor:stats.ativos, cor:'#fff', sub:'irmãos regulares' },
             { label:'Pendentes', valor:stats.pendentes, cor:'#fbbf24', sub:'aguardando aprovação' },
-            { label:'Aniversários', valor:stats.aniversarios, cor:'#34d399', sub:'em '+mesNome },
+            { label:'Aniversários', valor:aniversarios.length, cor:'#34d399', sub:'no período' },
           ].map(c => (
-            <div key={c.label} style={{ background:'rgba(255,255,255,0.1)', borderRadius:16, padding:'16px 12px', textAlign:'center', backdropFilter:'blur(10px)' }}>
+            <div key={c.label} style={{ background:'rgba(255,255,255,0.1)', borderRadius:16, padding:'16px 12px', textAlign:'center' }}>
               <div style={{ color:c.cor, fontSize:32, fontWeight:800 }}>{carregando ? '...' : c.valor}</div>
               <div style={{ color:'rgba(255,255,255,0.7)', fontSize:10, textTransform:'uppercase', letterSpacing:0.5, marginTop:4 }}>{c.label}</div>
               <div style={{ color:'rgba(255,255,255,0.4)', fontSize:10 }}>{c.sub}</div>
@@ -127,33 +151,34 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Próximos Eventos */}
-        <div style={{ background:'rgba(255,255,255,0.95)', borderRadius:16, padding:20, marginBottom:20 }}>
-          <div style={{ marginBottom:14 }}>
-            <p style={{ margin:'0 0 10px', fontWeight:700, color:'#1a237e', fontSize:15 }}>📅 Eventos</p>
-            <div style={{ display:'flex', gap:8, alignItems:'center', flexWrap:'wrap' }}>
-              <div style={{ display:'flex', alignItems:'center', gap:6, flex:1 }}>
-                <label style={{ fontSize:12, color:'#64748b', whiteSpace:'nowrap' }}>De:</label>
-                <input type="date" value={dataInicio} onChange={e => setDataInicio(e.target.value)}
-                  style={{ flex:1, padding:'6px 8px', borderRadius:6, border:'1px solid #e2e8f0', fontSize:12 }} />
-              </div>
-              <div style={{ display:'flex', alignItems:'center', gap:6, flex:1 }}>
-                <label style={{ fontSize:12, color:'#64748b', whiteSpace:'nowrap' }}>Até:</label>
-                <input type="date" value={dataFim} onChange={e => setDataFim(e.target.value)}
-                  style={{ flex:1, padding:'6px 8px', borderRadius:6, border:'1px solid #e2e8f0', fontSize:12 }} />
-              </div>
-            </div>
+        {/* Filtro de período */}
+        <div style={{ background:'rgba(255,255,255,0.1)', borderRadius:12, padding:'12px 16px', marginBottom:16, display:'flex', gap:12, alignItems:'center', flexWrap:'wrap' }}>
+          <span style={{ color:'rgba(255,255,255,0.8)', fontSize:13, whiteSpace:'nowrap' }}>📆 Período:</span>
+          <div style={{ display:'flex', alignItems:'center', gap:6, flex:1 }}>
+            <label style={{ fontSize:12, color:'rgba(255,255,255,0.7)', whiteSpace:'nowrap' }}>De:</label>
+            <input type="date" value={dataInicio} onChange={e => setDataInicio(e.target.value)}
+              style={{ flex:1, padding:'6px 8px', borderRadius:6, border:'none', fontSize:12 }} />
           </div>
+          <div style={{ display:'flex', alignItems:'center', gap:6, flex:1 }}>
+            <label style={{ fontSize:12, color:'rgba(255,255,255,0.7)', whiteSpace:'nowrap' }}>Até:</label>
+            <input type="date" value={dataFim} onChange={e => setDataFim(e.target.value)}
+              style={{ flex:1, padding:'6px 8px', borderRadius:6, border:'none', fontSize:12 }} />
+          </div>
+        </div>
+
+        {/* Eventos no período */}
+        <div style={{ background:'rgba(255,255,255,0.95)', borderRadius:16, padding:20, marginBottom:16 }}>
+          <p style={{ margin:'0 0 12px', fontWeight:700, color:'#1a237e', fontSize:15 }}>📅 Eventos no Período</p>
           {eventos.length === 0 ? (
-            <p style={{ color:'#94a3b8', textAlign:'center', fontSize:14 }}>Nenhum evento encontrado neste período.</p>
+            <p style={{ color:'#94a3b8', textAlign:'center', fontSize:14 }}>Nenhum evento neste período.</p>
           ) : eventos.map(ev => (
             <div key={ev.id} onClick={() => navigate('/calendario')}
               style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', background:'#f8fafc', borderRadius:10, marginBottom:8, cursor:'pointer', borderLeft:'4px solid #1a237e' }}>
-              <span style={{ fontSize:20 }}>{TIPOS_EMOJI[ev.tipo] || '📌'}</span>
+              <span style={{ fontSize:20 }}>{TIPOS_EMOJI[ev.tipo]||'📌'}</span>
               <div style={{ flex:1 }}>
                 <p style={{ margin:0, fontWeight:700, color:'#1e293b', fontSize:14 }}>{ev.titulo}</p>
                 <p style={{ margin:0, fontSize:12, color:'#64748b' }}>
-                  {formatarData(ev.data_evento)}{ev.hora ? ' · '+ev.hora : ''}{ev.local ? ' · '+ev.local : ''}
+                  {ev.data_evento ? ev.data_evento.split('-').reverse().join('/') : ''}{ev.hora ? ' · '+ev.hora : ''}{ev.local ? ' · '+ev.local : ''}
                 </p>
               </div>
             </div>
@@ -162,6 +187,22 @@ export default function Dashboard() {
             style={{ width:'100%', marginTop:8, padding:'10px', borderRadius:8, border:'none', background:'#1a237e', color:'#fff', fontWeight:700, fontSize:13, cursor:'pointer' }}>
             Ver calendário completo →
           </button>
+        </div>
+
+        {/* Aniversários no período */}
+        <div style={{ background:'rgba(255,255,255,0.95)', borderRadius:16, padding:20, marginBottom:16 }}>
+          <p style={{ margin:'0 0 12px', fontWeight:700, color:'#1a237e', fontSize:15 }}>🎂 Aniversários no Período</p>
+          {aniversarios.length === 0 ? (
+            <p style={{ color:'#94a3b8', textAlign:'center', fontSize:14 }}>Nenhum aniversário neste período.</p>
+          ) : aniversarios.map((a,i) => (
+            <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 14px', background:'#f8fafc', borderRadius:10, marginBottom:8 }}>
+              <div>
+                <p style={{ margin:0, fontWeight:700, color:'#1e293b', fontSize:14 }}>🎂 {a.nome}</p>
+                <p style={{ margin:0, fontSize:12, color:'#64748b' }}>{a.detalhe}</p>
+              </div>
+              <span style={{ fontWeight:700, color:'#1a237e', fontSize:14 }}>{a.dia}</span>
+            </div>
+          ))}
         </div>
 
         {/* Ações rápidas */}
