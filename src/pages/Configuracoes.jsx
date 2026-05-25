@@ -179,6 +179,10 @@ export default function Configuracoes() {
           <div style={{ height:4, background:'linear-gradient(90deg,#1e40af,#4f46e5,#7c3aed)' }} />
           <div style={{ padding:24 }}>
             <p style={{ margin:'0 0 16px', fontWeight:700, color:'#4f46e5', fontSize:13, textTransform:'uppercase', letterSpacing:1 }}>Mensagens</p>
+            <button onClick={() => navigate('/gestao-cargos')}
+              style={{ width:'100%', padding:'12px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#1a237e,#283593)', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer', marginBottom:10 }}>
+              ⚒️ Gestão de Cargos
+            </button>
             <button onClick={() => navigate('/templates-mensagens')}
               style={{ width:'100%', padding:'12px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#1e40af,#4f46e5)', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
               ✉️ Editar Templates de Aniversário
