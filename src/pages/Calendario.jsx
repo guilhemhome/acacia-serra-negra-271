@@ -60,7 +60,7 @@ export default function Calendario() {
   const [modal, setModal] = useState(null)
   const [modalPresencas, setModalPresencas] = useState(null)
   const [presencas, setPresencas] = useState([])
-  const [form, setForm] = useState({ titulo:'', tipo:'sessao_ordinaria', data:'', hora:'', local:'', descricao:'', status:'agendado', visibilidade:'todos' })
+  const [form, setForm] = useState({ titulo:'', tipo:'sessao_ordinaria', data_evento:'', hora:'', local:'', descricao:'', status:'agendado', visibilidade:'todos' })
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState('')
   const [aba, setAba] = useState('eventos') // 'eventos' | 'aniversarios'
@@ -107,7 +107,7 @@ export default function Calendario() {
     const [ano, mes] = filtroMes.split('-')
     const ultimo = new Date(ano, mes, 0).getDate()
     const fim = filtroMes + '-' + String(ultimo).padStart(2,'0')
-    const { data } = await supabase.from('eventos').select('*').gte('data',inicio).lte('data',fim).order('data')
+    const { data } = await supabase.from('eventos').select('*').gte('data_evento',inicio).lte('data_evento',fim).order('data_evento')
     
     // Filtrar por visibilidade
     const filtrados = (data||[]).filter(ev => {
@@ -156,19 +156,19 @@ export default function Calendario() {
   }
 
   function abrirNovo() {
-    setForm({ titulo:'', tipo:'sessao_ordinaria', data:'', hora:'', local:'', descricao:'', status:'agendado', visibilidade:'todos' })
+    setForm({ titulo:'', tipo:'sessao_ordinaria', data_evento:'', hora:'', local:'', descricao:'', status:'agendado', visibilidade:'todos' })
     setErro('')
     setModal('novo')
   }
 
   function abrirEditar(ev) {
-    setForm({ titulo:ev.titulo||'', tipo:ev.tipo||'outro', data:ev.data||'', hora:ev.hora||'', local:ev.local||'', descricao:ev.descricao||'', status:ev.status||'agendado', visibilidade:ev.visibilidade||'todos' })
+    setForm({ titulo:ev.titulo||'', tipo:ev.tipo||'outro', data_evento:ev.data_evento_evento||'', hora:ev.hora||'', local:ev.local||'', descricao:ev.descricao||'', status:ev.status||'agendado', visibilidade:ev.visibilidade||'todos' })
     setErro('')
     setModal(ev)
   }
 
   async function salvar() {
-    if (!form.titulo || !form.data) { setErro('Título e data são obrigatórios.'); return }
+    if (!form.titulo || !form.data_evento) { setErro('Título e data são obrigatórios.'); return }
     setSalvando(true); setErro('')
     let error
     if (modal === 'novo') {
@@ -268,7 +268,7 @@ export default function Calendario() {
             const tp = tipoInfo(ev.tipo)
             const vis = visInfo(ev.visibilidade)
             const resp = RESPOSTAS[ev.minhaResposta] || RESPOSTAS.pendente
-            const passado = ev.data < hj
+            const passado = ev.data_evento < hj
             return (
               <div key={ev.id} style={{ background:'rgba(255,255,255,0.95)', borderRadius:12, padding:16, marginBottom:12, borderLeft:'5px solid '+st.cor }}>
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8 }}>
@@ -280,7 +280,7 @@ export default function Calendario() {
                     </div>
                     <div style={{ fontSize:12, color:'#64748b', marginBottom:6 }}>{tp.label}</div>
                     <div style={{ display:'flex', flexWrap:'wrap', gap:8, fontSize:13, color:'#475569', marginBottom:8 }}>
-                      <span>📅 {formatarData(ev.data)}</span>
+                      <span>📅 {formatarData(ev.data_evento)}</span>
                       {ev.hora && <span>🕐 {ev.hora}</span>}
                       {ev.local && <span>📍 {ev.local}</span>}
                     </div>
@@ -413,7 +413,7 @@ export default function Calendario() {
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:12 }}>
                 <div>
                   <label style={{ display:'block', marginBottom:4, fontWeight:600, color:'#333', fontSize:14 }}>Data *</label>
-                  <input type="date" value={form.data} onChange={e => setForm({...form,data:e.target.value})}
+                  <input type="date" value={form.data_evento} onChange={e => setForm({...form,data:e.target.value})}
                     style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1px solid #ccc', fontSize:14, boxSizing:'border-box' }} />
                 </div>
                 <div>
