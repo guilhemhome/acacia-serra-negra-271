@@ -158,12 +158,12 @@ export default function Dashboard() {
           <div style={{ display:'flex', alignItems:'center', gap:6, flex:1 }}>
             <label style={{ fontSize:12, color:'rgba(255,255,255,0.7)', whiteSpace:'nowrap' }}>De:</label>
             <DateInput value={dataInicio} onChange={v => setDataInicio(v)}
-              style={{ flex:1, padding:'6px 8px', borderRadius:6, border:'none', fontSize:12 }} />
+              style={{ flex:1, padding:'6px 8px', borderRadius:6, border:'1px solid rgba(255,255,255,0.4)', fontSize:12, background:'rgba(255,255,255,0.15)', color:'#fff' }} />
           </div>
           <div style={{ display:'flex', alignItems:'center', gap:6, flex:1 }}>
             <label style={{ fontSize:12, color:'rgba(255,255,255,0.7)', whiteSpace:'nowrap' }}>Até:</label>
             <DateInput value={dataFim} onChange={v => setDataFim(v)}
-              style={{ flex:1, padding:'6px 8px', borderRadius:6, border:'none', fontSize:12 }} />
+              style={{ flex:1, padding:'6px 8px', borderRadius:6, border:'1px solid rgba(255,255,255,0.4)', fontSize:12, background:'rgba(255,255,255,0.15)', color:'#fff' }} />
           </div>
         </div>
 
