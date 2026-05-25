@@ -413,7 +413,7 @@ export default function Calendario() {
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:12 }}>
                 <div>
                   <label style={{ display:'block', marginBottom:4, fontWeight:600, color:'#333', fontSize:14 }}>Data *</label>
-                  <input type="date" value={form.data_evento} onChange={e => setForm({...form,data:e.target.value})}
+                  <input type="date" value={form.data_evento} onChange={e => setForm({...form,data_evento:e.target.value})}
                     style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1px solid #ccc', fontSize:14, boxSizing:'border-box' }} />
                 </div>
                 <div>
