@@ -20,7 +20,7 @@ export default function EditarPerfil() {
   const [mensagem, setMensagem] = useState('')
   const [associadoId, setAssociadoId] = useState(null)
 
-  const [pessoal, setPessoal] = useState({ nome_completo:'', email:'', tel_celular:'', data_nascimento:'', nome_pai:'', nome_mae:'', profissao:'', empresa:'' })
+  const [pessoal, setPessoal] = useState({ nome_completo:'', email:'', tel_celular:'', data_nascimento:'', nome_pai:'', nome_mae:'', profissao:'', empresa:'', estado_civil:'', data_casamento:'' })
   const [endereco, setEndereco] = useState({ tipo:'residencial', logradouro:'', numero:'', complemento:'', bairro:'', cidade:'', uf:'', cep:'' })
   const [enderecoComercial, setEnderecoComercial] = useState({ logradouro:'', numero:'', complemento:'', bairro:'', cidade:'', uf:'', cep:'' })
   const [familiares, setFamiliares] = useState([])
@@ -42,7 +42,7 @@ export default function EditarPerfil() {
       const { data: assoc } = await supabase.from('associados').select('*').eq('user_id', uid).single()
       if (assoc) {
         setAssociadoId(assoc.id)
-        setPessoal({ nome_completo: assoc.nome_completo||'', email: assoc.email||'', tel_celular: assoc.tel_celular||'', data_nascimento: assoc.data_nascimento||'', nome_pai: assoc.nome_pai||'', nome_mae: assoc.nome_mae||'', profissao: assoc.profissao||'', empresa: assoc.empresa||'' })
+        setPessoal({ nome_completo: assoc.nome_completo||'', email: assoc.email||'', tel_celular: assoc.tel_celular||'', data_nascimento: assoc.data_nascimento||'', nome_pai: assoc.nome_pai||'', nome_mae: assoc.nome_mae||'', profissao: assoc.profissao||'', empresa: assoc.empresa||'', estado_civil: assoc.estado_civil||'', data_casamento: assoc.data_casamento||'' })
         setBodes({ bodes_asfalto: assoc.bodes_asfalto||false, bodes_asfalto_numero: assoc.bodes_asfalto_numero||'', bodes_asfalto_data_admissao: assoc.bodes_asfalto_data_admissao||'' })
         const { data: fams } = await supabase.from('familiares').select('*').eq('associado_id', assoc.id)
         if (fams) setFamiliares(fams)
@@ -217,6 +217,21 @@ export default function EditarPerfil() {
                 <Input label="Nome da mãe" value={pessoal.nome_mae} onChange={v => setPessoal({...pessoal, nome_mae:v})} />
                 <Secao titulo="Profissão" />
                 <Input label="Profissão" value={pessoal.profissao} onChange={v => setPessoal({...pessoal, profissao:v})} />
+                <div style={{ marginTop:12 }}>
+                  <label style={{ fontSize:13, color:'#64748b', display:'block', marginBottom:4 }}>Estado civil</label>
+                  <select value={pessoal.estado_civil} onChange={e => setPessoal({...pessoal, estado_civil:e.target.value, data_casamento: e.target.value !== 'Casado' && e.target.value !== 'União Estável' ? '' : pessoal.data_casamento})}
+                    style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1px solid #cbd5e1', fontSize:14, color:'#1e293b', background:'#fff' }}>
+                    <option value="">Selecione...</option>
+                    <option value="Solteiro">Solteiro(a)</option>
+                    <option value="Casado">Casado(a)</option>
+                    <option value="União Estável">União Estável</option>
+                    <option value="Divorciado">Divorciado(a)</option>
+                    <option value="Viúvo">Viúvo(a)</option>
+                  </select>
+                </div>
+                {(pessoal.estado_civil === 'Casado' || pessoal.estado_civil === 'União Estável') && (
+                  <DateInput label="Data do casamento / união" value={pessoal.data_casamento} onChange={v => setPessoal({...pessoal, data_casamento:v})} style={{ marginTop:12 }} />
+                )}
                 <Input label="Empresa" value={pessoal.empresa} onChange={v => setPessoal({...pessoal, empresa:v})} />
                 <BtnSalvar onClick={salvarPessoal} />
               </div>
