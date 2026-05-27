@@ -96,7 +96,7 @@ export default function Calendario() {
     const aniv = (irmãos||[]).filter(a => a.data_nascimento && a.data_nascimento.split('-')[1] === mes)
     setAniversariantes(aniv)
     const { data: deps } = await supabase.from('familiares')
-      .select('nome, data_nascimento, parentesco, associado_id, associados(nome_completo)')
+      .select('nome, data_nascimento, parentesco, associado_id, associados(nome_completo, tel_celular)')
       .not('data_nascimento','is',null)
     const fam = (deps||[]).filter(d => d.data_nascimento && d.data_nascimento.split('-')[1] === mes)
     setFamiliares(fam)
