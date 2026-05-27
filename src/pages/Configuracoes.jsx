@@ -51,18 +51,22 @@ export default function Configuracoes() {
         })
       }
 
-      // Carregar perfis de acesso
+      // Carregar perfis de acesso — apenas usuários com login
       const { data: ps } = await supabase.from('perfis_acesso').select('*')
+      const { data: { user: userAtual } } = await supabase.auth.getUser()
       if (ps && ps.length > 0) {
-        const { data: assocs } = await supabase
-          .from('associados')
-          .select('user_id, nome_completo, email')
-          .in('user_id', ps.map(p => p.user_id))
-        const perfisComNome = ps.map(p => ({
-          ...p,
-          associados: assocs?.find(a => a.user_id === p.user_id) || null
-        }))
-        setPerfis(perfisComNome)
+        const outrosPerfis = ps.filter(p => p.user_id !== userAtual?.id)
+        if (outrosPerfis.length > 0) {
+          const { data: assocs } = await supabase
+            .from('associados')
+            .select('user_id, nome_completo, email')
+            .in('user_id', outrosPerfis.map(p => p.user_id))
+          const perfisComNome = outrosPerfis.map(p => ({
+            ...p,
+            associados: assocs?.find(a => a.user_id === p.user_id) || null
+          }))
+          setPerfis(perfisComNome)
+        }
       }
     }
     carregar()
