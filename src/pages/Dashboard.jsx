@@ -93,11 +93,11 @@ export default function Dashboard() {
     const listAniv = []
     ;(irmãos||[]).forEach(a => {
       if (dentroDoIntervalo(a.data_nascimento))
-        listAniv.push({ nome: a.nome_completo, detalhe: 'Irmão', dia: diaAniv(a.data_nascimento), data_nascimento: a.data_nascimento })
+        listAniv.push({ nome: a.nome_completo, detalhe: 'Irmão', dia: diaAniv(a.data_nascimento), data_nascimento: a.data_nascimento, tel: (a.tel_celular||'').replace(/\D/g,''), tipo: 'irmao' })
     })
     ;(fams||[]).forEach(f => {
       if (dentroDoIntervalo(f.data_nascimento))
-        listAniv.push({ nome: f.nome, detalhe: f.parentesco+' do Ir. '+(f.associados?.nome_completo||''), dia: diaAniv(f.data_nascimento), data_nascimento: f.data_nascimento })
+        listAniv.push({ nome: f.nome, detalhe: f.parentesco+' do Ir. '+(f.associados?.nome_completo||''), dia: diaAniv(f.data_nascimento), data_nascimento: f.data_nascimento, tel: (f.associados?.tel_celular||'').replace(/\D/g,''), nomeIrmao: f.associados?.nome_completo||'', parentesco: f.parentesco||'', tipo: 'familiar' })
     })
     listAniv.sort((a,b) => {
       const [,mA,dA] = (a.data_nascimento||'').split('T')[0].split('-').map(Number)
@@ -191,21 +191,36 @@ export default function Dashboard() {
         </div>
 
         {/* Aniversários no período */}
+        {['ADM','Venerável Mestre','Chanceler','Secretário'].includes(usuario.perfil) && (
         <div style={{ background:'rgba(255,255,255,0.95)', borderRadius:16, padding:20, marginBottom:16 }}>
           <p style={{ margin:'0 0 12px', fontWeight:700, color:'#1a237e', fontSize:15 }}>🎂 Aniversários no Período</p>
           {aniversarios.length === 0 ? (
             <p style={{ color:'#94a3b8', textAlign:'center', fontSize:14 }}>Nenhum aniversário neste período.</p>
           ) : aniversarios.map((a,i) => (
-            <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'8px 14px', background:'#f8fafc', borderRadius:10, marginBottom:6 }}>
+            <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'8px 14px', background:'#f8fafc', borderRadius:10, marginBottom:6, gap:8 }}>
               <div style={{ display:'flex', alignItems:'center', gap:8, flex:1, minWidth:0 }}>
                 <span>🎂</span>
-                <span style={{ fontWeight:700, color:'#1e293b', fontSize:13, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{a.nome}</span>
-                <span style={{ fontSize:12, color:'#94a3b8', whiteSpace:'nowrap' }}>· {a.detalhe}</span>
+                <div style={{ minWidth:0 }}>
+                  <span style={{ fontWeight:700, color:'#1e293b', fontSize:13 }}>{a.nome}</span>
+                  <span style={{ fontSize:12, color:'#94a3b8', marginLeft:6 }}>· {a.detalhe}</span>
+                </div>
               </div>
-              <span style={{ fontWeight:700, color:'#1a237e', fontSize:13, whiteSpace:'nowrap', marginLeft:8 }}>{a.dia}</span>
+              <span style={{ fontWeight:700, color:'#1a237e', fontSize:13, whiteSpace:'nowrap' }}>{a.dia}</span>
+              {a.tel && (
+                <a href={`https://wa.me/55${a.tel}?text=${encodeURIComponent(
+                  a.tipo==='irmao'
+                    ? `🌿 A Loja Maçônica Acácia de Serra Negra Nº 271 saúda com fraternidade o Ir∴ ${a.nome} que hoje completa mais um ano de vida. Que o G∴A∴D∴U∴ ilumine sempre sua jornada! 🎂`
+                    : `🌿 A Loja Maçônica Acácia de Serra Negra Nº 271 saúda o Ir∴ ${a.nomeIrmao} pelo aniversário de ${a.parentesco} ${a.nome}! Felicidades a toda a família! 🎂`
+                )}`}
+                  target="_blank" rel="noreferrer"
+                  style={{ background:'#25d366', color:'#fff', borderRadius:8, padding:'5px 10px', fontSize:11, fontWeight:700, textDecoration:'none', whiteSpace:'nowrap', minWidth:44, minHeight:44, display:'flex', alignItems:'center', flexShrink:0 }}>
+                  📱 WhatsApp
+                </a>
+              )}
             </div>
           ))}
         </div>
+        )}
 
         {/* Ações rápidas */}
         <div style={{ background:'rgba(255,255,255,0.95)', borderRadius:16, padding:20 }}>
