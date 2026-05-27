@@ -96,7 +96,7 @@ export default function Calendario() {
     if (tpls) {
       const ti = tpls.find(t => t.chave === 'aniversario_irmao_whatsapp')
       const td = tpls.find(t => t.chave === 'aniversario_dependente_whatsapp')
-      if (ti) setTplIrmao(ti.mensagem)
+      if (ti) { console.log('TEMPLATE IRMAO:', ti.mensagem); setTplIrmao(ti.mensagem) }
       if (td) setTplDependente(td.mensagem)
     }
     const mes = String(new Date().getMonth()+1).padStart(2,'0')
