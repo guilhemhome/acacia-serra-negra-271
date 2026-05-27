@@ -54,7 +54,7 @@ export default function Dashboard() {
       .gte('data_evento', dataInicio).lte('data_evento', dataFim).order('data_evento')
     const { data: evData } = await query
     const filtrados = (evData||[]).filter(ev => {
-      if (usuario.perfil === 'adm' || usuario.perfil === 'secretario') return true
+      if (['ADM','Venerável Mestre','Chanceler','Secretário'].includes(usuario.perfil)) return true
       if (ev.visibilidade === 'todos') return true
       if (ev.visibilidade === 'mestres' && grauUsuario === 'mestre') return true
       if (ev.visibilidade === 'companheiros' && (grauUsuario === 'mestre' || grauUsuario === 'companheiro')) return true
@@ -130,7 +130,7 @@ export default function Dashboard() {
           <div>
             <div style={{ color:'white', fontSize:16, fontWeight:500 }}>Olá, {primeiroNome}</div>
             <div style={{ color:'rgba(255,255,255,0.6)', fontSize:12 }}>
-              {usuario.perfil === 'adm' ? 'Administrador' : usuario.perfil === 'secretario' ? 'Secretário' : 'Membro'} · Acácia de Serra Negra Nº 271
+              {usuario.perfil === 'ADM' ? 'Administrador' : usuario.perfil === 'Venerável Mestre' ? 'Venerável Mestre' : usuario.perfil === 'Chanceler' ? 'Chanceler' : usuario.perfil === 'Secretário' ? 'Secretário' : 'Membro'} · Acácia de Serra Negra Nº 271
             </div>
           </div>
           <button onClick={async () => { await supabase.auth.signOut(); navigate('/') }} title="Sair"
