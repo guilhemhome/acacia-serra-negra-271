@@ -53,6 +53,8 @@ export default function Calendario() {
   const [eventos, setEventos] = useState([])
   const [aniversariantes, setAniversariantes] = useState([])
   const [familiares, setFamiliares] = useState([])
+  const [tplIrmao, setTplIrmao] = useState('🌿 A Loja Maçônica Acácia de Serra Negra Nº 271 saúda com fraternidade o Ir∴ {nome} que hoje completa mais um ano de vida. Que o G∴A∴D∴U∴ ilumine sempre sua jornada! 🎂')
+  const [tplDependente, setTplDependente] = useState('🌿 A Loja Maçônica Acácia de Serra Negra Nº 271 saúda o Ir∴ {nome_irmao} pelo aniversário de {parentesco} {nome_dependente}! Felicidades a toda a família! 🎂')
   const [loading, setLoading] = useState(true)
   const [perfil, setPerfil] = useState(null)
   const [grauUsuario, setGrauUsuario] = useState(null)
@@ -88,6 +90,15 @@ export default function Calendario() {
   }
 
   async function carregarAniversariantes() {
+    const { data: tpls } = await supabase.from('mensagens_templates')
+      .select('chave, mensagem')
+      .in('chave', ['aniversario_irmao_whatsapp', 'aniversario_dependente_whatsapp'])
+    if (tpls) {
+      const ti = tpls.find(t => t.chave === 'aniversario_irmao_whatsapp')
+      const td = tpls.find(t => t.chave === 'aniversario_dependente_whatsapp')
+      if (ti) setTplIrmao(ti.mensagem)
+      if (td) setTplDependente(td.mensagem)
+    }
     const mes = String(new Date().getMonth()+1).padStart(2,'0')
     const { data: irmãos } = await supabase.from('associados')
       .select('id, nome_completo, data_nascimento, tel_celular')
@@ -353,7 +364,7 @@ export default function Calendario() {
                       <p style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{a.nome_completo}</p>
                       <p style={{ margin:0, fontSize:12, color:'#64748b' }}>Dia {d}/{m}</p>
                     </div>
-                    <a href={`https://wa.me/55${(a.tel_celular||'').replace(/\D/g,'')}?text=${encodeURIComponent('Feliz aniversário, Ir. '+a.nome_completo+'! 🎂')}`} target="_blank" rel="noreferrer"
+                    <a href={`https://wa.me/55${(a.tel_celular||'').replace(/\D/g,'')}?text=${encodeURIComponent(tplIrmao.replace('{nome}', a.nome_completo).replace('{loja}','Acácia de Serra Negra Nº 271'))}`} target="_blank" rel="noreferrer"
                       style={{ background:'#25d366', color:'#fff', borderRadius:8, padding:'6px 12px', fontSize:12, fontWeight:700, textDecoration:'none' }}>
                       WhatsApp
                     </a>
@@ -376,7 +387,7 @@ export default function Calendario() {
                       <p style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{f.nome}</p>
                       <p style={{ margin:0, fontSize:12, color:'#64748b' }}>{f.parentesco} do Ir. {f.associados?.nome_completo} — Dia {d}/{m}</p>
                     </div>
-                    <a href={`https://wa.me/55${(Array.isArray(f.associados) ? f.associados[0]?.tel_celular : f.associados?.tel_celular||'').replace(/\D/g,'')}?text=${encodeURIComponent('Feliz aniversário, '+f.nome+'! 🎂')}`} target="_blank" rel="noreferrer"
+                    <a href={`https://wa.me/55${(Array.isArray(f.associados) ? f.associados[0]?.tel_celular : f.associados?.tel_celular||'').replace(/\D/g,'')}?text=${encodeURIComponent(tplDependente.replace('{nome_irmao}', Array.isArray(f.associados)?f.associados[0]?.nome_completo:f.associados?.nome_completo||'').replace('{parentesco}',f.parentesco||'').replace('{nome_dependente}',f.nome||'').replace('{loja}','Acácia de Serra Negra Nº 271'))}`} target="_blank" rel="noreferrer"
                       style={{ background:'#25d366', color:'#fff', borderRadius:8, padding:'6px 12px', fontSize:12, fontWeight:700, textDecoration:'none' }}>
                       WhatsApp
                     </a>
