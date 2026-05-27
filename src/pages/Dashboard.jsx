@@ -28,6 +28,7 @@ export default function Dashboard() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     const { data: p } = await supabase.from('perfis_acesso').select('perfil').eq('user_id', user.id).single()
+    console.log('PERFIL DO BANCO:', p, 'user_id:', user.id)
     const perfil = p?.perfil || 'membro'
     const { data: assoc } = await supabase.from('associados')
       .select('id, nome_completo, grau:historico_graus(grau)')
