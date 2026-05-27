@@ -353,7 +353,7 @@ export default function Calendario() {
                       <p style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{a.nome_completo}</p>
                       <p style={{ margin:0, fontSize:12, color:'#64748b' }}>Dia {d}/{m}</p>
                     </div>
-                    <a href={'https://wa.me/55?text=Feliz+aniversário+Ir.+'+encodeURIComponent(a.nome_completo)} target="_blank" rel="noreferrer"
+                    <a href={`https://wa.me/55${(a.tel_celular||'').replace(/\D/g,'')}?text=${encodeURIComponent('Feliz aniversário, Ir. '+a.nome_completo+'! 🎂')}`} target="_blank" rel="noreferrer"
                       style={{ background:'#25d366', color:'#fff', borderRadius:8, padding:'6px 12px', fontSize:12, fontWeight:700, textDecoration:'none' }}>
                       WhatsApp
                     </a>
@@ -376,7 +376,7 @@ export default function Calendario() {
                       <p style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{f.nome}</p>
                       <p style={{ margin:0, fontSize:12, color:'#64748b' }}>{f.parentesco} do Ir. {f.associados?.nome_completo} — Dia {d}/{m}</p>
                     </div>
-                    <a href={'https://wa.me/55?text=Feliz+aniversário+'+encodeURIComponent(f.nome)} target="_blank" rel="noreferrer"
+                    <a href={`https://wa.me/55${(f.associados?.tel_celular||'').replace(/\D/g,'')}?text=${encodeURIComponent('Feliz aniversário, '+f.nome+'! 🎂')}`} target="_blank" rel="noreferrer"
                       style={{ background:'#25d366', color:'#fff', borderRadius:8, padding:'6px 12px', fontSize:12, fontWeight:700, textDecoration:'none' }}>
                       WhatsApp
                     </a>
