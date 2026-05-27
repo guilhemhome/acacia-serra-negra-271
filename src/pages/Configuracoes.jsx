@@ -165,9 +165,14 @@ export default function Configuracoes() {
                 </div>
                 <select value={p.perfil} onChange={e => alterarPerfil(p.user_id, e.target.value)}
                   style={{ padding:'6px 10px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:13, background:'#fff', cursor:'pointer' }}>
-                  <option value="membro">Membro</option>
-                  <option value="secretario">Secretário</option>
-                  <option value="adm">ADM</option>
+                  <option value="Membro">Membro</option>
+                  <option value="Cerimonial">Cerimonial</option>
+                  <option value="Hospitalar">Hospitalar</option>
+                  <option value="Financeiro">Financeiro</option>
+                  <option value="Administrativo">Administrativo</option>
+                  <option value="Total">Total</option>
+                  <option value="Venerável Mestre">Venerável Mestre</option>
+                  <option value="ADM">ADM (Técnico)</option>
                 </select>
               </div>
             ))}
