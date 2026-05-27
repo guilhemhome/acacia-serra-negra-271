@@ -90,7 +90,7 @@ export default function Calendario() {
   async function carregarAniversariantes() {
     const mes = String(new Date().getMonth()+1).padStart(2,'0')
     const { data: irmãos } = await supabase.from('associados')
-      .select('id, nome_completo, data_nascimento')
+      .select('id, nome_completo, data_nascimento, tel_celular')
       .eq('status_cadastro','aprovado')
       .not('data_nascimento','is',null)
     const aniv = (irmãos||[]).filter(a => a.data_nascimento && a.data_nascimento.split('-')[1] === mes)
