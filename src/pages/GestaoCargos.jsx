@@ -210,61 +210,56 @@ export default function GestaoCargos() {
 
         {/* ABA: CARGOS ATUAIS */}
         {aba === 'atual' && (
-          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-            {cargos.map(c => {
-              const t = titular(c.nome)
+          <div style={{ background:'rgba(255,255,255,0.95)', borderRadius:16, overflow:'hidden' }}>
+            {cargos.map((cargo, idx) => {
+              const t = titular(cargo.nome)
               return (
-                <div key={c.id} style={{ background:'#fff', borderRadius:12, overflow:'hidden', boxShadow:'0 1px 4px rgba(0,0,0,0.06)', marginBottom:6 }}>
-                  <div style={{ padding:'10px 14px' }}>
-                    <div style={{ fontSize:11, fontWeight:700, color:'#1a237e', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:6 }}>{c.nome}</div>
-                    {t ? (
-                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:8 }}>
-                        <div style={{ flex:1, minWidth:0 }}>
-                          <div style={{ fontSize:13, fontWeight:700, color:'#1a237e' }}>{c2.nome}</div>
-                          <div style={{ fontSize:12, color:'#1e293b' }}>{t.associados?.nome_completo} · desde {fmt(t.data_inicio)}</div>
-                        </div>
-                        <div style={{ display:'flex', gap:8, flexShrink:0 }}>
-                          <button onClick={() => { setAtribuindo(c.nome); setFormAtribuir({ associado_id:'', data_inicio:'' }) }}
-                            style={{ background:'#e0f2fe', border:'none', borderRadius:8, color:'#0369a1', padding:'6px 10px', cursor:'pointer', fontSize:12, fontWeight:700, minWidth:44, minHeight:36 }}>✏️</button>
+                <div key={cargo.id}>
+                  <div style={{ display:'flex', alignItems:'center', gap:10, padding:'11px 14px', borderBottom:'1px solid #f1f5f9' }}>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontSize:13, fontWeight:700, color:'#1a237e' }}>{cargo.nome}</div>
+                      <div style={{ fontSize:12, color: t ? '#475569' : '#94a3b8', fontStyle: t ? 'normal' : 'italic', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                        {t ? t.associados?.nome_completo + ' · desde ' + fmt(t.data_inicio) : 'Cargo vago'}
+                      </div>
+                    </div>
+                    <div style={{ display:'flex', gap:6, flexShrink:0 }}>
+                      {t ? (
+                        <>
+                          <button onClick={() => { setAtribuindo(cargo.nome); setFormAtribuir({ associado_id:'', data_inicio:'' }) }}
+                            style={{ background:'#e0f2fe', border:'none', borderRadius:8, color:'#0369a1', padding:'6px 10px', cursor:'pointer', fontSize:13, fontWeight:700, minWidth:44, minHeight:40 }}>✏️</button>
                           <button onClick={() => encerrar(t)}
-                            style={{ background:'#fee2e2', border:'none', borderRadius:8, color:'#dc2626', padding:'6px 10px', cursor:'pointer', fontSize:12, fontWeight:700, minWidth:44, minHeight:36 }}>✕</button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                        <p style={{ margin:0, color:'#94a3b8', fontSize:13, fontStyle:'italic' }}>Cargo vago</p>
-                        <button onClick={() => { setAtribuindo(c.nome); setFormAtribuir({ associado_id:'', data_inicio:'' }) }}
-                          style={{ background:'#dcfce7', border:'none', borderRadius:8, color:'#16a34a', padding:'6px 10px', cursor:'pointer', fontSize:12, fontWeight:700, minWidth:44, minHeight:36 }}>＋</button>
-                      </div>
-                    )}
-
-                    {/* Form atribuir inline */}
-                    {atribuindo === c.nome && (
-                      <div style={{ marginTop:12, background:'#f8fafc', borderRadius:10, padding:14, border:'1px solid #e2e8f0' }}>
-                        <p style={{ margin:'0 0 10px', fontWeight:700, color:'#1a237e', fontSize:13 }}>Atribuir cargo</p>
-                        <select value={formAtribuir.associado_id} onChange={e => setFormAtribuir({...formAtribuir, associado_id:e.target.value})}
-                          style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, marginBottom:10, boxSizing:'border-box' }}>
-                          <option value="">Selecione o irmão...</option>
-                          {associados.map(a => <option key={a.id} value={a.id}>{a.nome_completo}</option>)}
-                        </select>
-                        <input type="date" value={formAtribuir.data_inicio} onChange={e => setFormAtribuir({...formAtribuir, data_inicio:e.target.value})}
-                          style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, marginBottom:10, boxSizing:'border-box' }} />
-                        <div style={{ display:'flex', gap:8 }}>
-                          <button onClick={atribuir}
-                            style={{ flex:1, padding:'10px', borderRadius:8, border:'none', background:'#1a237e', color:'#fff', fontWeight:700, fontSize:14, cursor:'pointer', minHeight:44 }}>💾 Confirmar</button>
-                          <button onClick={() => setAtribuindo(null)}
-                            style={{ flex:1, padding:'10px', borderRadius:8, border:'1px solid #e2e8f0', background:'#fff', color:'#64748b', fontWeight:700, fontSize:14, cursor:'pointer', minHeight:44 }}>Cancelar</button>
-                        </div>
-                      </div>
-                    )}
+                            style={{ background:'#fee2e2', border:'none', borderRadius:8, color:'#dc2626', padding:'6px 10px', cursor:'pointer', fontSize:13, fontWeight:700, minWidth:44, minHeight:40 }}>✕</button>
+                        </>
+                      ) : (
+                        <button onClick={() => { setAtribuindo(cargo.nome); setFormAtribuir({ associado_id:'', data_inicio:'' }) }}
+                          style={{ background:'#dcfce7', border:'none', borderRadius:8, color:'#16a34a', padding:'6px 12px', cursor:'pointer', fontSize:12, fontWeight:700, minWidth:44, minHeight:40 }}>＋ Atribuir</button>
+                      )}
+                    </div>
                   </div>
+                  {atribuindo === cargo.nome && (
+                    <div style={{ background:'#f8fafc', padding:'12px 14px', borderBottom:'1px solid #f1f5f9' }}>
+                      <select value={formAtribuir.associado_id} onChange={e => setFormAtribuir({...formAtribuir, associado_id:e.target.value})}
+                        style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, marginBottom:8, boxSizing:'border-box' }}>
+                        <option value="">Selecione o irmão...</option>
+                        {associados.map(a => <option key={a.id} value={a.id}>{a.nome_completo}</option>)}
+                      </select>
+                      <input type="date" value={formAtribuir.data_inicio} onChange={e => setFormAtribuir({...formAtribuir, data_inicio:e.target.value})}
+                        style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, marginBottom:8, boxSizing:'border-box' }} />
+                      <div style={{ display:'flex', gap:8 }}>
+                        <button onClick={atribuir}
+                          style={{ flex:1, padding:'10px', borderRadius:8, border:'none', background:'#1a237e', color:'#fff', fontWeight:700, fontSize:14, cursor:'pointer', minHeight:44 }}>💾 Confirmar</button>
+                        <button onClick={() => setAtribuindo(null)}
+                          style={{ flex:1, padding:'10px', borderRadius:8, border:'1px solid #e2e8f0', background:'#fff', color:'#64748b', fontWeight:700, fontSize:14, cursor:'pointer', minHeight:44 }}>Cancelar</button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )
             })}
           </div>
         )}
 
-        {/* ABA: GERENCIAR LISTA */}
+                {/* ABA: GERENCIAR LISTA */}
         {aba === 'gerenciar' && (
           <div>
             {/* Criar novo */}
