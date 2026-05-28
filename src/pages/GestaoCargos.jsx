@@ -10,6 +10,19 @@ const CARGOS_REAA = [
   'Mestre de Banquetes','Mestre de Harmonia','Bibliotecário','Arquiteto'
 ]
 
+const CARGO_PERFIL = {
+  'Venerável Mestre': 'Venerável Mestre',
+  'Tesoureiro': 'Financeiro',
+  'Secretário': 'Administrativo',
+  'Chanceler': 'Administrativo',
+  'Hospitaleiro': 'Hospitalaria',
+  '1º Vigilante': 'Ritualística',
+  '2º Vigilante': 'Ritualística',
+  'Orador': 'Ritualística',
+  'Mestre de Cerimônias': 'Ritualística',
+  'Mestre de Harmonia': 'Ritualística',
+}
+
 export default function GestaoCargos() {
   const navigate = useNavigate()
   const [nivelAcesso, setNivelAcesso] = useState(null)
@@ -74,7 +87,13 @@ export default function GestaoCargos() {
       data_inicio: formAtribuir.data_inicio,
       em_exercicio: true
     })
-    setMsg('✅ Cargo atribuído com sucesso!')
+    // Atualizar nível de acesso automaticamente
+    const novoPerfil = CARGO_PERFIL[cargo] || 'Membro'
+    const { data: assocUser } = await supabase.from('associados').select('user_id').eq('id', formAtribuir.associado_id).single()
+    if (assocUser?.user_id) {
+      await supabase.from('perfis_acesso').upsert({ user_id: assocUser.user_id, perfil: novoPerfil }, { onConflict: 'user_id' })
+    }
+    setMsg('✅ Cargo atribuído com sucesso! Nível de acesso atualizado para: ' + novoPerfil)
     setAtribuindo(null)
     setFormAtribuir({ associado_id:'', data_inicio:'' })
     await carregar()
