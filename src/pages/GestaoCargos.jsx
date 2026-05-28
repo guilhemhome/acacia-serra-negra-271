@@ -76,6 +76,12 @@ export default function GestaoCargos() {
 
   async function atribuir() {
     if (!formAtribuir.associado_id || !formAtribuir.data_inicio) { setMsg('Preencha o irmão e a data de início.'); return }
+    // Verificar se o irmão já ocupa algum cargo
+    const cargoAtual = exercicio.find(e => e.associado_id === formAtribuir.associado_id)
+    if (cargoAtual) {
+      const confirmar = window.confirm(`⚠️ Este irmão já ocupa o cargo de "${cargoAtual.cargo}". Deseja atribuir mesmo assim? O cargo anterior será encerrado automaticamente.`)
+      if (!confirmar) return
+    }
     const cargo = atribuindo
     const jaOcupa = exercicio.find(e => e.cargo === cargo)
     if (jaOcupa) {
