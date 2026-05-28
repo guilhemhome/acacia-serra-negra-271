@@ -37,6 +37,7 @@ export default function GestaoCargos() {
   const [editandoCargo, setEditandoCargo] = useState(null)
   const [editNome, setEditNome] = useState('')
   const [aba, setAba] = useState('atual')
+  const [alertaCargo, setAlertaCargo] = useState(null)
 
   useEffect(() => { init() }, [])
 
@@ -79,8 +80,8 @@ export default function GestaoCargos() {
     // Verificar se o irmão já ocupa algum cargo
     const cargoAtual = exercicio.find(e => e.associado_id === formAtribuir.associado_id)
     if (cargoAtual) {
-      const confirmar = window.confirm(`⚠️ Este irmão já ocupa o cargo de "${cargoAtual.cargo}". Deseja atribuir mesmo assim? O cargo anterior será encerrado automaticamente.`)
-      if (!confirmar) return
+      setAlertaCargo({ cargoAtual: cargoAtual.cargo, associado_id: formAtribuir.associado_id, data_inicio: formAtribuir.data_inicio, cargo: atribuindo })
+      return
     }
     const cargo = atribuindo
     const jaOcupa = exercicio.find(e => e.cargo === cargo)
@@ -102,6 +103,24 @@ export default function GestaoCargos() {
     setMsg('✅ Cargo atribuído com sucesso! Nível de acesso atualizado para: ' + novoPerfil)
     setAtribuindo(null)
     setFormAtribuir({ associado_id:'', data_inicio:'' })
+    await carregar()
+    setTimeout(() => setMsg(''), 3000)
+  }
+
+  async function confirmarAlerta() {
+    const { cargo, associado_id, data_inicio } = alertaCargo
+    setAlertaCargo(null)
+    const jaOcupa = exercicio.find(e => e.cargo === cargo)
+    if (jaOcupa) await supabase.from('cargos_historico').update({ em_exercicio: false, data_fim: data_inicio }).eq('id', jaOcupa.id)
+    const cargoAnterior = exercicio.find(e => e.associado_id === associado_id)
+    if (cargoAnterior) await supabase.from('cargos_historico').update({ em_exercicio: false, data_fim: data_inicio }).eq('id', cargoAnterior.id)
+    await supabase.from('cargos_historico').insert({ associado_id, cargo, data_inicio, em_exercicio: true })
+    const novoPerfil = CARGO_PERFIL[cargo] || 'Membro'
+    const { data: assocUser } = await supabase.from('associados').select('user_id').eq('id', associado_id).single()
+    if (assocUser?.user_id) await supabase.from('perfis_acesso').upsert({ user_id: assocUser.user_id, perfil: novoPerfil }, { onConflict: 'user_id' })
+    setMsg('Cargo atribuido! Nivel de acesso: ' + novoPerfil)
+    setAtribuindo(null)
+    setFormAtribuir({ associado_id: '', data_inicio: '' })
     await carregar()
     setTimeout(() => setMsg(''), 3000)
   }
@@ -151,6 +170,21 @@ export default function GestaoCargos() {
 
   return (
     <div style={{ minHeight:'100vh', background:'linear-gradient(135deg,#1a237e,#283593)', padding:'24px 16px' }}>
+      {alertaCargo && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.6)', zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', padding:24 }}>
+          <div style={{ background:'#fff', borderRadius:16, padding:24, maxWidth:360, width:'100%' }}>
+            <div style={{ textAlign:'center', marginBottom:12 }}><span style={{ fontSize:40 }}>⚠️</span></div>
+            <h3 style={{ margin:'0 0 8px', color:'#1e293b', fontSize:16, fontWeight:700, textAlign:'center' }}>Irmão já tem cargo</h3>
+            <p style={{ margin:'0 0 20px', color:'#64748b', fontSize:14, textAlign:'center', lineHeight:1.5 }}>
+              Este irmão já ocupa <strong style={{ color:'#1a237e' }}>"{alertaCargo.cargoAtual}"</strong>. Deseja atribuir <strong style={{ color:'#1a237e' }}>"{alertaCargo.cargo}"</strong> mesmo assim? O cargo anterior será encerrado automaticamente.
+            </p>
+            <div style={{ display:'flex', gap:10 }}>
+              <button onClick={() => setAlertaCargo(null)} style={{ flex:1, padding:'12px', borderRadius:10, border:'1px solid #e2e8f0', background:'#f8fafc', color:'#64748b', fontWeight:700, fontSize:14, cursor:'pointer', minHeight:44 }}>Cancelar</button>
+              <button onClick={confirmarAlerta} style={{ flex:1, padding:'12px', borderRadius:10, border:'none', background:'#1a237e', color:'#fff', fontWeight:700, fontSize:14, cursor:'pointer', minHeight:44 }}>Confirmar</button>
+            </div>
+          </div>
+        </div>
+      )}
       <div style={{ maxWidth:600, margin:'0 auto' }}>
 
         {/* Header */}
