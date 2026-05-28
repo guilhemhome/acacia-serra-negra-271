@@ -21,8 +21,7 @@ const GRUPOS_CARGOS = [
   { id:'outros', label:'Outros', icon:'📚', cargos:[] },
 ]
 
-const GRUPOS_CARGOS = [
-  { id:'direcao', label:'Direção', icon:'👑', cargos:['Venerável Mestre','1º Vigilante','2º Vigilante'] },
+},
   { id:'admin', label:'Administração', icon:'📋', cargos:['Secretário','Tesoureiro','Chanceler'] },
   { id:'juridico', label:'Jurídico', icon:'⚖️', cargos:['Orador'] },
   { id:'ritual', label:'Ritual', icon:'🕯️', cargos:['Mestre de Cerimônias','1º Diácono','2º Diácono','1º Experto','2º Experto','Mestre de Harmonia'] },
@@ -231,9 +230,6 @@ export default function GestaoCargos() {
 
         {/* ABA: CARGOS ATUAIS */}
         {aba === 'atual' && (() => {
-          const [gruposAbertos, setGruposAbertos] = [
-            abasAbertas, setAbasAbertas
-          ]
           return (
             <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
               {GRUPOS_CARGOS.map(grupo => {
@@ -244,10 +240,10 @@ export default function GestaoCargos() {
                 if (cargosDoGrupo.length === 0) return null
                 const preenchidos = cargosDoGrupo.filter(c => titular(c.nome)).length
                 const vagos = cargosDoGrupo.length - preenchidos
-                const aberto = gruposAbertos.includes(grupo.id)
+                const aberto = abasAbertas.includes(grupo.id)
                 return (
                   <div key={grupo.id} style={{ background:'rgba(255,255,255,0.95)', borderRadius:14, overflow:'hidden' }}>
-                    <div onClick={() => setGruposAbertos(prev => prev.includes(grupo.id) ? prev.filter(x => x !== grupo.id) : [...prev, grupo.id])}
+                    <div onClick={() => setAbasAbertas(prev => prev.includes(grupo.id) ? prev.filter(x => x !== grupo.id) : [...prev, grupo.id])}
                       style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 14px', cursor:'pointer', userSelect:'none' }}>
                       <span style={{ fontSize:18 }}>{grupo.icon}</span>
                       <span style={{ flex:1, fontSize:14, fontWeight:600, color:'#1e293b' }}>{grupo.label}</span>
