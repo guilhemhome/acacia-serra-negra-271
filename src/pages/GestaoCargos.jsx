@@ -214,29 +214,27 @@ export default function GestaoCargos() {
             {cargos.map(c => {
               const t = titular(c.nome)
               return (
-                <div key={c.id} style={{ background:'#fff', borderRadius:12, overflow:'hidden', boxShadow:'0 2px 8px rgba(0,0,0,0.1)' }}>
-                  <div style={{ background:'#1a237e', padding:'8px 14px' }}>
-                    <p style={{ margin:0, color:'#fff', fontWeight:700, fontSize:14 }}>{c.nome}</p>
-                  </div>
-                  <div style={{ padding:'12px 14px' }}>
+                <div key={c.id} style={{ background:'#fff', borderRadius:12, overflow:'hidden', boxShadow:'0 1px 4px rgba(0,0,0,0.06)', marginBottom:6 }}>
+                  <div style={{ padding:'10px 14px' }}>
+                    <div style={{ fontSize:11, fontWeight:700, color:'#1a237e', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:6 }}>{c.nome}</div>
                     {t ? (
                       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:8 }}>
-                        <div>
-                          <p style={{ margin:0, fontWeight:600, color:'#1e293b', fontSize:14 }}>{t.associados?.nome_completo}</p>
-                          <p style={{ margin:0, fontSize:12, color:'#64748b' }}>desde {fmt(t.data_inicio)}</p>
+                        <div style={{ flex:1, minWidth:0 }}>
+                          <div style={{ fontSize:13, fontWeight:700, color:'#1a237e' }}>{c2.nome}</div>
+                          <div style={{ fontSize:12, color:'#1e293b' }}>{t.associados?.nome_completo} · desde {fmt(t.data_inicio)}</div>
                         </div>
                         <div style={{ display:'flex', gap:8, flexShrink:0 }}>
                           <button onClick={() => { setAtribuindo(c.nome); setFormAtribuir({ associado_id:'', data_inicio:'' }) }}
-                            style={{ background:'#e0f2fe', border:'none', borderRadius:8, color:'#0369a1', padding:'8px 14px', cursor:'pointer', fontSize:13, fontWeight:700, minWidth:44, minHeight:44 }}>✏️ Trocar</button>
+                            style={{ background:'#e0f2fe', border:'none', borderRadius:8, color:'#0369a1', padding:'6px 10px', cursor:'pointer', fontSize:12, fontWeight:700, minWidth:44, minHeight:36 }}>✏️</button>
                           <button onClick={() => encerrar(t)}
-                            style={{ background:'#fee2e2', border:'none', borderRadius:8, color:'#dc2626', padding:'8px 14px', cursor:'pointer', fontSize:13, fontWeight:700, minWidth:44, minHeight:44 }}>✕ Encerrar</button>
+                            style={{ background:'#fee2e2', border:'none', borderRadius:8, color:'#dc2626', padding:'6px 10px', cursor:'pointer', fontSize:12, fontWeight:700, minWidth:44, minHeight:36 }}>✕</button>
                         </div>
                       </div>
                     ) : (
                       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
                         <p style={{ margin:0, color:'#94a3b8', fontSize:13, fontStyle:'italic' }}>Cargo vago</p>
                         <button onClick={() => { setAtribuindo(c.nome); setFormAtribuir({ associado_id:'', data_inicio:'' }) }}
-                          style={{ background:'#dcfce7', border:'none', borderRadius:8, color:'#16a34a', padding:'8px 14px', cursor:'pointer', fontSize:13, fontWeight:700, minWidth:44, minHeight:44 }}>＋ Atribuir</button>
+                          style={{ background:'#dcfce7', border:'none', borderRadius:8, color:'#16a34a', padding:'6px 10px', cursor:'pointer', fontSize:12, fontWeight:700, minWidth:44, minHeight:36 }}>＋</button>
                       </div>
                     )}
 
