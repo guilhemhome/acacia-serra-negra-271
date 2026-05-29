@@ -97,6 +97,7 @@ export default function PortalMembro() {
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:20 }}>
           {[
             { icon:'👤', label:'Meu Cadastro', sub:'Ver e editar dados', rota:'/editar-perfil' },
+            { icon:'⚒️', label:'Quadro de Oficiais', sub:'Cargos da loja', rota:'/oficiais' },
             { icon:'📅', label:'Calendário', sub:'Próximos eventos', rota:'/calendario' },
             { icon:'💰', label:'Financeiro', sub:'Minha situação', rota:null, emBreve:true },
             ...(ehBode ? [{ icon:'🏍️', label:'Bodes do Asfalto', sub:'Área do motoclub', rota:null, emBreve:true }] : []),
@@ -152,41 +153,6 @@ export default function PortalMembro() {
             </div>
           </>
         )}
-
-        {/* Quadro de oficiais colapsável */}
-        <p style={sec}>Quadro de oficiais</p>
-        <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:20 }}>
-          {GRUPOS_CARGOS.map(grupo => {
-            const cargosDoGrupo = grupo.id === 'outros'
-              ? cargos.filter(c => !GRUPOS_CARGOS.slice(0,-1).flatMap(g => g.cargos).includes(c.cargo))
-              : grupo.cargos.map(nome => cargos.find(c => c.cargo === nome)).filter(Boolean)
-            if (cargosDoGrupo.length === 0) return null
-            const aberto = gruposAbertos.includes(grupo.id)
-            const preenchidos = cargosDoGrupo.length
-            return (
-              <div key={grupo.id} style={{ borderRadius:12, overflow:'hidden', border:'1px solid #cbd5e1' }}>
-                <div onClick={() => setGruposAbertos(prev => prev.includes(grupo.id) ? prev.filter(x => x !== grupo.id) : [...prev, grupo.id])}
-                  style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 16px', cursor:'pointer', background: aberto ? '#1a237e' : '#f8fafc' }}>
-                  <span style={{ flex:1, fontSize:14, fontWeight:700, color: aberto ? '#fff' : '#1a237e' }}>{grupo.label}</span>
-                  <span style={{ fontSize:11, padding:'2px 8px', borderRadius:20, background: aberto ? 'rgba(255,255,255,0.2)' : '#dbeafe', color: aberto ? '#fff' : '#1d4ed8', fontWeight:600 }}>{preenchidos} oficial{preenchidos>1?'is':''}</span>
-                  <span style={{ color: aberto ? '#fff' : '#94a3b8', fontSize:16, display:'inline-block', transform: aberto ? 'rotate(180deg)' : 'none', transition:'transform 0.2s' }}>▾</span>
-                </div>
-                {aberto && (
-                  <div style={{ background:'#fff' }}>
-                    {cargosDoGrupo.map((c, idx) => (
-                      <div key={idx} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 16px', borderTop:'1px solid #f1f5f9', borderLeft:'4px solid #1a237e' }}>
-                        <div style={{ flex:1 }}>
-                          <span style={{ fontSize:13, fontWeight:700, color:'#0f172a' }}>{c.cargo}</span>
-                          <span style={{ fontSize:12, color:'#1a237e', fontWeight:500, marginLeft:8 }}>{c.associados?.nome_completo}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
 
         {/* Aniversariantes do mês */}
         {aniversarios.length > 0 && (
