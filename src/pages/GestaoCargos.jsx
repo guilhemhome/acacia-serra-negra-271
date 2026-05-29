@@ -224,17 +224,15 @@ export default function GestaoCargos() {
         {aba === 'atual' && (
           <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
             {GRUPOS_CARGOS.map(grupo => {
-              const cargosDoGrupo = cargos.filter(cargo =>
-                grupo.id === 'outros'
-                  ? !GRUPOS_CARGOS.slice(0,-1).flatMap(g => g.cargos).includes(cargo.nome)
-                  : grupo.cargos.includes(cargo.nome)
-              )
+              const cargosDoGrupo = grupo.id === 'outros'
+                ? cargos.filter(cargo => !GRUPOS_CARGOS.slice(0,-1).flatMap(g => g.cargos).includes(cargo.nome))
+                : grupo.cargos.map(nome => cargos.find(c => c.nome === nome)).filter(Boolean)
               if (cargosDoGrupo.length === 0) return null
               const preenchidos = cargosDoGrupo.filter(cargo => titular(cargo.nome)).length
               const vagos = cargosDoGrupo.length - preenchidos
               const aberto = abasAbertas.includes(grupo.id)
               return (
-                <div key={grupo.id} style={{ background:'rgba(255,255,255,0.95)', borderRadius:14, overflow:'hidden' }}>
+                <div key={grupo.id} style={{ background:'#ffffff', borderRadius:14, overflow:'hidden', boxShadow:'0 1px 4px rgba(0,0,0,0.1)' }}>
                   <div onClick={() => setAbasAbertas(prev => prev.includes(grupo.id) ? prev.filter(x => x !== grupo.id) : [...prev, grupo.id])}
                     style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 14px', cursor:'pointer', userSelect:'none', background: aberto ? '#f8f9ff' : '#fff' }}>
                     <span style={{ flex:1, fontSize:14, fontWeight:600, color:'#1a237e' }}>{grupo.label}</span>
