@@ -15,6 +15,7 @@ import PerfilIrmao from './pages/PerfilIrmao'
 import EditarPerfil from './pages/EditarPerfil'
 import Dashboard from './pages/Dashboard'
 import PortalMembro from './pages/PortalMembro'
+import Oficiais from './pages/Oficiais'
 
 const PERFIS_ADM = ['ADM', 'Total', 'Venerável Mestre', 'Administrativo', 'Financeiro', 'Hospitalaria', 'Ritualística']
 const PERFIS_GESTAO = ['ADM', 'Total', 'Venerável Mestre', 'Administrativo']
@@ -75,6 +76,7 @@ function App() {
 
         {/* Portal do Membro */}
         <Route path="/membro" element={<RotaProtegida><PortalMembro /></RotaProtegida>} />
+        <Route path="/oficiais" element={<RotaProtegida><Oficiais /></RotaProtegida>} />
 
         {/* Rotas para todos os perfis logados */}
         <Route path="/editar-perfil" element={<RotaProtegida><EditarPerfil /></RotaProtegida>} />
