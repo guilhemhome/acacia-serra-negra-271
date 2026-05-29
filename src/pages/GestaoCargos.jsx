@@ -236,9 +236,8 @@ export default function GestaoCargos() {
               return (
                 <div key={grupo.id} style={{ background:'rgba(255,255,255,0.95)', borderRadius:14, overflow:'hidden' }}>
                   <div onClick={() => setAbasAbertas(prev => prev.includes(grupo.id) ? prev.filter(x => x !== grupo.id) : [...prev, grupo.id])}
-                    style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 14px', cursor:'pointer', userSelect:'none' }}>
-                    <span style={{ fontSize:18 }}>{grupo.icon}</span>
-                    <span style={{ flex:1, fontSize:14, fontWeight:600, color:'#1e293b' }}>{grupo.label}</span>
+                    style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 14px', cursor:'pointer', userSelect:'none', background: aberto ? '#f8f9ff' : '#fff' }}>
+                    <span style={{ flex:1, fontSize:14, fontWeight:600, color:'#1a237e' }}>{grupo.label}</span>
                     <div style={{ display:'flex', gap:6, alignItems:'center' }}>
                       {preenchidos > 0 && <span style={{ fontSize:11, padding:'2px 8px', borderRadius:20, background:'#ede9fe', color:'#5b21b6', fontWeight:500 }}>{preenchidos} preenchido{preenchidos>1?'s':''}</span>}
                       {vagos > 0 && <span style={{ fontSize:11, padding:'2px 8px', borderRadius:20, background:'#f1f5f9', color:'#64748b', fontWeight:500 }}>{vagos} vago{vagos>1?'s':''}</span>}
