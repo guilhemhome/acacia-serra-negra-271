@@ -2,21 +2,29 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
+const GRUPOS_CARGOS = [
+  { id:'direcao', label:'Direção', cargos:['Venerável Mestre','1º Vigilante','2º Vigilante'] },
+  { id:'admin', label:'Administração', cargos:['Secretário','Tesoureiro','Chanceler'] },
+  { id:'juridico', label:'Jurídico', cargos:['Orador'] },
+  { id:'ritual', label:'Ritual', cargos:['Mestre de Cerimônias','1º Diácono','2º Diácono','1º Experto','2º Experto','Mestre de Harmonia'] },
+  { id:'assistencia', label:'Assistência', cargos:['Hospitaleiro','Mestre de Banquetes'] },
+  { id:'guarda', label:'Guarda', cargos:['Cobridor Interno','Cobridor Externo','Porta-Bandeira','Porta-Estandarte','Porta-Espada'] },
+  { id:'outros', label:'Outros', cargos:[] },
+]
+
 export default function PortalMembro() {
   const navigate = useNavigate()
   const [usuario, setUsuario] = useState(null)
   const [cargos, setCargos] = useState([])
   const [eventos, setEventos] = useState([])
   const [aniversarios, setAniversarios] = useState([])
+  const [avisos, setAvisos] = useState([])
+  const [ehBode, setEhBode] = useState(false)
+  const [gruposAbertos, setGruposAbertos] = useState([])
   const [carregando, setCarregando] = useState(true)
 
   function hojeStr() { return new Date().toISOString().split('T')[0] }
-  function fimMes() {
-    const d = new Date()
-    d.setMonth(d.getMonth() + 1)
-    d.setDate(0)
-    return d.toISOString().split('T')[0]
-  }
+  function fimMes() { const d = new Date(); d.setMonth(d.getMonth()+1); d.setDate(0); return d.toISOString().split('T')[0] }
   function fmt(d) { return d ? d.split('T')[0].split('-').reverse().join('/') : '' }
 
   useEffect(() => { buscarDados() }, [])
@@ -26,42 +34,40 @@ export default function PortalMembro() {
     if (!user) return
 
     const { data: assoc } = await supabase.from('associados')
-      .select('id, nome_completo, grau:historico_graus(grau)').eq('user_id', user.id).single()
+      .select('id, nome_completo, bodes_asfalto, bodes_asfalto_numero, bodes_asfalto_data_admissao').eq('user_id', user.id).single()
     const { data: perfil } = await supabase.from('perfis_acesso')
       .select('perfil').eq('user_id', user.id).single()
 
     setUsuario({ nome: assoc?.nome_completo || user.email.split('@')[0], perfil: perfil?.perfil || 'Membro' })
+    setEhBode(assoc?.bodes_asfalto === true)
 
-    // Cargos atuais
     const { data: ch } = await supabase.from('cargos_historico')
       .select('cargo, associados(nome_completo)').eq('em_exercicio', true)
     setCargos(ch || [])
 
-    // Próximos eventos do mês
     const { data: evs } = await supabase.from('eventos')
-      .select('*').eq('status', 'agendado')
+      .select('*').eq('status','agendado')
       .gte('data_evento', hojeStr()).lte('data_evento', fimMes())
       .order('data_evento').limit(3)
     setEventos(evs || [])
 
-    // Aniversariantes do mês
-    const hoje = hojeStr()
-    const fim = fimMes()
-    const mesAtual = hoje.split('-')[1]
+    const mesAtual = hojeStr().split('-')[1]
     const { data: irmaos } = await supabase.from('associados')
-      .select('nome_completo, data_nascimento').eq('status_cadastro', 'aprovado')
-    const anivs = (irmaos || []).filter(a => {
-      if (!a.data_nascimento) return false
-      const mes = a.data_nascimento.split('T')[0].split('-')[1]
-      return mes === mesAtual
-    }).slice(0, 5)
-    setAniversarios(anivs)
+      .select('nome_completo, data_nascimento').eq('status_cadastro','aprovado')
+    setAniversarios((irmaos||[]).filter(a => a.data_nascimento && a.data_nascimento.split('T')[0].split('-')[1] === mesAtual).slice(0,5))
+
+    const { data: avs } = await supabase.from('avisos')
+      .select('*, associados(nome_completo)').eq('ativo', true).order('created_at', { ascending: false }).limit(5)
+    setAvisos(avs || [])
 
     setCarregando(false)
   }
 
+  function titular(nomeCargo) { return cargos.find(c => c.cargo === nomeCargo) }
+
   const primeiroNome = usuario?.nome?.split(' ')[0] || ''
   const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
+  const sec = { color:'rgba(255,255,255,0.6)', fontSize:11, fontWeight:500, textTransform:'uppercase', letterSpacing:'0.06em', margin:'0 0 8px' }
 
   if (carregando) return (
     <div style={{ minHeight:'100vh', background:'linear-gradient(135deg,#1a237e 0%,#283593 50%,#1565c0 100%)', display:'flex', alignItems:'center', justifyContent:'center' }}>
@@ -82,40 +88,59 @@ export default function PortalMembro() {
           <p style={{ color:'rgba(255,255,255,0.65)', margin:0, fontSize:13 }}>{usuario?.perfil} · Acácia de Serra Negra Nº 271</p>
         </div>
 
-        {/* Cards de acesso rápido */}
-        <p style={{ color:'rgba(255,255,255,0.6)', fontSize:11, fontWeight:500, textTransform:'uppercase', letterSpacing:'0.06em', margin:'0 0 8px' }}>Acesso rápido</p>
+        {/* Cards acesso rápido */}
+        <p style={sec}>Acesso rápido</p>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:20 }}>
           {[
-            { icon:'👤', label:'Meu Cadastro', sub:'Ver e editar perfil', rota:'/editar-perfil' },
-            { icon:'⚒️', label:'Oficiais', sub:'Quadro de cargos', rota:null, acao:'cargos' },
+            { icon:'👤', label:'Meu Cadastro', sub:'Ver e editar dados', rota:'/editar-perfil' },
             { icon:'📅', label:'Calendário', sub:'Próximos eventos', rota:'/calendario' },
-            { icon:'✏️', label:'Meu Perfil', sub:'Dados pessoais', rota:'/editar-perfil' },
+            { icon:'💰', label:'Financeiro', sub:'Minha situação', rota:null, emBreve:true },
+            ...(ehBode ? [{ icon:'🏍️', label:'Bodes do Asfalto', sub:'Área do motoclub', rota:null, emBreve:true }] : []),
           ].map((c, i) => (
-            <button key={i} onClick={() => c.rota ? navigate(c.rota) : document.getElementById('sec-'+c.acao)?.scrollIntoView({ behavior:'smooth' })}
-              style={{ background:'rgba(255,255,255,0.1)', border:'none', borderRadius:16, padding:'16px 14px', cursor:'pointer', textAlign:'left' }}>
+            <button key={i} onClick={() => !c.emBreve && c.rota && navigate(c.rota)}
+              style={{ background: c.emBreve ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.12)', border:'none', borderRadius:16, padding:'16px 14px', cursor: c.emBreve ? 'default' : 'pointer', textAlign:'left', position:'relative' }}>
+              {c.emBreve && <span style={{ position:'absolute', top:8, right:8, fontSize:9, background:'rgba(255,255,255,0.2)', color:'rgba(255,255,255,0.6)', borderRadius:10, padding:'2px 6px' }}>em breve</span>}
               <div style={{ fontSize:22, marginBottom:6 }}>{c.icon}</div>
-              <div style={{ color:'#fff', fontSize:13, fontWeight:600, lineHeight:1.2 }}>{c.label}</div>
-              <div style={{ color:'rgba(255,255,255,0.5)', fontSize:11, marginTop:3 }}>{c.sub}</div>
+              <div style={{ color: c.emBreve ? 'rgba(255,255,255,0.5)' : '#fff', fontSize:13, fontWeight:600, lineHeight:1.2 }}>{c.label}</div>
+              <div style={{ color:'rgba(255,255,255,0.4)', fontSize:11, marginTop:3 }}>{c.sub}</div>
             </button>
           ))}
         </div>
+
+        {/* Avisos */}
+        {avisos.length > 0 && (
+          <>
+            <p style={sec}>📢 Avisos</p>
+            <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:20 }}>
+              {avisos.map((av, i) => (
+                <div key={i} style={{ background:'rgba(255,255,255,0.95)', borderRadius:14, padding:'14px 16px', borderLeft:'4px solid #f59e0b' }}>
+                  <div style={{ fontSize:13, fontWeight:700, color:'#1e293b', marginBottom:4 }}>{av.titulo}</div>
+                  <div style={{ fontSize:12, color:'#475569', lineHeight:1.5 }}>{av.conteudo}</div>
+                  <div style={{ fontSize:11, color:'#94a3b8', marginTop:6 }}>
+                    {av.associados?.nome_completo} · {fmt(av.created_at)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
         {/* Próximos eventos */}
         {eventos.length > 0 && (
           <>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
-              <p style={{ color:'rgba(255,255,255,0.6)', fontSize:11, fontWeight:500, textTransform:'uppercase', letterSpacing:'0.06em', margin:0 }}>Próximos eventos</p>
+              <p style={{ ...sec, margin:0 }}>Próximos eventos</p>
               <button onClick={() => navigate('/calendario')} style={{ background:'none', border:'none', color:'rgba(255,255,255,0.5)', fontSize:12, cursor:'pointer', padding:0 }}>Ver todos →</button>
             </div>
             <div style={{ background:'rgba(255,255,255,0.95)', borderRadius:16, padding:'4px 16px', marginBottom:20 }}>
               {eventos.map((ev, i) => (
                 <div key={ev.id} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 0', borderBottom: i < eventos.length-1 ? '1px solid #f1f5f9' : 'none' }}>
-                  <div style={{ textAlign:'center', minWidth:36, background:'#f1f5f9', borderRadius:8, padding:'6px 8px' }}>
+                  <div style={{ textAlign:'center', minWidth:36, background:'#f1f5f9', borderRadius:8, padding:'6px 8px', flexShrink:0 }}>
                     <div style={{ fontSize:16, fontWeight:600, color:'#1a237e', lineHeight:1 }}>{ev.data_evento.split('-')[2]}</div>
                     <div style={{ fontSize:9, color:'#94a3b8', textTransform:'uppercase' }}>{MESES[parseInt(ev.data_evento.split('-')[1])-1]}</div>
                   </div>
-                  <div style={{ flex:1 }}>
-                    <div style={{ fontSize:13, fontWeight:600, color:'#1e293b' }}>{ev.titulo}</div>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontSize:13, fontWeight:600, color:'#1e293b', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{ev.titulo}</div>
                     <div style={{ fontSize:11, color:'#64748b' }}>{ev.hora || '20:00'}</div>
                   </div>
                 </div>
@@ -124,26 +149,46 @@ export default function PortalMembro() {
           </>
         )}
 
-        {/* Quadro de oficiais */}
-        <p id="sec-cargos" style={{ color:'rgba(255,255,255,0.6)', fontSize:11, fontWeight:500, textTransform:'uppercase', letterSpacing:'0.06em', margin:'0 0 8px', scrollMarginTop:20 }}>Quadro de oficiais</p>
-        <div style={{ background:'rgba(255,255,255,0.95)', borderRadius:16, padding:'4px 16px', marginBottom:20 }}>
-          {cargos.length === 0 ? (
-            <p style={{ color:'#94a3b8', textAlign:'center', fontSize:13, padding:'12px 0' }}>Nenhum cargo atribuído ainda.</p>
-          ) : cargos.map((c, i) => (
-            <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 0', borderBottom: i < cargos.length-1 ? '1px solid #f1f5f9' : 'none' }}>
-              <div style={{ flex:1 }}>
-                <div style={{ fontSize:13, fontWeight:600, color:'#1a237e' }}>{c.cargo}</div>
-                <div style={{ fontSize:12, color:'#475569' }}>{c.associados?.nome_completo || '—'}</div>
+        {/* Quadro de oficiais colapsável */}
+        <p style={sec}>Quadro de oficiais</p>
+        <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:20 }}>
+          {GRUPOS_CARGOS.map(grupo => {
+            const cargosDoGrupo = grupo.id === 'outros'
+              ? cargos.filter(c => !GRUPOS_CARGOS.slice(0,-1).flatMap(g => g.cargos).includes(c.cargo))
+              : grupo.cargos.map(nome => cargos.find(c => c.cargo === nome)).filter(Boolean)
+            if (cargosDoGrupo.length === 0) return null
+            const aberto = gruposAbertos.includes(grupo.id)
+            const preenchidos = cargosDoGrupo.length
+            return (
+              <div key={grupo.id} style={{ borderRadius:12, overflow:'hidden', border:'1px solid #cbd5e1' }}>
+                <div onClick={() => setGruposAbertos(prev => prev.includes(grupo.id) ? prev.filter(x => x !== grupo.id) : [...prev, grupo.id])}
+                  style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 16px', cursor:'pointer', background: aberto ? '#1a237e' : '#f8fafc' }}>
+                  <span style={{ flex:1, fontSize:14, fontWeight:700, color: aberto ? '#fff' : '#1a237e' }}>{grupo.label}</span>
+                  <span style={{ fontSize:11, padding:'2px 8px', borderRadius:20, background: aberto ? 'rgba(255,255,255,0.2)' : '#dbeafe', color: aberto ? '#fff' : '#1d4ed8', fontWeight:600 }}>{preenchidos} oficial{preenchidos>1?'is':''}</span>
+                  <span style={{ color: aberto ? '#fff' : '#94a3b8', fontSize:16, display:'inline-block', transform: aberto ? 'rotate(180deg)' : 'none', transition:'transform 0.2s' }}>▾</span>
+                </div>
+                {aberto && (
+                  <div style={{ background:'#fff' }}>
+                    {cargosDoGrupo.map((c, idx) => (
+                      <div key={idx} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 16px', borderTop:'1px solid #f1f5f9', borderLeft:'4px solid #1a237e' }}>
+                        <div style={{ flex:1 }}>
+                          <span style={{ fontSize:13, fontWeight:700, color:'#0f172a' }}>{c.cargo}</span>
+                          <span style={{ fontSize:12, color:'#1a237e', fontWeight:500, marginLeft:8 }}>{c.associados?.nome_completo}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* Aniversariantes do mês */}
         {aniversarios.length > 0 && (
           <>
-            <p style={{ color:'rgba(255,255,255,0.6)', fontSize:11, fontWeight:500, textTransform:'uppercase', letterSpacing:'0.06em', margin:'0 0 8px' }}>Aniversariantes do mês</p>
-            <div style={{ background:'rgba(255,255,255,0.95)', borderRadius:16, padding:'4px 16px', marginBottom:20 }}>
+            <p style={sec}>🎂 Aniversariantes do mês</p>
+            <div style={{ background:'rgba(255,255,255,0.95)', borderRadius:16, padding:'4px 16px' }}>
               {aniversarios.map((a, i) => (
                 <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 0', borderBottom: i < aniversarios.length-1 ? '1px solid #f1f5f9' : 'none' }}>
                   <div style={{ width:32, height:32, borderRadius:'50%', background:'#ede9fe', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:600, color:'#7c3aed', flexShrink:0 }}>
