@@ -65,6 +65,7 @@ export default function PortalMembro() {
 
     setCarregando(false)
   } catch(err) { console.error('ERRO PORTAL:', err); setCarregando(false); }
+  }
 
   function titular(nomeCargo) { return cargos.find(c => c.cargo === nomeCargo) }
 
