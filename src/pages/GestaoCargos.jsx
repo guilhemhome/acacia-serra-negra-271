@@ -248,15 +248,12 @@ export default function GestaoCargos() {
                         return (
                           <div key={cargo.id}>
                             <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 16px', borderTop:'1px solid #f1f5f9', borderLeft: t ? '4px solid #1a237e' : '4px solid #e2e8f0', background: t ? '#f8faff' : '#fff' }}>
-                              <div style={{ flex:1, minWidth:0 }}>
-                                <div style={{ display:'flex', alignItems:'baseline', gap:8, flexWrap:'wrap' }}>
-                                  <span style={{ fontSize:14, fontWeight:700, color:'#0f172a' }}>{cargo.nome}</span>
-                                  {t
-                                    ? <span style={{ fontSize:13, fontWeight:600, color:'#1a237e' }}>{t.associados?.nome_completo}</span>
-                                    : <span style={{ fontSize:12, color:'#94a3b8', fontStyle:'italic' }}>Cargo vago</span>
-                                  }
-                                </div>
-                                {t && <div style={{ fontSize:11, color:'#475569', marginTop:2 }}>desde {fmt(t.data_inicio)}</div>}
+                              <div style={{ flex:1, minWidth:0, display:'flex', alignItems:'center', gap:8, flexWrap:'nowrap', overflow:'hidden' }}>
+                                <span style={{ fontSize:14, fontWeight:700, color:'#0f172a', flexShrink:0 }}>{cargo.nome}</span>
+                                {t
+                                  ? <span style={{ fontSize:12, color:'#1a237e', fontWeight:500, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{t.associados?.nome_completo} · <span style={{ color:'#475569' }}>desde {fmt(t.data_inicio)}</span></span>
+                                  : <span style={{ fontSize:12, color:'#94a3b8', fontStyle:'italic', flexShrink:0 }}>Cargo vago</span>
+                                }
                               </div>
                               <div style={{ display:'flex', gap:6, flexShrink:0 }}>
                                 {t ? (
