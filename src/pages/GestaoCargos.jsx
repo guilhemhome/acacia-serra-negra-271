@@ -48,7 +48,7 @@ export default function GestaoCargos() {
   const [editandoCargo, setEditandoCargo] = useState(null)
   const [editNome, setEditNome] = useState('')
   const [aba, setAba] = useState('atual')
-  const [abasAbertas, setAbasAbertas] = useState(['direcao'])
+  const [abasAbertas, setAbasAbertas] = useState([])
   const [alertaCargo, setAlertaCargo] = useState(null)
 
   useEffect(() => { init() }, [])
