@@ -252,11 +252,11 @@ export default function GestaoCargos() {
                         return (
                           <div key={cargo.id}>
                             <div style={{ display:'flex', alignItems:'center', gap:10, padding:'9px 14px 9px 16px', borderBottom: idx < cargosDoGrupo.length-1 ? '0.5px solid #f1f5f9' : 'none', borderLeft: t ? '3px solid #3730a3' : '3px solid #e2e8f0' }}>
-                              <div style={{ flex:1, minWidth:0 }}>
-                                <div style={{ fontSize:13, fontWeight:600, color:'#1e293b' }}>{cargo.nome}</div>
-                                <div style={{ fontSize:12, color: t ? '#475569' : '#94a3b8', fontStyle: t ? 'normal' : 'italic', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                                  {t ? t.associados?.nome_completo + ' · desde ' + fmt(t.data_inicio) : 'Cargo vago'}
-                                </div>
+                              <div style={{ flex:1, minWidth:0, display:'flex', alignItems:'center', gap:8 }}>
+                                <span style={{ fontSize:13, fontWeight:600, color:'#1e293b', flexShrink:0 }}>{cargo.nome}</span>
+                                <span style={{ fontSize:12, color: t ? '#475569' : '#94a3b8', fontStyle: t ? 'normal' : 'italic', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                                  {t ? '· ' + t.associados?.nome_completo + ' · desde ' + fmt(t.data_inicio) : '· Cargo vago'}
+                                </span>
                               </div>
                               <div style={{ display:'flex', gap:5, flexShrink:0 }}>
                                 {t ? (
