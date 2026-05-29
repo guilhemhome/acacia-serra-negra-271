@@ -28,7 +28,10 @@ export default function Login() {
       if (assoc && !assoc.user_id) {
         await supabase.from('associados').update({ user_id: uid }).eq('id', assoc.id)
       }
-      navigate('/dashboard')
+      const { data: p } = await supabase.from('perfis_acesso').select('perfil').eq('user_id', data.user.id).single()
+      const perfil = p?.perfil || 'Membro'
+      const perfisMembro = ['Membro', 'Ritualística', 'Hospitalaria']
+      navigate(perfisMembro.includes(perfil) ? '/membro' : '/dashboard')
     }
     setCarregando(false)
   }
