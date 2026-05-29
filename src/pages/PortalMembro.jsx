@@ -30,6 +30,7 @@ export default function PortalMembro() {
   useEffect(() => { buscarDados() }, [])
 
   async function buscarDados() {
+    try {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
@@ -61,7 +62,7 @@ export default function PortalMembro() {
     setAvisos(avs || [])
 
     setCarregando(false)
-  }
+  } catch(err) { console.error('ERRO PORTAL:', err); setCarregando(false); }
 
   function titular(nomeCargo) { return cargos.find(c => c.cargo === nomeCargo) }
 
