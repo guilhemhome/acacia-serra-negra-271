@@ -222,73 +222,81 @@ export default function GestaoCargos() {
 
         {/* ABA: CARGOS ATUAIS */}
         {aba === 'atual' && (
-          <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
             {GRUPOS_CARGOS.map(grupo => {
               const cargosDoGrupo = grupo.id === 'outros'
-                ? cargos.filter(cargo => !GRUPOS_CARGOS.slice(0,-1).flatMap(g => g.cargos).includes(cargo.nome))
+                ? cargos.filter(c => !GRUPOS_CARGOS.slice(0,-1).flatMap(g => g.cargos).includes(c.nome))
                 : grupo.cargos.map(nome => cargos.find(c => c.nome === nome)).filter(Boolean)
               if (cargosDoGrupo.length === 0) return null
-              const preenchidos = cargosDoGrupo.filter(cargo => titular(cargo.nome)).length
+              const preenchidos = cargosDoGrupo.filter(c => titular(c.nome)).length
               const vagos = cargosDoGrupo.length - preenchidos
               const aberto = abasAbertas.includes(grupo.id)
               return (
-                <div key={grupo.id} style={{ background:'#ffffff', borderRadius:14, overflow:'hidden', boxShadow:'0 1px 4px rgba(0,0,0,0.1)' }}>
+                <div key={grupo.id} style={{ borderRadius:12, overflow:'hidden', background:'#fff', border:'1.5px solid #e2e8f0' }}>
+                  {/* Header do grupo */}
                   <div onClick={() => setAbasAbertas(prev => prev.includes(grupo.id) ? prev.filter(x => x !== grupo.id) : [...prev, grupo.id])}
-                    style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 14px', cursor:'pointer', userSelect:'none', background: aberto ? '#f8f9ff' : '#fff' }}>
-                    <span style={{ flex:1, fontSize:14, fontWeight:600, color:'#1a237e' }}>{grupo.label}</span>
+                    style={{ display:'flex', alignItems:'center', gap:10, padding:'13px 16px', cursor:'pointer', background: aberto ? '#1a237e' : '#f8fafc', borderBottom: aberto ? '1.5px solid #1a237e' : 'none' }}>
+                    <span style={{ flex:1, fontSize:14, fontWeight:700, color: aberto ? '#fff' : '#1a237e', letterSpacing:'0.01em' }}>{grupo.label}</span>
                     <div style={{ display:'flex', gap:6, alignItems:'center' }}>
-                      {preenchidos > 0 && <span style={{ fontSize:11, padding:'2px 8px', borderRadius:20, background:'#ede9fe', color:'#5b21b6', fontWeight:500 }}>{preenchidos} preenchido{preenchidos>1?'s':''}</span>}
-                      {vagos > 0 && <span style={{ fontSize:11, padding:'2px 8px', borderRadius:20, background:'#f1f5f9', color:'#64748b', fontWeight:500 }}>{vagos} vago{vagos>1?'s':''}</span>}
+                      {preenchidos > 0 && (
+                        <span style={{ fontSize:11, padding:'3px 9px', borderRadius:20, background: aberto ? 'rgba(255,255,255,0.25)' : '#e0e7ff', color: aberto ? '#fff' : '#3730a3', fontWeight:600 }}>
+                          {preenchidos} preenchido{preenchidos>1?'s':''}
+                        </span>
+                      )}
+                      {vagos > 0 && (
+                        <span style={{ fontSize:11, padding:'3px 9px', borderRadius:20, background: aberto ? 'rgba(255,255,255,0.15)' : '#f1f5f9', color: aberto ? 'rgba(255,255,255,0.8)' : '#64748b', fontWeight:600 }}>
+                          {vagos} vago{vagos>1?'s':''}
+                        </span>
+                      )}
                     </div>
-                    <span style={{ fontSize:14, color:'#94a3b8', display:'inline-block', transform: aberto ? 'rotate(180deg)' : 'rotate(0deg)', transition:'transform 0.2s' }}>▾</span>
+                    <span style={{ fontSize:18, color: aberto ? '#fff' : '#94a3b8', display:'inline-block', transform: aberto ? 'rotate(180deg)' : 'rotate(0deg)', transition:'transform 0.2s', lineHeight:1 }}>⌄</span>
                   </div>
-                  {aberto && (
-                    <div style={{ borderTop:'1px solid #f1f5f9' }}>
-                      {cargosDoGrupo.map((cargo, idx) => {
-                        const t = titular(cargo.nome)
-                        return (
-                          <div key={cargo.id}>
-                            <div style={{ display:'flex', alignItems:'center', gap:10, padding:'9px 14px 9px 16px', borderBottom: idx < cargosDoGrupo.length-1 ? '0.5px solid #f1f5f9' : 'none', borderLeft: t ? '3px solid #3730a3' : '3px solid #e2e8f0' }}>
-                              <div style={{ flex:1, minWidth:0, display:'flex', alignItems:'center', gap:8 }}>
-                                <span style={{ fontSize:13, fontWeight:600, color:'#1e293b', flexShrink:0 }}>{cargo.nome}</span>
-                                <span style={{ fontSize:12, color: t ? '#475569' : '#94a3b8', fontStyle: t ? 'normal' : 'italic', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                                  {t ? '· ' + t.associados?.nome_completo + ' · desde ' + fmt(t.data_inicio) : '· Cargo vago'}
-                                </span>
-                              </div>
-                              <div style={{ display:'flex', gap:5, flexShrink:0 }}>
-                                {t ? (
-                                  <>
-                                    <button onClick={() => { setAtribuindo(cargo.nome); setFormAtribuir({ associado_id:'', data_inicio:'' }) }}
-                                      style={{ background:'#f0f9ff', border:'0.5px solid #bae6fd', borderRadius:6, color:'#0369a1', padding:'5px 8px', cursor:'pointer', fontSize:12, minWidth:32, minHeight:32 }}>✏️</button>
-                                    <button onClick={() => encerrar(t)}
-                                      style={{ background:'#fef2f2', border:'0.5px solid #fecaca', borderRadius:6, color:'#dc2626', padding:'5px 8px', cursor:'pointer', fontSize:12, minWidth:32, minHeight:32 }}>✕</button>
-                                  </>
-                                ) : (
-                                  <button onClick={() => { setAtribuindo(cargo.nome); setFormAtribuir({ associado_id:'', data_inicio:'' }) }}
-                                    style={{ background:'#f0fdf4', border:'0.5px solid #bbf7d0', borderRadius:6, color:'#15803d', padding:'5px 10px', cursor:'pointer', fontSize:11, fontWeight:600, minWidth:32, minHeight:32 }}>＋ Atribuir</button>
-                                )}
-                              </div>
-                            </div>
-                            {atribuindo === cargo.nome && (
-                              <div style={{ background:'#f8fafc', padding:'12px 14px', borderBottom:'0.5px solid #f1f5f9' }}>
-                                <select value={formAtribuir.associado_id} onChange={e => setFormAtribuir({...formAtribuir, associado_id:e.target.value})}
-                                  style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, marginBottom:8, boxSizing:'border-box' }}>
-                                  <option value="">Selecione o irmão...</option>
-                                  {associados.map(a => <option key={a.id} value={a.id}>{a.nome_completo}</option>)}
-                                </select>
-                                <input type="date" value={formAtribuir.data_inicio} onChange={e => setFormAtribuir({...formAtribuir, data_inicio:e.target.value})}
-                                  style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, marginBottom:8, boxSizing:'border-box' }} />
-                                <div style={{ display:'flex', gap:8 }}>
-                                  <button onClick={atribuir} style={{ flex:1, padding:'10px', borderRadius:8, border:'none', background:'#1a237e', color:'#fff', fontWeight:700, fontSize:14, cursor:'pointer', minHeight:44 }}>💾 Confirmar</button>
-                                  <button onClick={() => setAtribuindo(null)} style={{ flex:1, padding:'10px', borderRadius:8, border:'1px solid #e2e8f0', background:'#fff', color:'#64748b', fontWeight:700, fontSize:14, cursor:'pointer', minHeight:44 }}>Cancelar</button>
-                                </div>
-                              </div>
+                  {/* Lista de cargos */}
+                  {aberto && cargosDoGrupo.map((cargo, idx) => {
+                    const t = titular(cargo.nome)
+                    return (
+                      <div key={cargo.id}>
+                        <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 16px', borderBottom: idx < cargosDoGrupo.length-1 ? '1px solid #f1f5f9' : 'none', borderLeft: t ? '4px solid #3730a3' : '4px solid #e2e8f0', background: t ? '#fafbff' : '#fff' }}>
+                          <div style={{ flex:1, minWidth:0 }}>
+                            <span style={{ fontSize:13, fontWeight:600, color:'#1e293b' }}>{cargo.nome}</span>
+                            {t
+                              ? <span style={{ fontSize:12, color:'#3730a3', marginLeft:8, fontWeight:500 }}>{t.associados?.nome_completo}</span>
+                              : <span style={{ fontSize:12, color:'#94a3b8', marginLeft:8, fontStyle:'italic' }}>Cargo vago</span>
+                            }
+                            {t && <div style={{ fontSize:11, color:'#94a3b8', marginTop:1 }}>desde {fmt(t.data_inicio)}</div>}
+                          </div>
+                          <div style={{ display:'flex', gap:6, flexShrink:0 }}>
+                            {t ? (
+                              <>
+                                <button onClick={() => { setAtribuindo(cargo.nome); setFormAtribuir({ associado_id:'', data_inicio:'' }) }}
+                                  style={{ background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:8, color:'#1d4ed8', padding:'6px 10px', cursor:'pointer', fontSize:13, minWidth:36, minHeight:36 }}>✏️</button>
+                                <button onClick={() => encerrar(t)}
+                                  style={{ background:'#fff1f2', border:'1px solid #fecdd3', borderRadius:8, color:'#e11d48', padding:'6px 10px', cursor:'pointer', fontSize:13, minWidth:36, minHeight:36 }}>✕</button>
+                              </>
+                            ) : (
+                              <button onClick={() => { setAtribuindo(cargo.nome); setFormAtribuir({ associado_id:'', data_inicio:'' }) }}
+                                style={{ background:'#f0fdf4', border:'1px solid #bbf7d0', borderRadius:8, color:'#15803d', padding:'6px 12px', cursor:'pointer', fontSize:12, fontWeight:600, minHeight:36 }}>＋ Atribuir</button>
                             )}
                           </div>
-                        )
-                      })}
-                    </div>
-                  )}
+                        </div>
+                        {atribuindo === cargo.nome && (
+                          <div style={{ background:'#f8fafc', padding:'12px 16px', borderBottom:'1px solid #f1f5f9', borderLeft:'4px solid #3730a3' }}>
+                            <select value={formAtribuir.associado_id} onChange={e => setFormAtribuir({...formAtribuir, associado_id:e.target.value})}
+                              style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, marginBottom:8, boxSizing:'border-box' }}>
+                              <option value="">Selecione o irmão...</option>
+                              {associados.map(a => <option key={a.id} value={a.id}>{a.nome_completo}</option>)}
+                            </select>
+                            <input type="date" value={formAtribuir.data_inicio} onChange={e => setFormAtribuir({...formAtribuir, data_inicio:e.target.value})}
+                              style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, marginBottom:8, boxSizing:'border-box' }} />
+                            <div style={{ display:'flex', gap:8 }}>
+                              <button onClick={atribuir} style={{ flex:1, padding:'10px', borderRadius:8, border:'none', background:'#1a237e', color:'#fff', fontWeight:700, fontSize:14, cursor:'pointer', minHeight:44 }}>💾 Confirmar</button>
+                              <button onClick={() => setAtribuindo(null)} style={{ flex:1, padding:'10px', borderRadius:8, border:'1px solid #e2e8f0', background:'#fff', color:'#64748b', fontWeight:700, fontSize:14, cursor:'pointer', minHeight:44 }}>Cancelar</button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
               )
             })}
