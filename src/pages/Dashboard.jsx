@@ -23,34 +23,67 @@ export default function Dashboard() {
     return Math.ceil((new Date(a, m - 1, d) - hoje) / 86400000)
   }
 
+  const CACHE_KEY = 'dashboard_cache'
+  const CACHE_TTL = 5 * 60 * 1000 // 5 minutos
+
   useEffect(() => { buscarTudo() }, [])
 
   async function buscarTudo() {
+    // Verificar cache
+    try {
+      const raw = sessionStorage.getItem(CACHE_KEY)
+      if (raw) {
+        const { ts, dados } = JSON.parse(raw)
+        if (Date.now() - ts < CACHE_TTL) {
+          const { usuario, grau, stats, proximoEvento, templates, aniversarios, anivHoje } = dados
+          setUsuario(usuario)
+          setGrauUsuario(grau)
+          setStats(stats)
+          setProximoEvento(proximoEvento)
+          setTemplates(templates)
+          setAniversarios(aniversarios)
+          setAnivHoje(anivHoje)
+          setCarregando(false)
+          return
+        }
+      }
+    } catch(e) {}
+
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    const { data: p } = await supabase.from('perfis_acesso').select('perfil').eq('user_id', user.id).single()
-    const perfil = p?.perfil || 'Membro'
+    // Paralelizar todas as queries independentes
+    const [
+      { data: p },
+      { data: assoc },
+      { count: ativos },
+      { count: pendentes },
+      { data: evs },
+      { data: tmpl },
+      { data: irmaos },
+      { data: fams }
+    ] = await Promise.all([
+      supabase.from('perfis_acesso').select('perfil').eq('user_id', user.id).single(),
+      supabase.from('associados').select('nome_completo, grau:historico_graus(grau)').eq('user_id', user.id).single(),
+      supabase.from('associados').select('*', { count: 'exact', head: true }).eq('status_cadastro', 'aprovado'),
+      supabase.from('associados').select('*', { count: 'exact', head: true }).eq('status_cadastro', 'pendente'),
+      supabase.from('eventos').select('*').eq('status', 'agendado').gte('data_evento', hojeStr()).order('data_evento').limit(10),
+      supabase.from('mensagens_templates').select('tipo, conteudo').in('tipo', ['aniversario_irmao_whatsapp', 'aniversario_dependente_whatsapp']),
+      supabase.from('associados').select('nome_completo, data_nascimento, tel_celular').eq('status_cadastro', 'aprovado'),
+      supabase.from('familiares').select('nome, data_nascimento, parentesco, associados(nome_completo, tel_celular)').not('data_nascimento', 'is', null),
+    ])
 
-    const { data: assoc } = await supabase.from('associados')
-      .select('nome_completo, grau:historico_graus(grau)').eq('user_id', user.id).single()
+    const perfil = p?.perfil || 'Membro'
     const nome = assoc?.nome_completo || user.email.split('@')[0]
     const graus = assoc?.grau || []
     const temMestre = graus.some(g => g.grau === 'mestre')
     const temCompanheiro = graus.some(g => g.grau === 'companheiro')
     const grau = temMestre ? 'mestre' : temCompanheiro ? 'companheiro' : 'aprendiz'
+    const usuarioObj = { email: user.email, perfil, nome }
     setGrauUsuario(grau)
-    setUsuario({ email: user.email, perfil, nome })
-
-    const [{ count: ativos }, { count: pendentes }] = await Promise.all([
-      supabase.from('associados').select('*', { count: 'exact', head: true }).eq('status_cadastro', 'aprovado'),
-      supabase.from('associados').select('*', { count: 'exact', head: true }).eq('status_cadastro', 'pendente'),
-    ])
+    setUsuario(usuarioObj)
     setStats({ ativos: ativos || 0, pendentes: pendentes || 0 })
 
-    const { data: evs } = await supabase.from('eventos')
-      .select('*').eq('status', 'agendado').gte('data_evento', hojeStr())
-      .order('data_evento').limit(10)
     const filtEvs = (evs || []).filter(ev => {
       if (['ADM', 'Venerável Mestre', 'Administrativo', 'Total'].includes(perfil)) return true
       if (ev.visibilidade === 'todos') return true
@@ -58,29 +91,34 @@ export default function Dashboard() {
       if (ev.visibilidade === 'companheiros' && (grau === 'mestre' || grau === 'companheiro')) return true
       return false
     })
-    setProximoEvento(filtEvs[0] || null)
+    const proxEvento = filtEvs[0] || null
+    setProximoEvento(proxEvento)
 
-    const { data: tmpl } = await supabase.from('mensagens_templates')
-      .select('tipo, conteudo').in('tipo', ['aniversario_irmao_whatsapp', 'aniversario_dependente_whatsapp'])
     const tObj = {}
     ;(tmpl || []).forEach(t => { tObj[t.tipo] = t.conteudo })
     setTemplates(tObj)
 
-    await buscarAniversarios()
+    // Processar aniversários com os dados já buscados
+    const anivData = processarAniversarios(irmaos || [], fams || [])
+    setAnivHoje(anivData.anivHoje)
+    setAniversarios(anivData.lista)
+
+    // Salvar cache
+    try {
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify({
+        ts: Date.now(),
+        dados: { usuario: usuarioObj, grau, stats: { ativos: ativos || 0, pendentes: pendentes || 0 }, proximoEvento: proxEvento, templates: tObj, aniversarios: anivData.lista, anivHoje: anivData.anivHoje }
+      }))
+    } catch(e) {}
+
     setCarregando(false)
   }
 
-  async function buscarAniversarios() {
+  function processarAniversarios(irmaos, fams) {
     const hoje = hojeStr()
     const fim = daqui30()
     const [anoI, mesI, diaI] = hoje.split('-').map(Number)
     const [anoF, mesF, diaF] = fim.split('-').map(Number)
-
-    const { data: irmaos } = await supabase.from('associados')
-      .select('nome_completo, data_nascimento, tel_celular').eq('status_cadastro', 'aprovado')
-    const { data: fams } = await supabase.from('familiares')
-      .select('nome, data_nascimento, parentesco, associados(nome_completo, tel_celular)')
-      .not('data_nascimento', 'is', null)
 
     function dentroIntervalo(dataNasc) {
       if (!dataNasc) return false
@@ -91,7 +129,6 @@ export default function Dashboard() {
       }
       return false
     }
-
     function diasParaAniv(dataNasc) {
       if (!dataNasc) return 999
       const hj = new Date(); hj.setHours(0, 0, 0, 0)
@@ -101,28 +138,27 @@ export default function Dashboard() {
       if (aniv < hj) aniv = new Date(anoAtual + 1, mesN - 1, diaN)
       return Math.ceil((aniv - hj) / 86400000)
     }
-
     function diaAniv(dataNasc) {
       if (!dataNasc) return ''
       const [, m, d] = dataNasc.split('T')[0].split('-')
       return d + '/' + m
     }
-
     const list = []
-    ;(irmaos || []).forEach(a => {
+    irmaos.forEach(a => {
       if (dentroIntervalo(a.data_nascimento))
-        list.push({ nome: a.nome_completo, detalhe: 'Nascimento', dia: diaAniv(a.data_nascimento), data_nascimento: a.data_nascimento, tel: (a.tel_celular || '').replace(/\D/g, ''), tipo: 'irmao', diasRestantes: diasParaAniv(a.data_nascimento) })
+        list.push({ nome: a.nome_completo, detalhe: 'Nascimento', dia: diaAniv(a.data_nascimento), data_nascimento: a.data_nascimento, tel: (a.tel_celular || '').replace(/D/g, ''), tipo: 'irmao', diasRestantes: diasParaAniv(a.data_nascimento) })
     })
-    ;(fams || []).forEach(f => {
+    fams.forEach(f => {
       if (dentroIntervalo(f.data_nascimento)) {
         const assocF = Array.isArray(f.associados) ? f.associados[0] : f.associados
-        list.push({ nome: f.nome, detalhe: f.parentesco, dia: diaAniv(f.data_nascimento), data_nascimento: f.data_nascimento, tel: (assocF?.tel_celular || '').replace(/\D/g, ''), nomeIrmao: assocF?.nome_completo || '', parentesco: f.parentesco || '', tipo: 'familiar', diasRestantes: diasParaAniv(f.data_nascimento) })
+        list.push({ nome: f.nome, detalhe: f.parentesco, dia: diaAniv(f.data_nascimento), data_nascimento: f.data_nascimento, tel: (assocF?.tel_celular || '').replace(/D/g, ''), nomeIrmao: assocF?.nome_completo || '', parentesco: f.parentesco || '', tipo: 'familiar', diasRestantes: diasParaAniv(f.data_nascimento) })
       }
     })
     list.sort((a, b) => a.diasRestantes - b.diasRestantes)
-    setAnivHoje(list.filter(a => a.diasRestantes === 0).length)
-    setAniversarios(list.slice(0, 5))
+    return { lista: list.slice(0, 5), anivHoje: list.filter(a => a.diasRestantes === 0).length }
   }
+
+
 
   function msgWhatsApp(a) {
     const loja = 'Acácia de Serra Negra Nº 271'
