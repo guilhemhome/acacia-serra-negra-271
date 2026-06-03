@@ -9,6 +9,7 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [carregando, setCarregando] = useState(false)
+  const [mostrarSenha, setMostrarSenha] = useState(false)
   const [erro, setErro] = useState('')
   const navigate = useNavigate()
 
@@ -75,13 +76,20 @@ export default function Login() {
 
               <div className="mb-4">
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Senha</label>
-                <input
-                  type="password"
-                  className={inp}
-                  placeholder="••••••••"
-                  value={senha}
-                  onChange={e => setSenha(e.target.value)}
-                />
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={mostrarSenha ? 'text' : 'password'}
+                    className={inp}
+                    placeholder="••••••••"
+                    value={senha}
+                    onChange={e => setSenha(e.target.value)}
+                    style={{ paddingRight: 44 }}
+                  />
+                  <button type="button" onClick={() => setMostrarSenha(v => !v)}
+                    style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: '#94a3b8', padding: 0, lineHeight: 1 }}>
+                    {mostrarSenha ? '🙈' : '👁️'}
+                  </button>
+                </div>
               </div>
 
               {erro && (
