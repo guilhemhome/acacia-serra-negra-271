@@ -36,7 +36,7 @@ export default function PortalMembro() {
     console.log('USER:', user?.email)
     if (!user) { setCarregando(false); return }
 
-    const { data: assoc } = await supabase.from('associados')
+    console.log('STEP1'); const { data: assoc } = await supabase.from('associados')
       .select('id, nome_completo, bodes_asfalto, bodes_asfalto_numero, bodes_asfalto_data_admissao').eq('user_id', user.id).single()
     const { data: perfil } = await supabase.from('perfis_acesso')
       .select('perfil').eq('user_id', user.id).single()
@@ -66,7 +66,7 @@ export default function PortalMembro() {
       setAvisos(avs || [])
     } catch(e) { setAvisos([]) }
 
-    setCarregando(false)
+    console.log('STEP_DONE'); setCarregando(false)
   } catch(err) { console.error('ERRO PORTAL:', err); setCarregando(false); }
   }
 
