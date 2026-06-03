@@ -17,23 +17,30 @@ export default function Login() {
     setCarregando(true)
     setErro('')
     const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password: senha })
-    if (error) { setErro('E-mail ou senha incorretos.') } else {
-      // Vincular user_id automaticamente se ainda não estiver vinculado
-      const uid = authData.user.id
-      const { data: assoc } = await supabase
-        .from('associados')
-        .select('id, user_id')
-        .eq('email', email)
-        .single()
-      if (assoc && !assoc.user_id) {
-        await supabase.from('associados').update({ user_id: uid }).eq('id', assoc.id)
+    if (error) {
+      setErro('E-mail ou senha incorretos.')
+      setCarregando(false)
+    } else {
+      try {
+        const uid = authData.user.id
+        // Paralelizar: buscar associado e perfil ao mesmo tempo
+        const [{ data: assoc }, { data: p }] = await Promise.all([
+          supabase.from('associados').select('id, user_id').eq('email', email).single(),
+          supabase.from('perfis_acesso').select('perfil').eq('user_id', uid).single()
+        ])
+        // Vincular user_id se necessário (não bloqueia o login)
+        if (assoc && !assoc.user_id) {
+          supabase.from('associados').update({ user_id: uid }).eq('id', assoc.id)
+        }
+        const perfil = p?.perfil || 'Membro'
+        const perfisMembro = ['Membro', 'Ritualística', 'Hospitalaria']
+        navigate(perfisMembro.includes(perfil) ? '/membro' : '/dashboard')
+      } catch(e) {
+        navigate('/dashboard')
+      } finally {
+        setCarregando(false)
       }
-      const { data: p } = await supabase.from('perfis_acesso').select('perfil').eq('user_id', authData.user.id).single()
-      const perfil = p?.perfil || 'Membro'
-      const perfisMembro = ['Membro', 'Ritualística', 'Hospitalaria']
-      navigate(perfisMembro.includes(perfil) ? '/membro' : '/dashboard')
     }
-    setCarregando(false)
   }
 
   return (
