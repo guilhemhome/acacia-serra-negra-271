@@ -342,23 +342,23 @@ export default function EditarPerfil() {
                 ))}
                 <BtnSalvar onClick={salvarGraus} />
 
-                {/* Bodes do Asfalto */}
-                <Secao titulo="🐐 Bodes do Asfalto" />
-                <div style={{ marginBottom:14 }}>
-                  <label style={{ display:'flex', alignItems:'center', gap:10, cursor:'pointer' }}>
-                    <input type="checkbox" checked={bodes.bodes_asfalto} onChange={e => setBodes({...bodes, bodes_asfalto:e.target.checked})}
-                      style={{ width:20, height:20, cursor:'pointer' }} />
-                    <span style={{ fontSize:14, fontWeight:600, color:'#1e293b' }}>Sou membro do Moto Clube Bodes do Asfalto</span>
-                  </label>
-                  <p style={{ margin:'4px 0 0 30px', fontSize:12, color:'#64748b' }}>Entidade paramaçônica reconhecida pela GLESP</p>
-                </div>
+                {/* Bodes do Asfalto — só aparece para membros Bodes */}
                 {bodes.bodes_asfalto && (
-                  <div>
+                  <>
+                    <Secao titulo="🐐 Bodes do Asfalto" />
+                    <div style={{ marginBottom:14 }}>
+                      <label style={{ display:'flex', alignItems:'center', gap:10, cursor:'pointer' }}>
+                        <input type="checkbox" checked={bodes.bodes_asfalto} onChange={e => setBodes({...bodes, bodes_asfalto:e.target.checked})}
+                          style={{ width:20, height:20, cursor:'pointer' }} />
+                        <span style={{ fontSize:14, fontWeight:600, color:'#1e293b' }}>Sou membro do Moto Clube Bodes do Asfalto</span>
+                      </label>
+                      <p style={{ margin:'4px 0 0 30px', fontSize:12, color:'#64748b' }}>Entidade paramaçônica reconhecida pela GLESP</p>
+                    </div>
                     <Input label="Número de sócio" value={bodes.bodes_asfalto_numero} onChange={v => setBodes({...bodes, bodes_asfalto_numero:v})} />
                     <DateInput label="Data de admissão" value={bodes.bodes_asfalto_data_admissao} onChange={v => setBodes({...bodes, bodes_asfalto_data_admissao:v})} />
-                  </div>
+                    <BtnSalvar onClick={salvarBodes} />
+                  </>
                 )}
-                <BtnSalvar onClick={salvarBodes} />
               </div>
             )}
 
