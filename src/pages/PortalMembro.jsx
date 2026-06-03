@@ -59,9 +59,12 @@ export default function PortalMembro() {
       .select('nome_completo, data_nascimento').eq('status_cadastro','aprovado')
     setAniversarios((irmaos||[]).filter(a => a.data_nascimento && a.data_nascimento.split('T')[0].split('-')[1] === mesAtual).slice(0,5))
 
-    const { data: avs } = await supabase.from('avisos')
-      .select('*, associados(nome_completo)').eq('ativo', true).order('created_at', { ascending: false }).limit(5)
-    setAvisos(avs || [])
+    // tabela avisos ainda não implementada — ignorar erro
+    try {
+      const { data: avs } = await supabase.from('avisos')
+        .select('*, associados(nome_completo)').eq('ativo', true).order('created_at', { ascending: false }).limit(5)
+      setAvisos(avs || [])
+    } catch(e) { setAvisos([]) }
 
     setCarregando(false)
   } catch(err) { console.error('ERRO PORTAL:', err); setCarregando(false); }
