@@ -43,7 +43,7 @@ export default function EditarPerfil() {
       if (assoc) {
         setAssociadoId(assoc.id)
         setPessoal({ nome_completo: assoc.nome_completo||'', email: assoc.email||'', tel_celular: assoc.tel_celular||'', data_nascimento: assoc.data_nascimento||'', nome_pai: assoc.nome_pai||'', nome_mae: assoc.nome_mae||'', profissao: assoc.profissao||'', empresa: assoc.empresa||'', estado_civil: assoc.estado_civil||'', data_casamento: assoc.data_casamento||'' })
-        setBodes({ bodes_asfalto: assoc.bodes_asfalto||false, bodes_asfalto_numero: assoc.bodes_asfalto_numero||'', bodes_asfalto_data_admissao: assoc.bodes_asfalto_data_admissao||'' })
+        setBodes({ bodes_asfalto: assoc.bodes_asfalto||false, bodes_asfalto_numero: assoc.bodes_asfalto_numero||'', bodes_asfalto_data_admissao: assoc.bodes_asfalto_data_admissao||'', _eraBode: assoc.bodes_asfalto||false })
         const { data: fams } = await supabase.from('familiares').select('*').eq('associado_id', assoc.id)
         if (fams) setFamiliares(fams)
         const { data: ends } = await supabase.from('enderecos').select('*').eq('associado_id', assoc.id)
@@ -342,8 +342,8 @@ export default function EditarPerfil() {
                 ))}
                 <BtnSalvar onClick={salvarGraus} />
 
-                {/* Bodes do Asfalto — só aparece para membros Bodes */}
-                {bodes.bodes_asfalto && (
+                {/* Bodes do Asfalto — visível para membros Bodes, oculto para outros */}
+                {bodes.bodes_asfalto !== false || bodes._eraBode ? (
                   <>
                     <Secao titulo="🐐 Bodes do Asfalto" />
                     <div style={{ marginBottom:14 }}>
@@ -354,11 +354,15 @@ export default function EditarPerfil() {
                       </label>
                       <p style={{ margin:'4px 0 0 30px', fontSize:12, color:'#64748b' }}>Entidade paramaçônica reconhecida pela GLESP</p>
                     </div>
-                    <Input label="Número de sócio" value={bodes.bodes_asfalto_numero} onChange={v => setBodes({...bodes, bodes_asfalto_numero:v})} />
-                    <DateInput label="Data de admissão" value={bodes.bodes_asfalto_data_admissao} onChange={v => setBodes({...bodes, bodes_asfalto_data_admissao:v})} />
+                    {bodes.bodes_asfalto && (
+                      <>
+                        <Input label="Número de sócio" value={bodes.bodes_asfalto_numero} onChange={v => setBodes({...bodes, bodes_asfalto_numero:v})} />
+                        <DateInput label="Data de admissão" value={bodes.bodes_asfalto_data_admissao} onChange={v => setBodes({...bodes, bodes_asfalto_data_admissao:v})} />
+                      </>
+                    )}
                     <BtnSalvar onClick={salvarBodes} />
                   </>
-                )}
+                ) : null}
               </div>
             )}
 
