@@ -69,7 +69,7 @@ export default function Dashboard() {
       { data: fams }
     ] = await Promise.all([
       supabase.from('perfis_acesso').select('perfil').eq('user_id', user.id).single(),
-      supabase.from('associados').select('nome_completo, grau:historico_graus(grau)').eq('user_id', user.id).single(),
+      supabase.from('associados').select('nome_completo, id_acacia, email, grau:historico_graus(grau)').eq('user_id', user.id).single(),
       supabase.from('associados').select('*', { count: 'exact', head: true }).eq('status_cadastro', 'aprovado'),
       supabase.from('associados').select('*', { count: 'exact', head: true }).eq('status_cadastro', 'pendente'),
       supabase.from('eventos').select('*').eq('status', 'agendado').gte('data_evento', hojeStr()).order('data_evento').limit(10),
@@ -84,7 +84,7 @@ export default function Dashboard() {
     const temMestre = graus.some(g => g.grau === 'mestre')
     const temCompanheiro = graus.some(g => g.grau === 'companheiro')
     const grau = temMestre ? 'mestre' : temCompanheiro ? 'companheiro' : 'aprendiz'
-    const usuarioObj = { email: user.email, perfil, nome }
+    const usuarioObj = { email: user.email, perfil, nome, id_acacia: assoc?.id_acacia || '', email_assoc: assoc?.email || user.email }
     setGrauUsuario(grau)
     setUsuario(usuarioObj)
     setStats({ ativos: ativos || 0, pendentes: pendentes || 0 })
@@ -202,7 +202,9 @@ export default function Dashboard() {
           <button onClick={async () => { await supabase.auth.signOut(); navigate('/') }}
             style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: 8, color: '#fff', padding: '8px 12px', cursor: 'pointer', fontSize: 16, minWidth: 44, minHeight: 44 }}>↩</button>
           <img src="/logo-acacia.png" alt="Logo" style={{ width: 64, height: 64, borderRadius: '50%', border: '3px solid rgba(255,255,255,0.5)', objectFit: 'cover', display: 'block', margin: '0 auto 8px' }} />
-          <h1 style={{ color: '#fff', fontSize: '1.4rem', fontWeight: 500, margin: '0 0 2px' }}>Olá, {primeiroNome}</h1>
+          <h1 style={{ color: '#fff', fontSize: '1.4rem', fontWeight: 500, margin: '0 0 2px' }}>Olá, {usuario.nome}</h1>
+          {usuario.id_acacia && <p style={{ color:'rgba(255,255,255,0.75)', fontSize:12, margin:'0 0 1px' }}>Nº {usuario.id_acacia}</p>}
+          <p style={{ color:'rgba(255,255,255,0.65)', fontSize:11, margin:0 }}>{usuario.email_assoc || usuario.email}</p>
           <p style={{ color: 'rgba(255,255,255,0.65)', margin: 0, fontSize: 13 }}>{labelPerfil} · Acácia de Serra Negra Nº 271</p>
         </div>
 
