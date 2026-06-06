@@ -122,7 +122,6 @@ export default function Dashboard() {
       }))
     } catch(e) {}
 
-    setCarregando(false)
   }
 
   function processarAniversarios(irmaos, fams) {
