@@ -53,6 +53,8 @@ export default function Calendario() {
   const [eventos, setEventos] = useState([])
   const [aniversariantes, setAniversariantes] = useState([])
   const [familiares, setFamiliares] = useState([])
+  const [casamentos, setCasamentos] = useState([])
+  const [datasMaconicas, setDatasMaconicas] = useState([])
   const [tplIrmao, setTplIrmao] = useState('🌿 A Loja Maçônica Acácia de Serra Negra Nº 271 saúda com fraternidade o Ir∴ {nome} que hoje completa mais um ano de vida. Que o G∴A∴D∴U∴ ilumine sempre sua jornada! 🎂')
   const [tplDependente, setTplDependente] = useState('🌿 A Loja Maçônica Acácia de Serra Negra Nº 271 saúda o Ir∴ {nome_irmao} pelo aniversário de {parentesco} {nome_dependente}! Felicidades a toda a família! 🎂')
   const [loading, setLoading] = useState(true)
@@ -100,12 +102,35 @@ export default function Calendario() {
       if (td) setTplDependente(td.mensagem)
     }
     const mes = String(new Date().getMonth()+1).padStart(2,'0')
-    const { data: irmãos } = await supabase.from('associados')
-      .select('id, nome_completo, data_nascimento, tel_celular')
-      .eq('status_cadastro','aprovado')
-      .not('data_nascimento','is',null)
-    const aniv = (irmãos||[]).filter(a => a.data_nascimento && a.data_nascimento.split('-')[1] === mes)
+    const [{ data: irmaos }, { data: iniciacoes }] = await Promise.all([
+      supabase.from('associados')
+        .select('id, nome_completo, data_nascimento, tel_celular, data_casamento, bodes_asfalto, bodes_asfalto_data_admissao')
+        .eq('status_cadastro','aprovado'),
+      supabase.from('historico_graus')
+        .select('associado_id, data_concessao, associados(id, nome_completo, tel_celular)')
+        .eq('grau','aprendiz')
+        .not('data_concessao','is',null)
+    ])
+    const aniv = (irmaos||[]).filter(a => a.data_nascimento && a.data_nascimento.split('-')[1] === mes)
     setAniversariantes(aniv)
+    const cas = (irmaos||[]).filter(a => a.data_casamento && a.data_casamento.split('-')[1] === mes)
+    setCasamentos(cas)
+    const mac = []
+    ;(iniciacoes||[]).forEach(ini => {
+      if (ini.data_concessao && ini.data_concessao.split('-')[1] === mes) {
+        const anos = new Date().getFullYear() - Number(ini.data_concessao.split('-')[0])
+        const assoc = Array.isArray(ini.associados) ? ini.associados[0] : ini.associados
+        if (assoc) mac.push({ id: ini.associado_id, nome: assoc.nome_completo, tel_celular: assoc.tel_celular, data: ini.data_concessao, tipo: 'Iniciação Maçônica', anos })
+      }
+    })
+    ;(irmaos||[]).forEach(a => {
+      if (a.bodes_asfalto && a.bodes_asfalto_data_admissao && a.bodes_asfalto_data_admissao.split('-')[1] === mes) {
+        const anos = new Date().getFullYear() - Number(a.bodes_asfalto_data_admissao.split('-')[0])
+        mac.push({ id: a.id + '_bodes', nome: a.nome_completo, tel_celular: a.tel_celular, data: a.bodes_asfalto_data_admissao, tipo: 'Bodes do Asfalto', anos })
+      }
+    })
+    mac.sort((x,y) => Number(x.data.split('-')[2]) - Number(y.data.split('-')[2]))
+    setDatasMaconicas(mac)
     const { data: deps } = await supabase.from('familiares')
       .select('nome, data_nascimento, parentesco, associado_id, associados(nome_completo, tel_celular)')
       .not('data_nascimento','is',null)
@@ -388,6 +413,54 @@ export default function Calendario() {
                       <p style={{ margin:0, fontSize:12, color:'#64748b' }}>{f.parentesco} do Ir. {f.associados?.nome_completo} — Dia {d}/{m}</p>
                     </div>
                     <a href={`https://wa.me/55${(Array.isArray(f.associados) ? f.associados[0]?.tel_celular : f.associados?.tel_celular||'').replace(/\D/g,'')}?text=${encodeURIComponent(tplDependente.replace('{nome_irmao}', Array.isArray(f.associados)?f.associados[0]?.nome_completo:f.associados?.nome_completo||'').replace('{parentesco}',f.parentesco||'').replace('{nome_dependente}',f.nome||'').replace('{loja}','Acácia de Serra Negra Nº 271'))}`} target="_blank" rel="noreferrer"
+                      style={{ background:'#25d366', color:'#fff', borderRadius:8, padding:'6px 12px', fontSize:12, fontWeight:700, textDecoration:'none' }}>
+                      WhatsApp
+                    </a>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div style={{ background:'rgba(255,255,255,0.95)', borderRadius:12, padding:20, marginTop:16 }}>
+              <p style={{ margin:'0 0 14px', fontWeight:700, color:'#1a237e', textTransform:'uppercase', fontSize:13, letterSpacing:1 }}>
+                💍 Aniversários de Casamento — {mesNome}
+              </p>
+              {casamentos.length === 0 ? (
+                <p style={{ color:'#94a3b8', textAlign:'center' }}>Nenhum aniversário de casamento este mês.</p>
+              ) : casamentos.map(a => {
+                const [ano,m,d] = (a.data_casamento||'').split('-')
+                const anos = new Date().getFullYear() - Number(ano)
+                return (
+                  <div key={a.id} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 14px', background:'#f8fafc', borderRadius:8, marginBottom:8 }}>
+                    <div>
+                      <p style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{a.nome_completo}</p>
+                      <p style={{ margin:0, fontSize:12, color:'#64748b' }}>Dia {d}/{m} — {anos} {anos === 1 ? 'ano' : 'anos'} de união</p>
+                    </div>
+                    <a href={`https://wa.me/55${(a.tel_celular||'').replace(/\D/g,'')}?text=${encodeURIComponent('🌿 A Loja Acácia de Serra Negra Nº 271 parabeniza o Ir∴ ' + a.nome_completo + ' e sua cunhada pelos ' + anos + ' anos de união! Que o G∴A∴D∴U∴ abençoe sempre a família! 💍')}`} target="_blank" rel="noreferrer"
+                      style={{ background:'#25d366', color:'#fff', borderRadius:8, padding:'6px 12px', fontSize:12, fontWeight:700, textDecoration:'none' }}>
+                      WhatsApp
+                    </a>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div style={{ background:'rgba(255,255,255,0.95)', borderRadius:12, padding:20, marginTop:16 }}>
+              <p style={{ margin:'0 0 14px', fontWeight:700, color:'#1a237e', textTransform:'uppercase', fontSize:13, letterSpacing:1 }}>
+                ⚒️ Datas Maçônicas — {mesNome}
+              </p>
+              {datasMaconicas.length === 0 ? (
+                <p style={{ color:'#94a3b8', textAlign:'center' }}>Nenhuma data maçônica este mês.</p>
+              ) : datasMaconicas.map((item,i) => {
+                const [,m,d] = (item.data||'').split('-')
+                const emoji = item.tipo === 'Bodes do Asfalto' ? '🏍️' : '⚒️'
+                return (
+                  <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 14px', background:'#f8fafc', borderRadius:8, marginBottom:8 }}>
+                    <div>
+                      <p style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{item.nome}</p>
+                      <p style={{ margin:0, fontSize:12, color:'#64748b' }}>{emoji} {item.tipo} — Dia {d}/{m} — {item.anos} {item.anos === 1 ? 'ano' : 'anos'}</p>
+                    </div>
+                    <a href={`https://wa.me/55${(item.tel_celular||'').replace(/\D/g,'')}?text=${encodeURIComponent(emoji + ' A Loja Acácia de Serra Negra Nº 271 saúda o Ir∴ ' + item.nome + ' pelos ' + item.anos + ' anos de ' + item.tipo + '! Que o G∴A∴D∴U∴ ilumine sempre sua jornada fraterna! ⚒️')}`} target="_blank" rel="noreferrer"
                       style={{ background:'#25d366', color:'#fff', borderRadius:8, padding:'6px 12px', fontSize:12, fontWeight:700, textDecoration:'none' }}>
                       WhatsApp
                     </a>
