@@ -10,6 +10,15 @@ const STATUS_LABELS = {
 
 const FILTROS = ['todos', 'aprovado', 'pendente', 'rejeitado']
 
+const SITUACAO_LABELS = {
+  ativo:       { label: 'Ativo',       color: '#16a34a', bg: '#dcfce7' },
+  inativo:     { label: 'Inativo',     color: '#64748b', bg: '#f1f5f9' },
+  transferido: { label: 'Transferido', color: '#d97706', bg: '#fef9c3' },
+  falecido:    { label: 'Falecido',    color: '#374151', bg: '#e5e7eb' },
+  suspenso:    { label: 'Suspenso',    color: '#dc2626', bg: '#fee2e2' },
+}
+const FILTROS_SITUACAO = ['todas', 'ativo', 'inativo', 'transferido', 'falecido', 'suspenso']
+
 export default function Membros() {
   const navigate = useNavigate()
   const [membros, setMembros] = useState([])
