@@ -6,41 +6,60 @@ const bg = {background:'linear-gradient(135deg,#1a237e 0%,#283593 50%,#1565c0 10
 const inp = 'w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50'
 
 export default function Login() {
-  const [email, setEmail] = useState('')
+  const [cpf, setCpf] = useState('')
   const [senha, setSenha] = useState('')
   const [carregando, setCarregando] = useState(false)
   const [mostrarSenha, setMostrarSenha] = useState(false)
   const [erro, setErro] = useState('')
   const navigate = useNavigate()
 
+  function formatCpf(v) {
+    return v.replace(/\D/g,'').slice(0,11)
+      .replace(/(\d{3})(\d)/,'$1.$2')
+      .replace(/(\d{3})(\d)/,'$1.$2')
+      .replace(/(\d{3})(\d{1,2})$/,'$1-$2')
+  }
+
   const handleLogin = async (e) => {
     e.preventDefault()
     setCarregando(true)
     setErro('')
-    const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password: senha })
-    if (error) {
-      setErro('E-mail ou senha incorretos.')
-      setCarregando(false)
-    } else {
-      try {
-        const uid = authData.user.id
-        // Paralelizar: buscar associado e perfil ao mesmo tempo
-        const [{ data: assoc }, { data: p }] = await Promise.all([
-          supabase.from('associados').select('id, user_id').eq('email', email).single(),
-          supabase.from('perfis_acesso').select('perfil').eq('user_id', uid).single()
-        ])
-        // Vincular user_id se necessário (não bloqueia o login)
-        if (assoc && !assoc.user_id) {
-          supabase.from('associados').update({ user_id: uid }).eq('id', assoc.id)
-        }
-        const perfil = p?.perfil || 'Membro'
-        const perfisMembro = ['Membro', 'Ritualística', 'Hospitalaria']
-        navigate(perfisMembro.includes(perfil) ? '/membro' : '/dashboard')
-      } catch(e) {
-        navigate('/dashboard')
-      } finally {
+    try {
+      const cpfLimpo = cpf.replace(/\D/g,'')
+      if (cpfLimpo.length !== 11) {
+        setErro('CPF inválido.')
         setCarregando(false)
+        return
       }
+      // Buscar email pelo CPF
+      const { data: assocData, error: assocErr } = await supabase
+        .from('associados').select('id, email, user_id').eq('cpf', cpfLimpo).single()
+      if (assocErr || !assocData?.email) {
+        setErro('CPF não encontrado.')
+        setCarregando(false)
+        return
+      }
+      const { data: authData, error: authErr } = await supabase.auth.signInWithPassword({
+        email: assocData.email, password: senha
+      })
+      if (authErr) {
+        setErro('Senha incorreta.')
+        setCarregando(false)
+        return
+      }
+      const uid = authData.user.id
+      // Vincular user_id se necessário
+      if (!assocData.user_id) {
+        supabase.from('associados').update({ user_id: uid }).eq('id', assocData.id)
+      }
+      const { data: p } = await supabase.from('perfis_acesso').select('perfil').eq('user_id', uid).single()
+      const perfil = p?.perfil || 'Membro'
+      const perfisMembro = ['Membro', 'Ritualística', 'Hospitalaria']
+      navigate(perfisMembro.includes(perfil) ? '/membro' : '/dashboard')
+    } catch(err) {
+      setErro('Erro inesperado. Tente novamente.')
+    } finally {
+      setCarregando(false)
     }
   }
 
@@ -64,13 +83,15 @@ export default function Login() {
 
             <form onSubmit={handleLogin}>
               <div className="mb-4">
-                <label className="block text-sm font-semibold text-gray-700 mb-1">E-mail</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">CPF</label>
                 <input
-                  type="email"
+                  type="text"
+                  inputMode="numeric"
                   className={inp}
-                  placeholder="seu@email.com"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  placeholder="000.000.000-00"
+                  value={cpf}
+                  onChange={e => setCpf(formatCpf(e.target.value))}
+                  maxLength={14}
                 />
               </div>
 

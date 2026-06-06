@@ -49,9 +49,14 @@ export default function Dashboard() {
       }
     } catch(e) {}
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    let user
+    try {
+      const { data: { user: u } } = await supabase.auth.getUser()
+      user = u
+    } catch(e) {}
+    if (!user) { setCarregando(false); return }
 
+    try {
     // Paralelizar todas as queries independentes
     const [
       { data: p },
@@ -103,8 +108,14 @@ export default function Dashboard() {
     setAnivHoje(anivData.anivHoje)
     setAniversarios(anivData.lista)
 
+    } catch(queryErr) {
+      console.error('Erro ao carregar dashboard:', queryErr)
+    } finally {
+      setCarregando(false)
+    }
+
     // Salvar cache
-    try {
+    try { // inner try para cache
       sessionStorage.setItem(CACHE_KEY, JSON.stringify({
         ts: Date.now(),
         dados: { usuario: usuarioObj, grau, stats: { ativos: ativos || 0, pendentes: pendentes || 0 }, proximoEvento: proxEvento, templates: tObj, aniversarios: anivData.lista, anivHoje: anivData.anivHoje }
