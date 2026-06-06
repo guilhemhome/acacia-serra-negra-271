@@ -93,42 +93,40 @@ export default function Membros() {
               onChange={e => setBusca(e.target.value)}
               style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1.5px solid #e2e8f0', fontSize: 15, marginBottom: 16, boxSizing: 'border-box', outline: 'none' }}
             />
-
-            <p style={{ margin:'0 0 6px', fontSize:12, fontWeight:600, color:'#64748b', textTransform:'uppercase', letterSpacing:0.5 }}>Cadastro</p>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
-              {FILTROS.map(f => (
-                <button key={f} onClick={() => setFiltroStatus(f)}
-                  style={{
-                    padding: '6px 16px', borderRadius: 20, border: '1.5px solid',
-                    borderColor: filtroStatus === f ? '#4f46e5' : '#e2e8f0',
-                    background: filtroStatus === f ? '#4f46e5' : '#f8fafc',
-                    color: filtroStatus === f ? '#fff' : '#475569',
-                    fontWeight: filtroStatus === f ? 600 : 400,
-                    cursor: 'pointer', fontSize: 13
-                  }}>
-                  {f.charAt(0).toUpperCase() + f.slice(1)} ({contagem[f]})
-                </button>
-              ))}
-            </div>
-
-            <p style={{ margin:'8px 0 6px', fontSize:12, fontWeight:600, color:'#64748b', textTransform:'uppercase', letterSpacing:0.5 }}>Situação</p>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
-              {FILTROS_SITUACAO.map(f => {
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
+              <button onClick={() => { setFiltroSituacao('todas'); setFiltroStatus('todos') }}
+                style={{ padding: '6px 14px', borderRadius: 20, border: '1.5px solid', cursor: 'pointer', fontSize: 13,
+                  borderColor: filtroSituacao === 'todas' && filtroStatus === 'todos' ? '#4f46e5' : '#e2e8f0',
+                  background: filtroSituacao === 'todas' && filtroStatus === 'todos' ? '#4f46e5' : '#f8fafc',
+                  color: filtroSituacao === 'todas' && filtroStatus === 'todos' ? '#fff' : '#475569',
+                  fontWeight: filtroSituacao === 'todas' && filtroStatus === 'todos' ? 600 : 400 }}>
+                Todos ({membros.length})
+              </button>
+              {FILTROS_SITUACAO.filter(f => f !== 'todas').map(f => {
                 const sl = SITUACAO_LABELS[f]
+                const ativo = filtroSituacao === f
                 return (
-                  <button key={f} onClick={() => setFiltroSituacao(f)}
-                    style={{
-                      padding: '6px 16px', borderRadius: 20, border: '1.5px solid',
-                      borderColor: filtroSituacao === f ? (sl?.color || '#4f46e5') : '#e2e8f0',
-                      background: filtroSituacao === f ? (sl?.color || '#4f46e5') : '#f8fafc',
-                      color: filtroSituacao === f ? '#fff' : '#475569',
-                      fontWeight: filtroSituacao === f ? 600 : 400,
-                      cursor: 'pointer', fontSize: 13
-                    }}>
-                    {f === 'todas' ? 'Todas' : sl?.label} ({contagemSituacao[f] || 0})
+                  <button key={f} onClick={() => { setFiltroSituacao(f); setFiltroStatus('todos') }}
+                    style={{ padding: '6px 14px', borderRadius: 20, border: '1.5px solid', cursor: 'pointer', fontSize: 13,
+                      borderColor: ativo ? sl.color : '#e2e8f0',
+                      background: ativo ? sl.color : '#f8fafc',
+                      color: ativo ? '#fff' : '#475569',
+                      fontWeight: ativo ? 600 : 400 }}>
+                    {sl.label} ({contagemSituacao[f] || 0})
                   </button>
                 )
               })}
+            </div>
+            <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+              {['pendente','rejeitado'].map(f => (
+                <button key={f} onClick={() => { setFiltroStatus(f); setFiltroSituacao('todas') }}
+                  style={{ padding: '3px 10px', borderRadius: 20, border: '1.5px solid', cursor: 'pointer', fontSize: 11,
+                    borderColor: filtroStatus === f ? '#94a3b8' : '#e2e8f0',
+                    background: filtroStatus === f ? '#94a3b8' : 'transparent',
+                    color: filtroStatus === f ? '#fff' : '#94a3b8', fontWeight: 500 }}>
+                  {f.charAt(0).toUpperCase() + f.slice(1)} ({contagem[f]})
+                </button>
+              ))}
             </div>
             {carregando ? (
               <p style={{ textAlign: 'center', color: '#94a3b8', padding: 40 }}>Carregando irmãos...</p>
@@ -137,8 +135,9 @@ export default function Membros() {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {membrosFiltrados.map(m => {
-                  const st = STATUS_LABELS[m.status_cadastro] || STATUS_LABELS['pendente']
-                  const sit = SITUACAO_LABELS[m.situacao] || SITUACAO_LABELS['ativo']
+                  const sit = m.status_cadastro !== 'aprovado'
+                    ? (STATUS_LABELS[m.status_cadastro] || STATUS_LABELS['pendente'])
+                    : (SITUACAO_LABELS[m.situacao] || SITUACAO_LABELS['ativo'])
                   return (
                     <div key={m.id}
                       style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderRadius: 10, border: '1.5px solid #e2e8f0', background: '#f8fafc', cursor: 'pointer' }} onClick={() => navigate(`/perfil/${m.id}`)}
@@ -154,14 +153,9 @@ export default function Membros() {
                           <p style={{ margin: 0, color: '#64748b', fontSize: 13 }}>{m.email}</p>
                         </div>
                       </div>
-                      <div style={{ display:'flex', flexDirection:'column', gap:4, alignItems:'flex-end' }}>
-                        <span style={{ padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, color: st.color, background: st.bg }}>
-                          {st.label}
-                        </span>
-                        <span style={{ padding: '2px 8px', borderRadius: 20, fontSize: 11, fontWeight: 600, color: sit.color, background: sit.bg }}>
-                          {sit.label}
-                        </span>
-                      </div>
+                      <span style={{ padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, color: sit.color, background: sit.bg, whiteSpace:'nowrap' }}>
+                        {sit.label}
+                      </span>
                     </div>
                   )
                 })}
