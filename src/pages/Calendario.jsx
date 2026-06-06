@@ -102,15 +102,24 @@ export default function Calendario() {
       if (td) setTplDependente(td.mensagem)
     }
     const mes = String(new Date().getMonth()+1).padStart(2,'0')
-    const [{ data: irmaos }, { data: iniciacoes }] = await Promise.all([
-      supabase.from('associados')
-        .select('id, nome_completo, data_nascimento, tel_celular, data_casamento, bodes_asfalto, bodes_asfalto_data_admissao')
-        .eq('status_cadastro','aprovado'),
-      supabase.from('historico_graus')
-        .select('associado_id, data_concessao, associados(id, nome_completo, tel_celular)')
+    const { data: irmaos } = await supabase.from('associados')
+      .select('id, nome_completo, data_nascimento, tel_celular, data_casamento, bodes_asfalto, bodes_asfalto_data_admissao')
+      .eq('status_cadastro','aprovado')
+    // Buscar iniciações sem join — cruzar com irmaos pelo associado_id
+    let iniciacoes = []
+    try {
+      const { data: ini } = await supabase.from('historico_graus')
+        .select('associado_id, data_concessao')
         .eq('grau','aprendiz')
         .not('data_concessao','is',null)
-    ])
+      // Enriquecer com dados do associado
+      const irmaosMap = {}
+      ;(irmaos||[]).forEach(a => { irmaosMap[a.id] = a })
+      iniciacoes = (ini||[]).map(ini => ({
+        ...ini,
+        associados: irmaosMap[ini.associado_id] || null
+      }))
+    } catch(e) { iniciacoes = [] }
     const aniv = (irmaos||[]).filter(a => a.data_nascimento && a.data_nascimento.split('-')[1] === mes)
     setAniversariantes(aniv)
     const cas = (irmaos||[]).filter(a => a.data_casamento && a.data_casamento.split('-')[1] === mes)
