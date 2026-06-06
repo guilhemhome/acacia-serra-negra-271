@@ -134,6 +134,7 @@ export default function Membros() {
                           {sit.label}
                         </span>
                       </div>
+                    </div>
                   )
                 })}
               </div>
