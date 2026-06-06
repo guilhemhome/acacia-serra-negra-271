@@ -102,6 +102,25 @@ export default function Membros() {
               ))}
             </div>
 
+            <p style={{ margin:'8px 0 6px', fontSize:12, fontWeight:600, color:'#64748b', textTransform:'uppercase', letterSpacing:0.5 }}>Situação</p>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+              {FILTROS_SITUACAO.map(f => {
+                const sl = SITUACAO_LABELS[f]
+                return (
+                  <button key={f} onClick={() => setFiltroSituacao(f)}
+                    style={{
+                      padding: '6px 16px', borderRadius: 20, border: '1.5px solid',
+                      borderColor: filtroSituacao === f ? (sl?.color || '#4f46e5') : '#e2e8f0',
+                      background: filtroSituacao === f ? (sl?.color || '#4f46e5') : '#f8fafc',
+                      color: filtroSituacao === f ? '#fff' : '#475569',
+                      fontWeight: filtroSituacao === f ? 600 : 400,
+                      cursor: 'pointer', fontSize: 13
+                    }}>
+                    {f === 'todas' ? 'Todas' : sl?.label} ({contagemSituacao[f] || 0})
+                  </button>
+                )
+              })}
+            </div>
             {carregando ? (
               <p style={{ textAlign: 'center', color: '#94a3b8', padding: 40 }}>Carregando irmãos...</p>
             ) : membrosFiltrados.length === 0 ? (
