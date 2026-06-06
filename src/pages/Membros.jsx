@@ -15,6 +15,7 @@ export default function Membros() {
   const [membros, setMembros] = useState([])
   const [busca, setBusca] = useState('')
   const [filtroStatus, setFiltroStatus] = useState('todos')
+  const [filtroSituacao, setFiltroSituacao] = useState('todas')
   const [carregando, setCarregando] = useState(true)
 
   useEffect(() => {
@@ -39,7 +40,8 @@ export default function Membros() {
   const membrosFiltrados = membros.filter(m => {
     const nomeOk = m.nome_completo?.toLowerCase().includes(busca.toLowerCase())
     const statusOk = filtroStatus === 'todos' || m.status_cadastro === filtroStatus
-    return nomeOk && statusOk
+    const situacaoOk = filtroSituacao === 'todas' || m.situacao === filtroSituacao
+    return nomeOk && statusOk && situacaoOk
   })
 
   const contagem = {
@@ -47,6 +49,14 @@ export default function Membros() {
     aprovado: membros.filter(m => m.status_cadastro === 'aprovado').length,
     pendente: membros.filter(m => m.status_cadastro === 'pendente').length,
     rejeitado: membros.filter(m => m.status_cadastro === 'rejeitado').length,
+  }
+  const contagemSituacao = {
+    todas: membros.filter(m => m.status_cadastro === 'aprovado').length,
+    ativo: membros.filter(m => m.situacao === 'ativo').length,
+    inativo: membros.filter(m => m.situacao === 'inativo').length,
+    transferido: membros.filter(m => m.situacao === 'transferido').length,
+    falecido: membros.filter(m => m.situacao === 'falecido').length,
+    suspenso: membros.filter(m => m.situacao === 'suspenso').length,
   }
 
   return (
@@ -75,7 +85,8 @@ export default function Membros() {
               style={{ width: '100%', padding: '10px 14px', borderRadius: 8, border: '1.5px solid #e2e8f0', fontSize: 15, marginBottom: 16, boxSizing: 'border-box', outline: 'none' }}
             />
 
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
+            <p style={{ margin:'0 0 6px', fontSize:12, fontWeight:600, color:'#64748b', textTransform:'uppercase', letterSpacing:0.5 }}>Cadastro</p>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
               {FILTROS.map(f => (
                 <button key={f} onClick={() => setFiltroStatus(f)}
                   style={{
@@ -99,6 +110,7 @@ export default function Membros() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {membrosFiltrados.map(m => {
                   const st = STATUS_LABELS[m.status_cadastro] || STATUS_LABELS['pendente']
+                  const sit = SITUACAO_LABELS[m.situacao] || SITUACAO_LABELS['ativo']
                   return (
                     <div key={m.id}
                       style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderRadius: 10, border: '1.5px solid #e2e8f0', background: '#f8fafc', cursor: 'pointer' }} onClick={() => navigate(`/perfil/${m.id}`)}
@@ -114,10 +126,14 @@ export default function Membros() {
                           <p style={{ margin: 0, color: '#64748b', fontSize: 13 }}>{m.email}</p>
                         </div>
                       </div>
-                      <span style={{ padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, color: st.color, background: st.bg }}>
-                        {st.label}
-                      </span>
-                    </div>
+                      <div style={{ display:'flex', flexDirection:'column', gap:4, alignItems:'flex-end' }}>
+                        <span style={{ padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, color: st.color, background: st.bg }}>
+                          {st.label}
+                        </span>
+                        <span style={{ padding: '2px 8px', borderRadius: 20, fontSize: 11, fontWeight: 600, color: sit.color, background: sit.bg }}>
+                          {sit.label}
+                        </span>
+                      </div>
                   )
                 })}
               </div>
