@@ -157,7 +157,7 @@ export default function Calendario() {
     
     // Filtrar por visibilidade
     const filtrados = (data||[]).filter(ev => {
-      if (!perfil || perfil === 'adm' || perfil === 'secretario') return true
+      if (!perfil || perfil === 'ADM' || perfil === 'Secretário') return true
       if (ev.visibilidade === 'todos') return true
       if (ev.visibilidade === 'mestres' && grauUsuario === 'mestre') return true
       if (ev.visibilidade === 'companheiros' && (grauUsuario === 'mestre' || grauUsuario === 'companheiro')) return true
@@ -227,7 +227,7 @@ export default function Calendario() {
     setModal(null); carregarEventos()
   }
 
-  const isAdm = perfil === 'adm' || perfil === 'secretario'
+  const isAdm = perfil === 'ADM' || perfil === 'Secretário'
   const hj = hoje()
   const proximos = eventos.filter(e => e.data >= hj && e.status === 'agendado')
   const realizados = eventos.filter(e => e.status === 'realizado')
