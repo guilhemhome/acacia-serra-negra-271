@@ -65,7 +65,7 @@ export default function Calendario() {
   const [modal, setModal] = useState(null)
   const [modalPresencas, setModalPresencas] = useState(null)
   const [presencas, setPresencas] = useState([])
-  const [form, setForm] = useState({ titulo:'', tipo:'sessao_ordinaria', data_evento:'', hora:'', local:'', descricao:'', status:'agendado', visibilidade:'todos' })
+  const [form, setForm] = useState({ titulo:'', tipo:'sessao_ordinaria', data_evento:'', hora:'', local:'', descricao:'', status:'ativo', visibilidade:'todos' })
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState('')
   const [aba, setAba] = useState('eventos') // 'eventos' | 'aniversarios'
@@ -202,13 +202,13 @@ export default function Calendario() {
   }
 
   function abrirNovo() {
-    setForm({ titulo:'', tipo:'sessao_ordinaria', data_evento:'', hora:'', local:'', descricao:'', status:'agendado', visibilidade:'todos' })
+    setForm({ titulo:'', tipo:'sessao_ordinaria', data_evento:'', hora:'', local:'', descricao:'', status:'ativo', visibilidade:'todos' })
     setErro('')
     setModal('novo')
   }
 
   function abrirEditar(ev) {
-    setForm({ titulo:ev.titulo||'', tipo:ev.tipo||'outro', data_evento:ev.data_evento_evento||'', hora:ev.hora||'', local:ev.local||'', descricao:ev.descricao||'', status:ev.status||'agendado', visibilidade:ev.visibilidade||'todos' })
+    setForm({ titulo:ev.titulo||'', tipo:ev.tipo||'outro', data_evento:ev.data_evento_evento||'', hora:ev.hora||'', local:ev.local||'', descricao:ev.descricao||'', status:ev.status||'ativo', visibilidade:ev.visibilidade||'todos' })
     setErro('')
     setModal(ev)
   }
@@ -229,7 +229,7 @@ export default function Calendario() {
 
   const isAdm = perfil === 'ADM' || perfil === 'Secretário'
   const hj = hoje()
-  const proximos = eventos.filter(e => e.data >= hj && e.status === 'agendado')
+  const proximos = eventos.filter(e => e.data >= hj && e.status === 'ativo')
   const realizados = eventos.filter(e => e.status === 'realizado')
   const cancelados = eventos.filter(e => e.status === 'cancelado')
 
@@ -333,7 +333,7 @@ export default function Calendario() {
                     {ev.descricao && <p style={{ margin:'0 0 10px', fontSize:13, color:'#64748b', lineHeight:1.4 }}>{ev.descricao}</p>}
 
                     {/* Confirmação de presença */}
-                    {ev.status === 'agendado' && !passado && (
+                    {ev.status === 'ativo' && !passado && (
                       <div style={{ marginTop:8 }}>
                         <p style={{ margin:'0 0 6px', fontSize:12, color:'#64748b', fontWeight:600 }}>Sua presença:</p>
                         <div style={{ display:'flex', gap:6 }}>
@@ -364,11 +364,11 @@ export default function Calendario() {
                           style={{ background:'#e0f2fe', border:'none', borderRadius:6, color:'#0369a1', padding:'4px 10px', cursor:'pointer', fontSize:12, fontWeight:600 }}>✏️ Editar</button>
                         <button onClick={() => verPresencas(ev)}
                           style={{ background:'#f0fdf4', border:'none', borderRadius:6, color:'#166534', padding:'4px 10px', cursor:'pointer', fontSize:12, fontWeight:600 }}>👥 Presenças</button>
-                        {ev.status === 'agendado' && passado && (
+                        {ev.status === 'ativo' && passado && (
                           <button onClick={() => supabase.from('eventos').update({status:'realizado'}).eq('id',ev.id).then(carregarEventos)}
                             style={{ background:'#d1fae5', border:'none', borderRadius:6, color:'#065f46', padding:'4px 8px', cursor:'pointer', fontSize:12, fontWeight:600 }}>✅ Realizado</button>
                         )}
-                        {ev.status === 'agendado' && (
+                        {ev.status === 'ativo' && (
                           <button onClick={() => supabase.from('eventos').update({status:'cancelado'}).eq('id',ev.id).then(carregarEventos)}
                             style={{ background:'#fee2e2', border:'none', borderRadius:6, color:'#dc2626', padding:'4px 8px', cursor:'pointer', fontSize:12, fontWeight:600 }}>✕ Cancelar</button>
                         )}
@@ -530,7 +530,7 @@ export default function Calendario() {
               <label style={{ display:'block', marginBottom:4, fontWeight:600, color:'#333', fontSize:14 }}>Status</label>
               <select value={form.status} onChange={e => setForm({...form,status:e.target.value})}
                 style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1px solid #ccc', fontSize:14, marginBottom:16, boxSizing:'border-box' }}>
-                <option value="agendado">🟡 Agendado</option>
+                <option value="ativo">🟡 Agendado</option>
                 <option value="realizado">🟢 Realizado</option>
                 <option value="cancelado">🔴 Cancelado</option>
               </select>

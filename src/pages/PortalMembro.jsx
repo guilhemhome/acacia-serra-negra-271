@@ -49,7 +49,7 @@ export default function PortalMembro() {
     setCargos(ch || [])
 
     const { data: evs } = await supabase.from('eventos')
-      .select('*').eq('status','agendado')
+      .select('*').eq('status','ativo')
       .gte('data_evento', hojeStr()).lte('data_evento', fimMes())
       .order('data_evento').limit(3)
     setEventos(evs || [])
