@@ -10,18 +10,26 @@ export default function PerfilIrmao() {
   const [enderecos, setEnderecos] = useState([])
   const [graus, setGraus] = useState([])
   const [carregando, setCarregando] = useState(true)
+  const [isAdm, setIsAdm] = useState(false)
+  const [situacao, setSituacao] = useState('')
+  const [alterandoSituacao, setAlterandoSituacao] = useState(false)
+  const [salvandoSituacao, setSalvandoSituacao] = useState(false)
+  const [erroSituacao, setErroSituacao] = useState('')
 
   useEffect(() => {
     async function carregar() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { navigate('/'); return }
+      const userId = session.user.id
+      const { data: perfilLogado } = await supabase.from('perfis_acesso').select('perfil').eq('user_id', userId).single()
+      if (perfilLogado?.perfil === 'ADM') setIsAdm(true)
       const [{ data: a }, { data: f }, { data: e }, { data: g }] = await Promise.all([
         supabase.from('associados').select('*').eq('id', id).single(),
         supabase.from('familiares').select('*').eq('associado_id', id),
         supabase.from('enderecos').select('*').eq('associado_id', id),
         supabase.from('historico_graus').select('*').eq('associado_id', id).order('data_concessao'),
       ])
-      if (a) setIrmao(a)
+      if (a) { setIrmao(a); setSituacao(a.situacao || 'ativo') }
       setFamiliares(f || [])
       setEnderecos(e || [])
       setGraus(g || [])
@@ -41,6 +49,28 @@ export default function PerfilIrmao() {
     if (!data) return '—'
     const [y,m,d] = data.split('T')[0].split('-'); return `${d}/${m}/${y}`
   }
+  const SITUACOES = [
+    { valor: 'ativo', label: 'Ativo', color: '#16a34a', bg: '#dcfce7' },
+    { valor: 'inativo', label: 'Inativo', color: '#64748b', bg: '#f1f5f9' },
+    { valor: 'transferido', label: 'Transferido', color: '#d97706', bg: '#fef3c7' },
+    { valor: 'falecido', label: 'Falecido', color: '#1e293b', bg: '#e2e8f0' },
+    { valor: 'suspenso', label: 'Suspenso', color: '#dc2626', bg: '#fee2e2' },
+  ]
+
+  async function salvarSituacao(novaSituacao) {
+    setSalvandoSituacao(true)
+    setErroSituacao('')
+    const { error } = await supabase.from('associados').update({ situacao: novaSituacao }).eq('id', id)
+    if (error) {
+      setErroSituacao('Erro ao salvar. Tente novamente.')
+    } else {
+      setSituacao(novaSituacao)
+      setIrmao(prev => ({ ...prev, situacao: novaSituacao }))
+      setAlterandoSituacao(false)
+    }
+    setSalvandoSituacao(false)
+  }
+
   function Campo({ label, valor }) {
     return (
       <div style={{ marginBottom: 12 }}>
@@ -78,11 +108,43 @@ export default function PerfilIrmao() {
                 <h2 style={{ margin: '0 0 4px', fontSize: '1.3rem', fontWeight: 700, color: '#1e293b' }}>{irmao.nome_completo}</h2>
                 <p style={{ margin: 0, color: '#64748b', fontSize: 14 }}>{irmao.email}</p>
               </div>
-              <span style={{ padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 600, color: STATUS[irmao.status_cadastro]?.color, background: STATUS[irmao.status_cadastro]?.bg }}>
-                {STATUS[irmao.status_cadastro]?.label}
-              </span>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+                <span style={{ padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 600, color: STATUS[irmao.status_cadastro]?.color, background: STATUS[irmao.status_cadastro]?.bg }}>
+                  {STATUS[irmao.status_cadastro]?.label}
+                </span>
+                {(() => {
+                  const sit = SITUACOES.find(s => s.valor === situacao) || SITUACOES[0]
+                  return (
+                    <span style={{ padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, color: sit.color, background: sit.bg }}>
+                      {sit.label}
+                    </span>
+                  )
+                })()}
+                {isAdm && !alterandoSituacao && (
+                  <button onClick={() => setAlterandoSituacao(true)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 8, border: '1px solid #e2e8f0', background: '#f8fafc', color: '#4f46e5', cursor: 'pointer', fontWeight: 600 }}>
+                    ✏️ Alterar situação
+                  </button>
+                )}
+              </div>
             </div>
             <div style={{ padding: 24 }}>
+              {isAdm && alterandoSituacao && (
+                <div style={{ background: '#f0f4ff', border: '1px solid #c7d2fe', borderRadius: 12, padding: 16, marginBottom: 20 }}>
+                  <p style={{ margin: '0 0 12px', fontWeight: 700, color: '#4f46e5', fontSize: 13 }}>Alterar Situação do Irmão</p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+                    {SITUACOES.map(s => (
+                      <button key={s.valor} onClick={() => !salvandoSituacao && salvarSituacao(s.valor)}
+                        style={{ padding: '8px 16px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: salvandoSituacao ? 'not-allowed' : 'pointer', border: situacao === s.valor ? '2px solid ' + s.color : '2px solid #e2e8f0', color: situacao === s.valor ? s.color : '#64748b', background: situacao === s.valor ? s.bg : '#fff', opacity: salvandoSituacao ? 0.6 : 1 }}>
+                        {salvandoSituacao && situacao === s.valor ? 'Salvando...' : s.label}
+                      </button>
+                    ))}
+                  </div>
+                  {erroSituacao && <p style={{ margin: '0 0 8px', color: '#dc2626', fontSize: 13 }}>{erroSituacao}</p>}
+                  <button onClick={() => setAlterandoSituacao(false)} style={{ fontSize: 12, color: '#64748b', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
+                    Cancelar
+                  </button>
+                </div>
+              )}
               <p style={{ margin: '0 0 16px', fontWeight: 700, color: '#4f46e5', fontSize: 13, textTransform: 'uppercase', letterSpacing: 1 }}>Dados Pessoais</p>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 24px' }}>
                 <Campo label="Telefone" valor={irmao.tel_celular} />
