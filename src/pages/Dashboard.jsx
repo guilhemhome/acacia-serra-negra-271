@@ -228,7 +228,7 @@ export default function Dashboard() {
           </button>
 
           {podeVerAniv && (
-            <button onClick={() => document.getElementById('sec-aniversarios')?.scrollIntoView({ behavior: 'smooth' })} style={card}>
+            <button onClick={() => navigate('/calendario')} style={card}>
               {anivHoje > 0 && (
                 <span style={{ position: 'absolute', top: 10, right: 10, background: '#f59e0b', color: '#fff', fontSize: 10, fontWeight: 600, borderRadius: 20, padding: '2px 7px' }}>hoje</span>
               )}
@@ -273,36 +273,7 @@ export default function Dashboard() {
           </>
         )}
 
-        {/* Aniversariantes */}
-        {podeVerAniv && aniversarios.length > 0 && (
-          <>
-            <p id="sec-aniversarios" style={{ ...sec, scrollMarginTop: 20 }}>Aniversariantes</p>
-            <div style={{ background: 'rgba(255,255,255,0.95)', borderRadius: 16, padding: '4px 16px', marginBottom: 20 }}>
-              {aniversarios.map((a, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: i < aniversarios.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
-                  <div style={{ width: 34, height: 34, borderRadius: '50%', background: '#ede9fe', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 600, color: '#7c3aed', flexShrink: 0 }}>
-                    {a.nome.split(' ').filter(Boolean).map(p => p[0]).slice(0, 2).join('')}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: '#1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.nome}</div>
-                    <div style={{ fontSize: 11, color: '#94a3b8' }}>
-                      {a.dia} · {a.diasRestantes === 0 ? '🎂 hoje!' : a.diasRestantes === 1 ? 'amanhã' : `em ${a.diasRestantes} dias`}
-                    </div>
-                  </div>
-                  {a.tel ? (
-                    <a href={`https://wa.me/55${a.tel}?text=${encodeURIComponent(msgWhatsApp(a))}`}
-                      target="_blank" rel="noreferrer"
-                      style={{ background: '#25d366', color: '#fff', borderRadius: 8, padding: '6px 10px', fontSize: 12, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-                      📱 WA
-                    </a>
-                  ) : (
-                    <span style={{ fontSize: 11, color: '#cbd5e1', flexShrink: 0 }}>sem tel.</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </>
-        )}
+
 
         {/* Ações rápidas */}
         <p style={sec}>Ações rápidas</p>
@@ -312,6 +283,8 @@ export default function Dashboard() {
             { icon: '➕', label: 'Novo cadastro', rota: '/cadastro' },
             { icon: '👨‍⚖️', label: 'Ver membros', rota: '/membros' },
             { icon: '📅', label: 'Calendário', rota: '/calendario' },
+            { icon: '🎂', label: 'Aniversários', rota: '/calendario' },
+            { icon: '🗓️', label: 'Eventos', rota: '/calendario' },
             { icon: '⚙️', label: 'Configurações', rota: '/configuracoes' },
             { icon: '✏️', label: 'Meu perfil', rota: '/editar-perfil' },
           ].map(a => (
