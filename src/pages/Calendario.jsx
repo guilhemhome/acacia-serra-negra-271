@@ -28,7 +28,7 @@ const STATUS_EV = {
 }
 
 const RESPOSTAS = {
-  confirmado: { label:'Confirmado', cor:'#10b981', bg:'#d1fae5', emoji:'✅' },
+  presente:   { label:'Confirmado', cor:'#10b981', bg:'#d1fae5', emoji:'✅' },
   ausente:    { label:'Não irei',   cor:'#ef4444', bg:'#fee2e2', emoji:'❌' },
   pendente:   { label:'Pendente',   cor:'#94a3b8', bg:'#f1f5f9', emoji:'⏳' },
 }
@@ -195,7 +195,7 @@ export default function Calendario() {
 
   async function verPresencas(ev) {
     const { data } = await supabase.from('eventos_presencas')
-      .select('resposta, associados(nome_completo)')
+      .select('resposta, justificativa, associados(nome_completo)')
       .eq('evento_id', ev.id)
     setPresencas(data||[])
     setModalPresencas(ev)
@@ -337,10 +337,10 @@ export default function Calendario() {
                       <div style={{ marginTop:8 }}>
                         <p style={{ margin:'0 0 6px', fontSize:12, color:'#64748b', fontWeight:600 }}>Sua presença:</p>
                         <div style={{ display:'flex', gap:6 }}>
-                          <button onClick={() => responderPresenca(ev.id,'confirmado')}
+                          <button onClick={() => responderPresenca(ev.id,'presente')}
                             style={{ padding:'5px 12px', borderRadius:8, border:'2px solid', fontSize:12, fontWeight:700, cursor:'pointer',
-                              borderColor:'#10b981', background: ev.minhaResposta==='confirmado' ? '#10b981' : '#fff',
-                              color: ev.minhaResposta==='confirmado' ? '#fff' : '#10b981' }}>✅ Confirmar</button>
+                              borderColor:'#10b981', background: ev.minhaResposta==='presente' ? '#10b981' : '#fff',
+                              color: ev.minhaResposta==='presente' ? '#fff' : '#10b981' }}>✅ Confirmar</button>
                           <button onClick={() => responderPresenca(ev.id,'ausente')}
                             style={{ padding:'5px 12px', borderRadius:8, border:'2px solid', fontSize:12, fontWeight:700, cursor:'pointer',
                               borderColor:'#ef4444', background: ev.minhaResposta==='ausente' ? '#ef4444' : '#fff',
@@ -558,18 +558,34 @@ export default function Calendario() {
               <h3 style={{ margin:'0 0 4px', color:'#1a237e' }}>👥 Presenças</h3>
               <p style={{ margin:'0 0 16px', color:'#64748b', fontSize:14 }}>{modalPresencas.titulo}</p>
 
+              {/* Contadores */}
+              <div style={{ display:'flex', gap:8, marginBottom:16 }}>
+                <div style={{ flex:1, textAlign:'center', background:'#e8f5e9', borderRadius:10, padding:'10px 4px' }}>
+                  <div style={{ fontSize:22, fontWeight:800, color:'#2e7d32' }}>{presencas.filter(p => p.resposta === 'presente').length}</div>
+                  <div style={{ fontSize:11, color:'#2e7d32' }}>Confirmados</div>
+                </div>
+                <div style={{ flex:1, textAlign:'center', background:'#ffebee', borderRadius:10, padding:'10px 4px' }}>
+                  <div style={{ fontSize:22, fontWeight:800, color:'#c62828' }}>{presencas.filter(p => p.resposta === 'ausente').length}</div>
+                  <div style={{ fontSize:11, color:'#c62828' }}>Ausentes</div>
+                </div>
+                <div style={{ flex:1, textAlign:'center', background:'#f1f5f9', borderRadius:10, padding:'10px 4px' }}>
+                  <div style={{ fontSize:22, fontWeight:800, color:'#64748b' }}>{presencas.filter(p => !p.resposta || p.resposta === 'pendente').length}</div>
+                  <div style={{ fontSize:11, color:'#64748b' }}>Sem resposta</div>
+                </div>
+              </div>
+
               {[
-                { key:'confirmado', label:'✅ Confirmados' },
-                { key:'ausente',    label:'❌ Não irão' },
-                { key:'pendente',   label:'⏳ Sem resposta' },
+                { key:'presente', label:'Confirmados', cor:'#2e7d32' },
+                { key:'ausente',  label:'Ausentes',    cor:'#c62828' },
               ].map(grupo => {
-                const lista = presencas.filter(p => (p.resposta||'pendente') === grupo.key)
+                const lista = presencas.filter(p => p.resposta === grupo.key)
                 return lista.length > 0 ? (
                   <div key={grupo.key} style={{ marginBottom:14 }}>
-                    <p style={{ margin:'0 0 6px', fontWeight:700, color:'#333', fontSize:13 }}>{grupo.label} ({lista.length})</p>
+                    <p style={{ margin:'0 0 6px', fontWeight:700, color:grupo.cor, fontSize:13 }}>{grupo.label} ({lista.length})</p>
                     {lista.map((p,i) => (
-                      <div key={i} style={{ padding:'6px 12px', background:'#f8fafc', borderRadius:6, marginBottom:4, fontSize:14, color:'#1e293b' }}>
-                        {p.associados?.nome_completo || '—'}
+                      <div key={i} style={{ padding:'8px 12px', background:'#f8fafc', borderRadius:8, marginBottom:4 }}>
+                        <div style={{ fontSize:14, color:'#1e293b', fontWeight:500 }}>{p.associados?.nome_completo || '-'}</div>
+                        {p.justificativa && <div style={{ fontSize:12, color:'#64748b', marginTop:2 }}>Justificativa: {p.justificativa}</div>}
                       </div>
                     ))}
                   </div>
