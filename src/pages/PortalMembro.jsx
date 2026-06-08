@@ -47,6 +47,7 @@ export default function PortalMembro() {
       .select('perfil').eq('user_id', user.id).single()
 
     setUsuario({ nome: assoc?.nome_completo || user.email.split('@')[0], perfil: perfil?.perfil || 'Membro' })
+    setAssociadoId(assoc?.id || null)
     setEhBode(assoc?.bodes_asfalto === true)
 
     const { data: ch } = await supabase.from('cargos_historico')
