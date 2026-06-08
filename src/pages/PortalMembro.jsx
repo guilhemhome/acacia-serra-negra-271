@@ -22,6 +22,11 @@ export default function PortalMembro() {
   const [ehBode, setEhBode] = useState(false)
   const [gruposAbertos, setGruposAbertos] = useState([])
   const [carregando, setCarregando] = useState(true)
+  const [presencas, setPresencas] = useState({})
+  const [justificativaAberta, setJustificativaAberta] = useState(null)
+  const [textoJustificativa, setTextoJustificativa] = useState('')
+  const [salvandoPresenca, setSalvandoPresenca] = useState(false)
+  const [associadoId, setAssociadoId] = useState(null)
 
   function hojeStr() { return new Date().toISOString().split('T')[0] }
   function fimMes() { const d = new Date(); d.setMonth(d.getMonth()+1); d.setDate(0); return d.toISOString().split('T')[0] }
@@ -71,6 +76,25 @@ export default function PortalMembro() {
   }
 
   function titular(nomeCargo) { return cargos.find(c => c.cargo === nomeCargo) }
+
+  async function confirmarPresenca(eventoId, resposta, justificativa) {
+    if (!associadoId) return
+    setSalvandoPresenca(eventoId + resposta)
+    try {
+      await supabase.from('eventos_presencas').upsert({
+        evento_id: eventoId,
+        associado_id: associadoId,
+        resposta: resposta,
+        justificativa: justificativa || null,
+        confirmado_em: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'evento_id,associado_id' })
+      setPresencas(prev => ({ ...prev, [eventoId]: { resposta, justificativa } }))
+      setJustificativaAberta(null)
+      setTextoJustificativa('')
+    } catch(err) { console.error('Erro ao salvar presença:', err) }
+    setSalvandoPresenca(false)
+  }
 
   const primeiroNome = usuario?.nome?.split(' ')[0] || ''
   const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
