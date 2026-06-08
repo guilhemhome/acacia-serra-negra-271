@@ -22,6 +22,7 @@ const VISIBILIDADE = [
 ]
 
 const STATUS_EV = {
+  ativo:     { label:'Agendado',  cor:'#f59e0b', bg:'#fef3c7' },
   agendado:  { label:'Agendado',  cor:'#f59e0b', bg:'#fef3c7' },
   realizado: { label:'Realizado', cor:'#10b981', bg:'#d1fae5' },
   cancelado: { label:'Cancelado', cor:'#ef4444', bg:'#fee2e2' },
@@ -68,6 +69,8 @@ export default function Calendario() {
   const [form, setForm] = useState({ titulo:'', tipo:'sessao_ordinaria', data_evento:'', hora:'', local:'', descricao:'', status:'ativo', visibilidade:'todos' })
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState('')
+  const [justifAberta, setJustifAberta] = useState(null)
+  const [textoJustif, setTextoJustif] = useState('')
   const [aba, setAba] = useState('eventos') // 'eventos' | 'aniversarios'
 
   useEffect(() => { init() }, [])
@@ -184,10 +187,10 @@ export default function Calendario() {
     setLoading(false)
   }
 
-  async function responderPresenca(eventoId, resposta) {
+  async function responderPresenca(eventoId, resposta, justificativa) {
     if (!associadoId) return
     await supabase.from('eventos_presencas').upsert(
-      { evento_id: eventoId, associado_id: associadoId, resposta, updated_at: new Date().toISOString() },
+      { evento_id: eventoId, associado_id: associadoId, resposta, justificativa: justificativa||null, confirmado_em: new Date().toISOString(), updated_at: new Date().toISOString() },
       { onConflict: 'evento_id,associado_id' }
     )
     carregarEventos()
@@ -229,7 +232,7 @@ export default function Calendario() {
 
   const isAdm = perfil === 'ADM' || perfil === 'Secretário'
   const hj = hoje()
-  const proximos = eventos.filter(e => e.data >= hj && e.status === 'ativo')
+  const proximos = eventos.filter(e => e.data_evento >= hj && e.status === 'ativo')
   const realizados = eventos.filter(e => e.status === 'realizado')
   const cancelados = eventos.filter(e => e.status === 'cancelado')
 
@@ -336,20 +339,42 @@ export default function Calendario() {
                     {ev.status === 'ativo' && !passado && (
                       <div style={{ marginTop:8 }}>
                         <p style={{ margin:'0 0 6px', fontSize:12, color:'#64748b', fontWeight:600 }}>Sua presença:</p>
-                        <div style={{ display:'flex', gap:6 }}>
-                          <button onClick={() => responderPresenca(ev.id,'presente')}
-                            style={{ padding:'5px 12px', borderRadius:8, border:'2px solid', fontSize:12, fontWeight:700, cursor:'pointer',
-                              borderColor:'#10b981', background: ev.minhaResposta==='presente' ? '#10b981' : '#fff',
-                              color: ev.minhaResposta==='presente' ? '#fff' : '#10b981' }}>✅ Confirmar</button>
-                          <button onClick={() => responderPresenca(ev.id,'ausente')}
-                            style={{ padding:'5px 12px', borderRadius:8, border:'2px solid', fontSize:12, fontWeight:700, cursor:'pointer',
-                              borderColor:'#ef4444', background: ev.minhaResposta==='ausente' ? '#ef4444' : '#fff',
-                              color: ev.minhaResposta==='ausente' ? '#fff' : '#ef4444' }}>❌ Não irei</button>
-                          {ev.minhaResposta !== 'pendente' && (
-                            <button onClick={() => responderPresenca(ev.id,'pendente')}
-                              style={{ padding:'5px 12px', borderRadius:8, border:'2px solid #94a3b8', fontSize:12, fontWeight:700, cursor:'pointer', background:'#fff', color:'#94a3b8' }}>⏳</button>
-                          )}
-                        </div>
+                        {justifAberta === ev.id ? (
+                          <div style={{ marginTop:4 }}>
+                            <textarea
+                              placeholder="Justificativa (obrigatorio)..."
+                              value={textoJustif}
+                              onChange={e => setTextoJustif(e.target.value)}
+                              style={{ width:'100%', borderRadius:8, border:'1px solid #e2e8f0', padding:'8px 10px', fontSize:12, resize:'none', fontFamily:'inherit', boxSizing:'border-box' }}
+                              rows={2}
+                            />
+                            <div style={{ display:'flex', gap:6, marginTop:4 }}>
+                              <button
+                                onClick={() => { if(textoJustif.trim()) { responderPresenca(ev.id,'ausente',textoJustif.trim()); setJustifAberta(null); setTextoJustif('') } }}
+                                disabled={!textoJustif.trim()}
+                                style={{ flex:1, padding:'5px 10px', borderRadius:8, border:'none', fontSize:12, fontWeight:700, cursor: textoJustif.trim() ? 'pointer' : 'default', background: textoJustif.trim() ? '#ef4444' : '#e2e8f0', color: textoJustif.trim() ? '#fff' : '#94a3b8' }}>
+                                Confirmar ausencia
+                              </button>
+                              <button onClick={() => { setJustifAberta(null); setTextoJustif('') }}
+                                style={{ padding:'5px 10px', borderRadius:8, border:'1px solid #e2e8f0', fontSize:12, cursor:'pointer', background:'#fff', color:'#64748b' }}>Cancelar</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div style={{ display:'flex', gap:6 }}>
+                            <button onClick={() => responderPresenca(ev.id,'presente')}
+                              style={{ padding:'5px 12px', borderRadius:8, border:'2px solid', fontSize:12, fontWeight:700, cursor:'pointer',
+                                borderColor:'#10b981', background: ev.minhaResposta==='presente' ? '#10b981' : '#fff',
+                                color: ev.minhaResposta==='presente' ? '#fff' : '#10b981' }}>Confirmar</button>
+                            <button onClick={() => { setJustifAberta(ev.id); setTextoJustif('') }}
+                              style={{ padding:'5px 12px', borderRadius:8, border:'2px solid', fontSize:12, fontWeight:700, cursor:'pointer',
+                                borderColor:'#ef4444', background: ev.minhaResposta==='ausente' ? '#ef4444' : '#fff',
+                                color: ev.minhaResposta==='ausente' ? '#fff' : '#ef4444' }}>Nao irei</button>
+                            {ev.minhaResposta !== 'pendente' && (
+                              <button onClick={() => responderPresenca(ev.id,'pendente')}
+                                style={{ padding:'5px 12px', borderRadius:8, border:'2px solid #94a3b8', fontSize:12, fontWeight:700, cursor:'pointer', background:'#fff', color:'#94a3b8' }}>-</button>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
