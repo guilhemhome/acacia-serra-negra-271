@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
@@ -27,6 +27,7 @@ export default function PortalMembro() {
   const [textoJustificativa, setTextoJustificativa] = useState('')
   const [salvandoPresenca, setSalvandoPresenca] = useState(false)
   const [associadoId, setAssociadoId] = useState(null)
+  const associadoIdRef = React.useRef(null)
 
   function hojeStr() { return new Date().toISOString().split('T')[0] }
   function fimMes() { const d = new Date(); d.setMonth(d.getMonth()+1); d.setDate(0); return d.toISOString().split('T')[0] }
@@ -48,6 +49,7 @@ export default function PortalMembro() {
 
     setUsuario({ nome: assoc?.nome_completo || user.email.split('@')[0], perfil: perfil?.perfil || 'Membro' })
     setAssociadoId(assoc?.id || null)
+    associadoIdRef.current = assoc?.id || null
     setEhBode(assoc?.bodes_asfalto === true)
 
     const { data: ch } = await supabase.from('cargos_historico')
@@ -90,12 +92,13 @@ export default function PortalMembro() {
   function titular(nomeCargo) { return cargos.find(c => c.cargo === nomeCargo) }
 
   async function confirmarPresenca(eventoId, resposta, justificativa) {
-    if (!associadoId) return
+    const aid = associadoIdRef.current
+    if (!aid) { console.warn('associadoId nulo'); return }
     setSalvandoPresenca(eventoId + resposta)
     try {
       await supabase.from('eventos_presencas').upsert({
         evento_id: eventoId,
-        associado_id: associadoId,
+        associado_id: aid,
         resposta: resposta,
         justificativa: justificativa || null,
         confirmado_em: new Date().toISOString(),
