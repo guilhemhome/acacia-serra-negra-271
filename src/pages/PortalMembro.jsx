@@ -195,9 +195,9 @@ export default function PortalMembro() {
                   {presencas[ev.id] ? (
                     <div style={{ marginTop:8, display:'flex', alignItems:'center', gap:8 }}>
                       {presencas[ev.id].resposta === 'presente' ? (
-                        <span style={{ fontSize:12, color:'#2e7d32', background:'#e8f5e9', borderRadius:20, padding:'4px 12px', fontWeight:600 }}>Presenca confirmada</span>
+                        <span style={{ fontSize:12, color:'#2e7d32', background:'#e8f5e9', borderRadius:20, padding:'4px 12px', fontWeight:600 }}>Presença confirmada</span>
                       ) : (
-                        <span style={{ fontSize:12, color:'#c62828', background:'#ffebee', borderRadius:20, padding:'4px 12px', fontWeight:600 }}>Ausencia justificada</span>
+                        <span style={{ fontSize:12, color:'#c62828', background:'#ffebee', borderRadius:20, padding:'4px 12px', fontWeight:600 }}>Ausência justificada</span>
                       )}
                       <button onClick={() => { setPresencas(prev => { const n = {...prev}; delete n[ev.id]; return n }) }}
                         style={{ fontSize:11, color:'#94a3b8', background:'none', border:'none', cursor:'pointer', padding:0 }}>alterar</button>
@@ -216,7 +216,7 @@ export default function PortalMembro() {
                           onClick={() => textoJustificativa.trim() && confirmarPresenca(ev.id, 'ausente', textoJustificativa.trim())}
                           disabled={!textoJustificativa.trim() || salvandoPresenca === ev.id + 'ausente'}
                           style={{ flex:1, background: textoJustificativa.trim() ? '#c62828' : '#e2e8f0', color: textoJustificativa.trim() ? '#fff' : '#94a3b8', border:'none', borderRadius:8, padding:'8px 0', fontSize:12, fontWeight:600, cursor: textoJustificativa.trim() ? 'pointer' : 'default' }}>
-                          {salvandoPresenca === ev.id + 'ausente' ? 'Salvando...' : 'Confirmar ausencia'}
+                          {salvandoPresenca === ev.id + 'ausente' ? 'Salvando...' : 'Confirmar ausência'}
                         </button>
                         <button onClick={() => { setJustificativaAberta(null); setTextoJustificativa('') }}
                           style={{ background:'#f1f5f9', color:'#64748b', border:'none', borderRadius:8, padding:'8px 14px', fontSize:12, cursor:'pointer' }}>Cancelar</button>
@@ -227,7 +227,7 @@ export default function PortalMembro() {
                       <button onClick={() => confirmarPresenca(ev.id, 'presente', null)}
                         disabled={salvandoPresenca === ev.id + 'presente'}
                         style={{ flex:1, background:'#e8f5e9', color:'#2e7d32', border:'1px solid #a5d6a7', borderRadius:8, padding:'7px 0', fontSize:12, fontWeight:600, cursor:'pointer' }}>
-                        {salvandoPresenca === ev.id + 'presente' ? 'Salvando...' : 'Confirmar presenca'}
+                        {salvandoPresenca === ev.id + 'presente' ? 'Salvando...' : 'Confirmar presença'}
                       </button>
                       <button onClick={() => setJustificativaAberta(ev.id)}
                         style={{ flex:1, background:'#ffebee', color:'#c62828', border:'1px solid #ef9a9a', borderRadius:8, padding:'7px 0', fontSize:12, fontWeight:600, cursor:'pointer' }}>
