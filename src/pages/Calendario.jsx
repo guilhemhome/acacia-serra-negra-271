@@ -173,12 +173,12 @@ export default function Calendario() {
       const ids = filtrados.map(e => e.id)
       if (ids.length > 0) {
         const { data: pres } = await supabase.from('eventos_presencas')
-          .select('evento_id, resposta')
+          .select('evento_id, resposta, justificativa')
           .eq('associado_id', associadoId)
           .in('evento_id', ids)
         const presMap = {}
-        ;(pres||[]).forEach(p => { presMap[p.evento_id] = p.resposta })
-        setEventos(filtrados.map(ev => ({ ...ev, minhaResposta: presMap[ev.id] || 'pendente' })))
+        ;(pres||[]).forEach(p => { presMap[p.evento_id] = { resposta: p.resposta, justificativa: p.justificativa } })
+        setEventos(filtrados.map(ev => ({ ...ev, minhaResposta: presMap[ev.id]?.resposta || 'pendente', minhaJustificativa: presMap[ev.id]?.justificativa || '' })))
       } else {
         setEventos([])
       }
@@ -343,7 +343,7 @@ export default function Calendario() {
                         {justifAberta === ev.id ? (
                           <div style={{ marginTop:4 }}>
                             <textarea
-                              placeholder="Justificativa (obrigatorio)..."
+                              placeholder="Justificativa (obrigatório)..."
                               value={textoJustif}
                               onChange={e => setTextoJustif(e.target.value)}
                               style={{ width:'100%', borderRadius:8, border:'1px solid #e2e8f0', padding:'8px 10px', fontSize:12, resize:'none', fontFamily:'inherit', boxSizing:'border-box' }}
@@ -354,7 +354,7 @@ export default function Calendario() {
                                 onClick={() => { if(textoJustif.trim()) { responderPresenca(ev.id,'ausente',textoJustif.trim()); setJustifAberta(null); setTextoJustif('') } }}
                                 disabled={!textoJustif.trim()}
                                 style={{ flex:1, padding:'5px 10px', borderRadius:8, border:'none', fontSize:12, fontWeight:700, cursor: textoJustif.trim() ? 'pointer' : 'default', background: textoJustif.trim() ? '#ef4444' : '#e2e8f0', color: textoJustif.trim() ? '#fff' : '#94a3b8' }}>
-                                Confirmar ausencia
+                                Confirmar ausência
                               </button>
                               <button onClick={() => { setJustifAberta(null); setTextoJustif('') }}
                                 style={{ padding:'5px 10px', borderRadius:8, border:'1px solid #e2e8f0', fontSize:12, cursor:'pointer', background:'#fff', color:'#64748b' }}>Cancelar</button>
@@ -369,10 +369,10 @@ export default function Calendario() {
                             <button onClick={() => { setJustifAberta(ev.id); setTextoJustif('') }}
                               style={{ padding:'5px 12px', borderRadius:8, border:'2px solid', fontSize:12, fontWeight:700, cursor:'pointer',
                                 borderColor:'#ef4444', background: ev.minhaResposta==='ausente' ? '#ef4444' : '#fff',
-                                color: ev.minhaResposta==='ausente' ? '#fff' : '#ef4444' }}>Nao irei</button>
+                                color: ev.minhaResposta==='ausente' ? '#fff' : '#ef4444' }}>Não irei</button>
                             {ev.minhaResposta !== 'pendente' && (
-                              <button onClick={() => responderPresenca(ev.id,'pendente')}
-                                style={{ padding:'5px 12px', borderRadius:8, border:'2px solid #94a3b8', fontSize:12, fontWeight:700, cursor:'pointer', background:'#fff', color:'#94a3b8' }}>-</button>
+                              <button onClick={() => { setJustifAberta(ev.id); setTextoJustif(ev.minhaJustificativa || '') }}
+                                style={{ padding:'5px 12px', borderRadius:8, border:'2px solid #94a3b8', fontSize:12, fontWeight:700, cursor:'pointer', background:'#fff', color:'#94a3b8' }}>✏️</button>
                             )}
                           </div>
                         )}
