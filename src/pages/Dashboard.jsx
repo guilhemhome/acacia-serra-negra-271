@@ -45,6 +45,16 @@ export default function Dashboard() {
           setAniversarios(aniversarios)
           setAnivHoje(anivHoje)
           setCarregando(false)
+          // Buscar presencas sempre ao vivo (nao cachear)
+          if (proximoEvento) {
+            supabase.from('eventos_presencas')
+              .select('resposta').eq('evento_id', proximoEvento.id)
+              .then(({ data: pres }) => {
+                const confirmados = (pres||[]).filter(p => p.resposta === 'presente').length
+                const ausentes = (pres||[]).filter(p => p.resposta === 'ausente').length
+                setResumoPresencas({ confirmados, ausentes, total: stats.ativos || 0 })
+              })
+          }
           return
         }
       }
