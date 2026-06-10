@@ -173,7 +173,7 @@ export default function PortalMembro() {
         )}
 
         {/* Banner pendencia de presenca */}
-        {eventos.some(ev => !presencas[ev.id]) && (
+        {eventos.some(ev => !presencas[ev.id]?.resposta) && (
           <div style={{ background:'#fff3e0', borderRadius:14, padding:'12px 16px', marginBottom:16, borderLeft:'4px solid #f59e0b', display:'flex', alignItems:'center', gap:10 }}>
             <span style={{ fontSize:20 }}>⚠️</span>
             <div>
@@ -210,7 +210,7 @@ export default function PortalMembro() {
                       ) : (
                         <span style={{ fontSize:12, color:'#c62828', background:'#ffebee', borderRadius:20, padding:'4px 12px', fontWeight:600 }}>Ausência justificada</span>
                       )}
-                      <button onClick={() => { setPresencas(prev => { const n = {...prev}; delete n[ev.id]; return n }) }}
+                      <button onClick={() => { setPresencas(prev => ({ ...prev, [ev.id]: { resposta: null, justificativa: null } })) }}
                         style={{ fontSize:11, color:'#94a3b8', background:'none', border:'none', cursor:'pointer', padding:0 }}>alterar</button>
                     </div>
                   ) : justificativaAberta === ev.id ? (

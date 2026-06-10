@@ -81,18 +81,24 @@ export default function Calendario() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) return
     const { data: p } = await supabase.from('perfis_acesso').select('perfil').eq('user_id', session.user.id).single()
-    setPerfil(p?.perfil || 'membro')
+    const perfilAtual = p?.perfil || 'membro'
+    setPerfil(perfilAtual)
     const { data: assoc } = await supabase.from('associados').select('id, grau:historico_graus(grau)').eq('user_id', session.user.id).single()
+    let aid = null
+    let grauAtual = 'aprendiz'
     if (assoc) {
-      setAssociadoId(assoc.id)
+      aid = assoc.id
+      setAssociadoId(aid)
       const graus = assoc.grau || []
       const temMestre = graus.some(g => g.grau === 'mestre')
       const temCompanheiro = graus.some(g => g.grau === 'companheiro')
-      setGrauUsuario(temMestre ? 'mestre' : temCompanheiro ? 'companheiro' : 'aprendiz')
+      grauAtual = temMestre ? 'mestre' : temCompanheiro ? 'companheiro' : 'aprendiz'
+      setGrauUsuario(grauAtual)
     } else {
       setAssociadoId(null)
     }
     await carregarAniversariantes()
+    await carregarEventos(aid, perfilAtual, grauAtual)
   }
 
   async function carregarAniversariantes() {
@@ -151,30 +157,31 @@ export default function Calendario() {
     setFamiliares(fam)
   }
 
-  async function carregarEventos() {
+  async function carregarEventos(aidParam, perfilParam, grauParam) {
     setLoading(true)
+    const aid = aidParam !== undefined ? aidParam : associadoId
+    const perf = perfilParam !== undefined ? perfilParam : perfil
+    const grau = grauParam !== undefined ? grauParam : grauUsuario
     const inicio = filtroMes + '-01'
     const [ano, mes] = filtroMes.split('-')
     const ultimo = new Date(ano, mes, 0).getDate()
     const fim = filtroMes + '-' + String(ultimo).padStart(2,'0')
     const { data } = await supabase.from('eventos').select('*').gte('data_evento',inicio).lte('data_evento',fim).order('data_evento')
-    
-    // Filtrar por visibilidade
+
     const filtrados = (data||[]).filter(ev => {
-      if (!perfil || perfil === 'ADM' || perfil === 'Secretário') return true
+      if (!perf || perf === 'ADM' || perf === 'Secretário') return true
       if (ev.visibilidade === 'todos') return true
-      if (ev.visibilidade === 'mestres' && grauUsuario === 'mestre') return true
-      if (ev.visibilidade === 'companheiros' && (grauUsuario === 'mestre' || grauUsuario === 'companheiro')) return true
+      if (ev.visibilidade === 'mestres' && grau === 'mestre') return true
+      if (ev.visibilidade === 'companheiros' && (grau === 'mestre' || grau === 'companheiro')) return true
       return false
     })
 
-    // Carregar presença do usuário para cada evento
-    if (associadoId) {
+    if (aid) {
       const ids = filtrados.map(e => e.id)
       if (ids.length > 0) {
         const { data: pres } = await supabase.from('eventos_presencas')
           .select('evento_id, resposta, justificativa')
-          .eq('associado_id', associadoId)
+          .eq('associado_id', aid)
           .in('evento_id', ids)
         const presMap = {}
         ;(pres||[]).forEach(p => { presMap[p.evento_id] = { resposta: p.resposta, justificativa: p.justificativa } })
