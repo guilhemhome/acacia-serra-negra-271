@@ -58,8 +58,8 @@ export default function PortalMembro() {
 
     const { data: evs } = await supabase.from('eventos')
       .select('*').eq('status','ativo')
-      .gte('data_evento', hojeStr()).lte('data_evento', fimMes())
-      .order('data_evento').limit(3)
+      .gte('data_evento', hojeStr())
+      .order('data_evento').limit(1)
     setEventos(evs || [])
 
       if (assoc?.id && evs && evs.length > 0) {
@@ -173,7 +173,7 @@ export default function PortalMembro() {
         )}
 
         {/* Banner pendencia de presenca */}
-        {eventos.some(ev => !presencas[ev.id]?.resposta) && (
+        {eventos.length > 0 && !presencas[eventos[0].id]?.resposta && (
           <div style={{ background:'#fff3e0', borderRadius:14, padding:'12px 16px', marginBottom:16, borderLeft:'4px solid #f59e0b', display:'flex', alignItems:'center', gap:10 }}>
             <span style={{ fontSize:20 }}>⚠️</span>
             <div>
@@ -187,7 +187,7 @@ export default function PortalMembro() {
         {eventos.length > 0 && (
           <>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
-              <p style={{ ...sec, margin:0 }}>Próximos eventos</p>
+              <p style={{ ...sec, margin:0 }}>Próximo evento</p>
               <button onClick={() => navigate('/calendario')} style={{ background:'none', border:'none', color:'rgba(255,255,255,0.5)', fontSize:12, cursor:'pointer', padding:0 }}>Ver todos →</button>
             </div>
             <div style={{ background:'rgba(255,255,255,0.95)', borderRadius:16, padding:'4px 16px', marginBottom:20 }}>

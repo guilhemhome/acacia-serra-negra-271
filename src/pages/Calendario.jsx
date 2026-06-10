@@ -347,42 +347,79 @@ export default function Calendario() {
                     {ev.status === 'ativo' && !passado && (
                       <div style={{ marginTop:8 }}>
                         <p style={{ margin:'0 0 6px', fontSize:12, color:'#64748b', fontWeight:600 }}>Sua presença:</p>
-                        {justifAberta === ev.id ? (
+
+                        {/* Estado: já respondeu e não está editando */}
+                        {ev.minhaResposta !== 'pendente' && justifAberta !== ev.id && (
+                          <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
+                            {ev.minhaResposta === 'presente' ? (
+                              <span style={{ fontSize:12, color:'#2e7d32', background:'#e8f5e9', borderRadius:20, padding:'4px 12px', fontWeight:600 }}>✅ Presença confirmada</span>
+                            ) : (
+                              <div>
+                                <span style={{ fontSize:12, color:'#c62828', background:'#ffebee', borderRadius:20, padding:'4px 12px', fontWeight:600 }}>❌ Ausência justificada</span>
+                                {ev.minhaJustificativa && (
+                                  <div style={{ fontSize:11, color:'#94a3b8', marginTop:4, fontStyle:'italic' }}>"{ev.minhaJustificativa}"</div>
+                                )}
+                              </div>
+                            )}
+                            <button
+                              onClick={() => { setJustifAberta(ev.id); setTextoJustif('') }}
+                              style={{ fontSize:11, color:'#94a3b8', background:'none', border:'1px solid #e2e8f0', borderRadius:8, padding:'3px 10px', cursor:'pointer' }}>
+                              alterar
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Estado: pendente — mostrar botões */}
+                        {ev.minhaResposta === 'pendente' && justifAberta !== ev.id && (
+                          <div style={{ display:'flex', gap:6 }}>
+                            <button onClick={() => responderPresenca(ev.id,'presente')}
+                              style={{ padding:'5px 12px', borderRadius:8, border:'2px solid #10b981', fontSize:12, fontWeight:700, cursor:'pointer', background:'#fff', color:'#10b981' }}>
+                              Confirmar
+                            </button>
+                            <button onClick={() => { setJustifAberta(ev.id); setTextoJustif('') }}
+                              style={{ padding:'5px 12px', borderRadius:8, border:'2px solid #ef4444', fontSize:12, fontWeight:700, cursor:'pointer', background:'#fff', color:'#ef4444' }}>
+                              Não irei
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Estado: editando */}
+                        {justifAberta === ev.id && (
                           <div style={{ marginTop:4 }}>
+                            <div style={{ display:'flex', gap:6, marginBottom:6 }}>
+                              <button
+                                onClick={() => { responderPresenca(ev.id,'presente'); setJustifAberta(null); setTextoJustif('') }}
+                                style={{ flex:1, padding:'5px 10px', borderRadius:8, border:'2px solid #10b981', fontSize:12, fontWeight:700, cursor:'pointer',
+                                  background: ev.minhaResposta==='presente' ? '#10b981' : '#fff',
+                                  color: ev.minhaResposta==='presente' ? '#fff' : '#10b981' }}>
+                                ✅ Confirmado
+                              </button>
+                              <button
+                                onClick={() => { if(textoJustif.trim()) { responderPresenca(ev.id,'ausente',textoJustif.trim()); setJustifAberta(null); setTextoJustif('') } }}
+                                disabled={!textoJustif.trim()}
+                                style={{ flex:1, padding:'5px 10px', borderRadius:8, border:'2px solid #ef4444', fontSize:12, fontWeight:700,
+                                  cursor: textoJustif.trim() ? 'pointer' : 'default',
+                                  background: ev.minhaResposta==='ausente' ? '#ef4444' : '#fff',
+                                  color: ev.minhaResposta==='ausente' ? '#fff' : '#ef4444' }}>
+                                ❌ Não irei
+                              </button>
+                            </div>
                             <textarea
-                              placeholder="Justificativa (obrigatório)..."
+                              placeholder="Justificativa para ausência (obrigatório para Não irei)..."
                               value={textoJustif}
                               onChange={e => setTextoJustif(e.target.value)}
                               style={{ width:'100%', borderRadius:8, border:'1px solid #e2e8f0', padding:'8px 10px', fontSize:12, resize:'none', fontFamily:'inherit', boxSizing:'border-box' }}
                               rows={2}
                             />
-                            <div style={{ display:'flex', gap:6, marginTop:4 }}>
-                              <button
-                                onClick={() => { if(textoJustif.trim()) { responderPresenca(ev.id,'ausente',textoJustif.trim()); setJustifAberta(null); setTextoJustif('') } }}
-                                disabled={!textoJustif.trim()}
-                                style={{ flex:1, padding:'5px 10px', borderRadius:8, border:'none', fontSize:12, fontWeight:700, cursor: textoJustif.trim() ? 'pointer' : 'default', background: textoJustif.trim() ? '#ef4444' : '#e2e8f0', color: textoJustif.trim() ? '#fff' : '#94a3b8' }}>
-                                Confirmar ausência
-                              </button>
+                            <div style={{ display:'flex', justifyContent:'flex-end', marginTop:4 }}>
                               <button onClick={() => { setJustifAberta(null); setTextoJustif('') }}
-                                style={{ padding:'5px 10px', borderRadius:8, border:'1px solid #e2e8f0', fontSize:12, cursor:'pointer', background:'#fff', color:'#64748b' }}>Cancelar</button>
+                                style={{ padding:'4px 14px', borderRadius:8, border:'1px solid #e2e8f0', fontSize:12, cursor:'pointer', background:'#fff', color:'#64748b' }}>
+                                Cancelar
+                              </button>
                             </div>
                           </div>
-                        ) : (
-                          <div style={{ display:'flex', gap:6 }}>
-                            <button onClick={() => responderPresenca(ev.id,'presente')}
-                              style={{ padding:'5px 12px', borderRadius:8, border:'2px solid', fontSize:12, fontWeight:700, cursor:'pointer',
-                                borderColor:'#10b981', background: ev.minhaResposta==='presente' ? '#10b981' : '#fff',
-                                color: ev.minhaResposta==='presente' ? '#fff' : '#10b981' }}>Confirmar</button>
-                            <button onClick={() => { setJustifAberta(ev.id); setTextoJustif('') }}
-                              style={{ padding:'5px 12px', borderRadius:8, border:'2px solid', fontSize:12, fontWeight:700, cursor:'pointer',
-                                borderColor:'#ef4444', background: ev.minhaResposta==='ausente' ? '#ef4444' : '#fff',
-                                color: ev.minhaResposta==='ausente' ? '#fff' : '#ef4444' }}>Não irei</button>
-                            {ev.minhaResposta !== 'pendente' && (
-                              <button onClick={() => { setJustifAberta(ev.id); setTextoJustif(ev.minhaJustificativa || '') }}
-                                style={{ padding:'5px 12px', borderRadius:8, border:'2px solid #94a3b8', fontSize:12, fontWeight:700, cursor:'pointer', background:'#fff', color:'#94a3b8' }}>✏️</button>
-                            )}
-                          </div>
                         )}
+
                       </div>
                     )}
                   </div>
