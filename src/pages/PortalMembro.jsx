@@ -50,6 +50,7 @@ export default function PortalMembro() {
     setUsuario({ nome: assoc?.nome_completo || user.email.split('@')[0], perfil: perfil?.perfil || 'Membro' })
     setAssociadoId(assoc?.id || null)
     associadoIdRef.current = assoc?.id || null
+    console.log('ASSOC ID:', assoc?.id, 'REF:', associadoIdRef.current)
     setEhBode(assoc?.bodes_asfalto === true)
 
     const { data: ch } = await supabase.from('cargos_historico')
@@ -205,7 +206,7 @@ export default function PortalMembro() {
                   ) : justificativaAberta === ev.id ? (
                     <div style={{ marginTop:8 }}>
                       <textarea
-                        placeholder="Informe sua justificativa (obrigatorio)..."
+                        placeholder="Informe sua justificativa (obrigatório)..."
                         value={textoJustificativa}
                         onChange={e => setTextoJustificativa(e.target.value)}
                         style={{ width:'100%', borderRadius:8, border:'1px solid #e2e8f0', padding:'8px 10px', fontSize:12, resize:'none', fontFamily:'inherit', boxSizing:'border-box' }}
@@ -231,7 +232,7 @@ export default function PortalMembro() {
                       </button>
                       <button onClick={() => setJustificativaAberta(ev.id)}
                         style={{ flex:1, background:'#ffebee', color:'#c62828', border:'1px solid #ef9a9a', borderRadius:8, padding:'7px 0', fontSize:12, fontWeight:600, cursor:'pointer' }}>
-                        Nao irei
+                        Não irei
                       </button>
                     </div>
                   )}
