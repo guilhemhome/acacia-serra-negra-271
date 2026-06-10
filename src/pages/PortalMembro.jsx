@@ -50,7 +50,6 @@ export default function PortalMembro() {
     setUsuario({ nome: assoc?.nome_completo || user.email.split('@')[0], perfil: perfil?.perfil || 'Membro' })
     setAssociadoId(assoc?.id || null)
     associadoIdRef.current = assoc?.id || null
-    console.log('ASSOC ID:', assoc?.id, 'REF:', associadoIdRef.current)
     setEhBode(assoc?.bodes_asfalto === true)
 
     const { data: ch } = await supabase.from('cargos_historico')
@@ -171,6 +170,17 @@ export default function PortalMembro() {
               ))}
             </div>
           </>
+        )}
+
+        {/* Banner pendencia de presenca */}
+        {eventos.some(ev => !presencas[ev.id]) && (
+          <div style={{ background:'#fff3e0', borderRadius:14, padding:'12px 16px', marginBottom:16, borderLeft:'4px solid #f59e0b', display:'flex', alignItems:'center', gap:10 }}>
+            <span style={{ fontSize:20 }}>⚠️</span>
+            <div>
+              <div style={{ fontSize:13, fontWeight:700, color:'#e65100' }}>Manifestação pendente</div>
+              <div style={{ fontSize:12, color:'#bf360c' }}>Confirme sua presença nos próximos eventos da loja.</div>
+            </div>
+          </div>
         )}
 
         {/* Próximos eventos */}
