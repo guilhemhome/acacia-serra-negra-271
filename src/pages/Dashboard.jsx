@@ -6,6 +6,7 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const [stats, setStats] = useState({ ativos: 0, pendentes: 0 })
   const [proximoEvento, setProximoEvento] = useState(null)
+  const [resumoPresencas, setResumoPresencas] = useState(null)
   const [aniversarios, setAniversarios] = useState([])
   const [anivHoje, setAnivHoje] = useState(0)
   const [usuario, setUsuario] = useState({ email: '', perfil: 'Membro', nome: '' })
@@ -98,6 +99,16 @@ export default function Dashboard() {
     })
     const proxEvento = filtEvs[0] || null
     setProximoEvento(proxEvento)
+
+    // Buscar resumo de presencas do proximo evento
+    if (proxEvento) {
+      const { data: pres } = await supabase.from('eventos_presencas')
+        .select('resposta, associados(nome_completo)')
+        .eq('evento_id', proxEvento.id)
+      const confirmados = (pres||[]).filter(p => p.resposta === 'presente').length
+      const ausentes = (pres||[]).filter(p => p.resposta === 'ausente').length
+      setResumoPresencas({ confirmados, ausentes, total: ativos || 0 })
+    }
 
     const tObj = {}
     ;(tmpl || []).forEach(t => { tObj[t.tipo] = t.conteudo })
@@ -274,6 +285,31 @@ export default function Dashboard() {
         )}
 
 
+
+        {/* Resumo presencas proximo evento */}
+        {proximoEvento && resumoPresencas && (
+          <div style={{ background:'rgba(255,255,255,0.95)', borderRadius:16, padding:'14px 16px', marginBottom:20 }}>
+            <p style={{ margin:'0 0 10px', fontSize:12, fontWeight:700, color:'#1a237e', textTransform:'uppercase', letterSpacing:'0.05em' }}>Presenças — {proximoEvento.titulo}</p>
+            <div style={{ display:'flex', gap:8 }}>
+              <div style={{ flex:1, textAlign:'center', background:'#e8f5e9', borderRadius:10, padding:'10px 4px' }}>
+                <div style={{ fontSize:22, fontWeight:800, color:'#2e7d32' }}>{resumoPresencas.confirmados}</div>
+                <div style={{ fontSize:11, color:'#2e7d32' }}>Confirmados</div>
+              </div>
+              <div style={{ flex:1, textAlign:'center', background:'#ffebee', borderRadius:10, padding:'10px 4px' }}>
+                <div style={{ fontSize:22, fontWeight:800, color:'#c62828' }}>{resumoPresencas.ausentes}</div>
+                <div style={{ fontSize:11, color:'#c62828' }}>Ausentes</div>
+              </div>
+              <div style={{ flex:1, textAlign:'center', background:'#f1f5f9', borderRadius:10, padding:'10px 4px' }}>
+                <div style={{ fontSize:22, fontWeight:800, color:'#64748b' }}>{resumoPresencas.total - resumoPresencas.confirmados - resumoPresencas.ausentes}</div>
+                <div style={{ fontSize:11, color:'#64748b' }}>Pendentes</div>
+              </div>
+            </div>
+            <button onClick={() => navigate('/calendario')}
+              style={{ width:'100%', marginTop:10, padding:'8px', borderRadius:8, border:'none', background:'#1a237e', color:'#fff', fontSize:12, fontWeight:600, cursor:'pointer' }}>
+              Ver lista completa →
+            </button>
+          </div>
+        )}
 
         {/* Ações rápidas */}
         <p style={sec}>Ações rápidas</p>
