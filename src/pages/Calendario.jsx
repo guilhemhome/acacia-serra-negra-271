@@ -195,6 +195,15 @@ export default function Calendario() {
     setLoading(false)
   }
 
+  async function removerPresenca(eventoId) {
+    if (!associadoId) return
+    await supabase.from('eventos_presencas')
+      .delete()
+      .eq('evento_id', eventoId)
+      .eq('associado_id', associadoId)
+    carregarEventos()
+  }
+
   async function responderPresenca(eventoId, resposta, justificativa) {
     if (!associadoId) return
     await supabase.from('eventos_presencas').upsert(
@@ -388,7 +397,14 @@ export default function Calendario() {
                           <div style={{ marginTop:4 }}>
                             <div style={{ display:'flex', gap:6, marginBottom:6 }}>
                               <button
-                                onClick={() => { responderPresenca(ev.id,'presente'); setJustifAberta(null); setTextoJustif('') }}
+                                onClick={() => {
+                                  if (ev.minhaResposta === 'presente') {
+                                    removerPresenca(ev.id)
+                                  } else {
+                                    responderPresenca(ev.id,'presente')
+                                  }
+                                  setJustifAberta(null); setTextoJustif('')
+                                }}
                                 style={{ flex:1, padding:'5px 10px', borderRadius:8, border:'2px solid #10b981', fontSize:12, fontWeight:700, cursor:'pointer',
                                   background: ev.minhaResposta==='presente' ? '#10b981' : '#fff',
                                   color: ev.minhaResposta==='presente' ? '#fff' : '#10b981' }}>
