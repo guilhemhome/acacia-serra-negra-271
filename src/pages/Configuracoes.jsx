@@ -51,22 +51,19 @@ export default function Configuracoes() {
         })
       }
 
-      // Carregar perfis de acesso — apenas usuários com login
+      // Carregar perfis de acesso — todos os usuários com login
       const { data: ps } = await supabase.from('perfis_acesso').select('*')
-      const { data: { user: userAtual } } = await supabase.auth.getUser()
       if (ps && ps.length > 0) {
-        const outrosPerfis = ps.filter(p => p.user_id !== userAtual?.id)
-        if (outrosPerfis.length > 0) {
-          const { data: assocs } = await supabase
-            .from('associados')
-            .select('user_id, nome_completo, email')
-            .in('user_id', outrosPerfis.map(p => p.user_id))
-          const perfisComNome = outrosPerfis.map(p => ({
-            ...p,
-            associados: assocs?.find(a => a.user_id === p.user_id) || null
-          }))
-          setPerfis(perfisComNome)
-        }
+        const { data: assocs } = await supabase
+          .from('associados')
+          .select('user_id, nome_completo, email, cpf')
+          .in('user_id', ps.map(p => p.user_id))
+        const perfisComNome = ps.map(p => ({
+          ...p,
+          associados: assocs?.find(a => a.user_id === p.user_id) || null
+        }))
+        perfisComNome.sort((a, b) => (a.associados?.nome_completo || '').localeCompare(b.associados?.nome_completo || ''))
+        setPerfis(perfisComNome)
       }
     }
     carregar()
@@ -81,6 +78,15 @@ export default function Configuracoes() {
     if (error) msg('Erro ao salvar: ' + error.message)
     else msg('Configurações salvas! ✅')
     setSalvando(false)
+  }
+
+  async function resetarSenha(email) {
+    if (!email) { msg('Este usuário não tem e-mail cadastrado.'); return }
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/'
+    })
+    if (error) msg('Erro ao enviar e-mail: ' + error.message)
+    else msg('E-mail de redefinição enviado para ' + email + ' ✅')
   }
 
   async function alterarPerfil(userId, novoPerfil) {
@@ -162,22 +168,36 @@ export default function Configuracoes() {
             {perfis.length === 0 ? (
               <p style={{ color:'#94a3b8', textAlign:'center' }}>Nenhum perfil configurado.</p>
             ) : perfis.map((p, i) => (
-              <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'12px 14px', background:'#f8fafc', borderRadius:8, marginBottom:8 }}>
-                <div>
-                  <p style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{p.associados?.nome_completo || '—'}</p>
-                  <p style={{ margin:0, fontSize:12, color:'#64748b' }}>{p.associados?.email}</p>
+              <div key={i} style={{ background:'#f8fafc', borderRadius:10, padding:'14px 16px', marginBottom:10, border:'1px solid #e2e8f0' }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8, flexWrap:'wrap' }}>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <p style={{ margin:'0 0 2px', fontWeight:700, color:'#1e293b', fontSize:14 }}>{p.associados?.nome_completo || '—'}</p>
+                    <p style={{ margin:'0 0 1px', fontSize:12, color:'#64748b' }}>CPF: {p.associados?.cpf || '—'}</p>
+                    <p style={{ margin:0, fontSize:12, color:'#64748b' }}>E-mail: {p.associados?.email || '—'}</p>
+                  </div>
+                  <select value={p.perfil} onChange={e => alterarPerfil(p.user_id, e.target.value)}
+                    style={{ padding:'6px 10px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:13, background:'#fff', cursor:'pointer', flexShrink:0 }}>
+                    <option value="Membro">Membro</option>
+                    <option value="Ritualística">Ritualística</option>
+                    <option value="Hospitalaria">Hospitalaria</option>
+                    <option value="Secretário">Secretário</option>
+                    <option value="Financeiro">Financeiro</option>
+                    <option value="Administrativo">Administrativo</option>
+                    <option value="Venerável Mestre">Venerável Mestre</option>
+                    <option value="Total">Total</option>
+                    <option value="ADM">ADM</option>
+                  </select>
                 </div>
-                <select value={p.perfil} onChange={e => alterarPerfil(p.user_id, e.target.value)}
-                  style={{ padding:'6px 10px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:13, background:'#fff', cursor:'pointer' }}>
-                  <option value="Membro">Membro</option>
-                  <option value="Ritualística">Ritualística</option>
-                  <option value="Hospitalaria">Hospitalaria</option>
-                  <option value="Financeiro">Financeiro</option>
-                  <option value="Administrativo">Administrativo</option>
-                  <option value="Total">Total</option>
-                  <option value="Venerável Mestre">Venerável Mestre</option>
-                  <option value="ADM">ADM (Técnico)</option>
-                </select>
+                <div style={{ display:'flex', gap:8, marginTop:10 }}>
+                  <button onClick={() => navigate('/perfil/' + p.user_id)}
+                    style={{ flex:1, padding:'6px 0', borderRadius:8, border:'1px solid #e2e8f0', background:'#fff', color:'#1a237e', fontSize:12, fontWeight:600, cursor:'pointer' }}>
+                    👤 Ver perfil
+                  </button>
+                  <button onClick={() => resetarSenha(p.associados?.email)}
+                    style={{ flex:1, padding:'6px 0', borderRadius:8, border:'none', background:'#fef3c7', color:'#b45309', fontSize:12, fontWeight:600, cursor:'pointer' }}>
+                    🔑 Resetar senha
+                  </button>
+                </div>
               </div>
             ))}
           </div>
