@@ -21,6 +21,7 @@ export default function EditarPerfil() {
   const [associadoId, setAssociadoId] = useState(null)
 
   const [pessoal, setPessoal] = useState({ nome_completo:'', email:'', tel_celular:'', data_nascimento:'', nome_pai:'', nome_mae:'', profissao:'', empresa:'', estado_civil:'', data_casamento:'' })
+  const [cpf, setCpf] = useState('')
   const [endereco, setEndereco] = useState({ tipo:'residencial', logradouro:'', numero:'', complemento:'', bairro:'', cidade:'', uf:'', cep:'' })
   const [enderecoComercial, setEnderecoComercial] = useState({ logradouro:'', numero:'', complemento:'', bairro:'', cidade:'', uf:'', cep:'' })
   const [familiares, setFamiliares] = useState([])
@@ -43,6 +44,7 @@ export default function EditarPerfil() {
       if (assoc) {
         setAssociadoId(assoc.id)
         setPessoal({ nome_completo: assoc.nome_completo||'', email: assoc.email||'', tel_celular: assoc.tel_celular||'', data_nascimento: assoc.data_nascimento||'', nome_pai: assoc.nome_pai||'', nome_mae: assoc.nome_mae||'', profissao: assoc.profissao||'', empresa: assoc.empresa||'', estado_civil: assoc.estado_civil||'', data_casamento: assoc.data_casamento||'' })
+        setCpf(assoc.cpf || '')
         setBodes({ bodes_asfalto: assoc.bodes_asfalto||false, bodes_asfalto_numero: assoc.bodes_asfalto_numero||'', bodes_asfalto_data_admissao: assoc.bodes_asfalto_data_admissao||'', _eraBode: assoc.bodes_asfalto||false })
         const { data: fams } = await supabase.from('familiares').select('*').eq('associado_id', assoc.id)
         if (fams) setFamiliares(fams)
@@ -210,6 +212,12 @@ export default function EditarPerfil() {
               <div>
                 <Secao titulo="Dados Pessoais" />
                 <Input label="Nome completo" value={pessoal.nome_completo} onChange={v => setPessoal({...pessoal, nome_completo:v})} />
+                <div style={{ marginBottom:16 }}>
+                  <label style={{ display:'block', fontSize:11, fontWeight:600, color:'#94a3b8', textTransform:'uppercase', letterSpacing:1, marginBottom:4 }}>CPF</label>
+                  <input value={cpf || '—'} readOnly
+                    style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box', background:'#f8fafc', color:'#64748b', cursor:'not-allowed' }} />
+                  <p style={{ margin:'4px 0 0', fontSize:11, color:'#94a3b8' }}>O CPF não pode ser alterado — é seu identificador de acesso.</p>
+                </div>
                 <Input label="E-mail" value={pessoal.email} onChange={v => setPessoal({...pessoal, email:v})} />
                 <Input label="Telefone" value={pessoal.tel_celular} onChange={v => setPessoal({...pessoal, tel_celular:v})} />
                 <DateInput label="Data de nascimento" value={pessoal.data_nascimento} onChange={v => setPessoal({...pessoal, data_nascimento:v})} />

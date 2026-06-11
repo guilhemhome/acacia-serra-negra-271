@@ -329,7 +329,7 @@ export default function Dashboard() {
             { icon: '➕', label: 'Novo cadastro', rota: '/cadastro' },
             { icon: '👨‍⚖️', label: 'Ver membros', rota: '/membros' },
             { icon: '📅', label: 'Calendário', rota: '/calendario' },
-            { icon: '🎂', label: 'Aniversários', rota: '/calendario' },
+            { icon: '🎂', label: 'Aniversários', rota: '/calendario?aba=aniversarios' },
             { icon: '🗓️', label: 'Eventos', rota: '/calendario' },
             { icon: '⚙️', label: 'Configurações', rota: '/configuracoes' },
             { icon: '✏️', label: 'Meu perfil', rota: '/editar-perfil' },

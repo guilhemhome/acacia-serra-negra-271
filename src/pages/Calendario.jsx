@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { DateInput } from '../components/DateInput'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
@@ -52,6 +53,7 @@ function mesAtual() {
 
 export default function Calendario() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [eventos, setEventos] = useState([])
   const [aniversariantes, setAniversariantes] = useState([])
   const [familiares, setFamiliares] = useState([])
@@ -72,7 +74,7 @@ export default function Calendario() {
   const [erro, setErro] = useState('')
   const [justifAberta, setJustifAberta] = useState(null)
   const [textoJustif, setTextoJustif] = useState('')
-  const [aba, setAba] = useState('eventos') // 'eventos' | 'aniversarios'
+  const [aba, setAba] = useState(() => new URLSearchParams(location.search).get('aba') === 'aniversarios' ? 'aniversarios' : 'eventos')
 
   useEffect(() => { init() }, [])
   useEffect(() => { carregarEventos() }, [filtroMes])
