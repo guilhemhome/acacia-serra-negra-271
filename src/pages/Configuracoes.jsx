@@ -56,7 +56,7 @@ export default function Configuracoes() {
       if (ps && ps.length > 0) {
         const { data: assocs } = await supabase
           .from('associados')
-          .select('user_id, nome_completo, email, cpf')
+          .select('id, user_id, nome_completo, email, cpf')
           .in('user_id', ps.map(p => p.user_id))
         const perfisComNome = ps.map(p => ({
           ...p,
@@ -189,7 +189,7 @@ export default function Configuracoes() {
                   </select>
                 </div>
                 <div style={{ display:'flex', gap:8, marginTop:10 }}>
-                  <button onClick={() => navigate('/perfil/' + p.user_id)}
+                  <button onClick={() => p.associados?.id ? navigate('/perfil/' + p.associados.id) : msg('Associado sem perfil cadastrado.')}
                     style={{ flex:1, padding:'6px 0', borderRadius:8, border:'1px solid #e2e8f0', background:'#fff', color:'#1a237e', fontSize:12, fontWeight:600, cursor:'pointer' }}>
                     👤 Ver perfil
                   </button>
