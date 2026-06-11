@@ -249,7 +249,7 @@ export default function Dashboard() {
           </button>
 
           {podeVerAniv && (
-            <button onClick={() => navigate('/calendario')} style={card}>
+            <button onClick={() => navigate('/calendario?aba=aniversarios')} style={card}>
               {anivHoje > 0 && (
                 <span style={{ position: 'absolute', top: 10, right: 10, background: '#f59e0b', color: '#fff', fontSize: 10, fontWeight: 600, borderRadius: 20, padding: '2px 7px' }}>hoje</span>
               )}
