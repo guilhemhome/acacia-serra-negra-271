@@ -372,8 +372,8 @@ export default function Calendario() {
                             )}
                             <button
                               onClick={() => { setJustifAberta(ev.id); setTextoJustif('') }}
-                              style={{ fontSize:11, color:'#94a3b8', background:'none', border:'1px solid #e2e8f0', borderRadius:8, padding:'3px 10px', cursor:'pointer' }}>
-                              alterar
+                              style={{ fontSize:12, color:'#1a237e', background:'#e8eaf6', border:'none', borderRadius:8, padding:'4px 12px', cursor:'pointer', fontWeight:600 }}>
+                              ✏️ alterar
                             </button>
                           </div>
                         )}
