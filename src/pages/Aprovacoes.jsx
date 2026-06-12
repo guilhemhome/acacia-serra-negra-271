@@ -116,14 +116,21 @@ export default function Aprovacoes() {
             ) : (
               filtrados.map(c => (
                 <div key={c.id} style={{ background:'#f9fafb', borderRadius:12, padding:16, marginBottom:12, border:'1px solid #e5e7eb' }}>
-                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexWrap:'wrap', gap:8 }}>
-                    <div>
-                      <p style={{ fontWeight:700, fontSize:'1.1rem', margin:'0 0 4px' }}>{c.nome_completo}</p>
-                      <p style={{ color:'#6b7280', margin:'0 0 2px', fontSize:'0.9rem' }}>{c.email}</p>
-                      <p style={{ color:'#6b7280', margin:0, fontSize:'0.9rem' }}>{c.telefone}</p>
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexWrap:'wrap', gap:8, marginBottom:10 }}>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <p style={{ fontWeight:700, fontSize:'1.1rem', margin:'0 0 4px', color:'#1e293b' }}>{c.nome_completo}</p>
+                      <p style={{ color:'#6b7280', margin:'0 0 2px', fontSize:'0.85rem' }}>📧 {c.email || '—'}</p>
+                      <p style={{ color:'#6b7280', margin:'0 0 2px', fontSize:'0.85rem' }}>📱 {c.tel_celular || '—'}</p>
+                      <p style={{ color:'#6b7280', margin:'0 0 2px', fontSize:'0.85rem' }}>🪪 CPF: {c.cpf || '—'}</p>
+                      {c.data_nascimento && (
+                        <p style={{ color:'#6b7280', margin:'0 0 2px', fontSize:'0.85rem' }}>🎂 {c.data_nascimento.split('T')[0].split('-').reverse().join('/')}</p>
+                      )}
+                      {c.cidade && (
+                        <p style={{ color:'#6b7280', margin:0, fontSize:'0.85rem' }}>📍 {c.cidade}{c.uf ? ' — ' + c.uf : ''}</p>
+                      )}
                     </div>
                     {aba === 'Pendente' && (
-                      <div style={{ display:'flex', gap:8 }}>
+                      <div style={{ display:'flex', gap:8, flexShrink:0 }}>
                         <button onClick={() => aprovar(c)} disabled={processando === c.id}
                           style={{ padding:'10px 16px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#16a34a,#15803d)', color:'white', fontWeight:700, cursor:'pointer' }}>
                           ✓ Aprovar
@@ -133,6 +140,18 @@ export default function Aprovacoes() {
                           ✗ Rejeitar
                         </button>
                       </div>
+                    )}
+                  </div>
+                  <div style={{ display:'flex', gap:8, borderTop:'1px solid #e5e7eb', paddingTop:10 }}>
+                    <button onClick={() => navigate('/perfil/' + c.id)}
+                      style={{ flex:1, padding:'7px 0', borderRadius:8, border:'1px solid #e2e8f0', background:'#fff', color:'#1a237e', fontSize:13, fontWeight:600, cursor:'pointer' }}>
+                      👤 Ver perfil
+                    </button>
+                    {aba === 'Aprovado' && (
+                      <button onClick={() => navigate('/perfil/' + c.id)}
+                        style={{ flex:1, padding:'7px 0', borderRadius:8, border:'none', background:'#e0f2fe', color:'#0369a1', fontSize:13, fontWeight:600, cursor:'pointer' }}>
+                        ✏️ Editar cadastro
+                      </button>
                     )}
                   </div>
                 </div>
