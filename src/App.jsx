@@ -17,39 +17,39 @@ import Dashboard from './pages/Dashboard'
 import PortalMembro from './pages/PortalMembro'
 import Oficiais from './pages/Oficiais'
 
-const PERFIS_ADM = ['ADM', 'Total', 'Venerável Mestre', 'Administrativo', 'Financeiro', 'Hospitalaria', 'Ritualística']
-const PERFIS_GESTAO = ['ADM', 'Total', 'Venerável Mestre', 'Administrativo']
-const PERFIS_CARGOS = ['ADM', 'Venerável Mestre']
+const PERFIS_MEMBRO = ['Membro', 'Ritualística', 'Hospitalaria']
 
-function RotaProtegida({ children, perfisPermitidos }) {
+function RotaProtegida({ children, modulo, apenasAdm }) {
   const [sessao, setSessao] = useState(undefined)
   const [perfil, setPerfil] = useState(undefined)
+  const [nivel, setNivel] = useState(undefined)
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data }) => {
-      setSessao(data.session)
-      if (data.session) {
-        const { data: p } = await supabase.from('perfis_acesso')
-          .select('perfil').eq('user_id', data.session.user.id).single()
-        setPerfil(p?.perfil || 'Membro')
-      } else {
-        setPerfil(null)
-      }
-    })
-    const { data: listener } = supabase.auth.onAuthStateChange(async (_e, s) => {
-      setSessao(s)
-      if (s) {
-        const { data: p } = await supabase.from('perfis_acesso')
-          .select('perfil').eq('user_id', s.user.id).single()
-        setPerfil(p?.perfil || 'Membro')
-      } else {
-        setPerfil(null)
-      }
-    })
-    return () => listener.subscription.unsubscribe()
-  }, [])
+    async function verificar() {
+      const { data: { session } } = await supabase.auth.getSession()
+      setSessao(session)
+      if (!session) { setPerfil(null); setNivel(null); return }
 
-  if (sessao === undefined || perfil === undefined) return (
+      const { data: p } = await supabase.from('perfis_acesso')
+        .select('perfil').eq('user_id', session.user.id).single()
+      const perfilAtual = p?.perfil || 'Membro'
+      setPerfil(perfilAtual)
+
+      if (perfilAtual === 'ADM') { setNivel('total'); return }
+
+      if (!modulo) { setNivel('total'); return }
+
+      const { data: perm } = await supabase.from('permissoes_perfil')
+        .select('nivel').eq('perfil', perfilAtual).eq('modulo', modulo).single()
+      setNivel(perm?.nivel || 'bloqueado')
+    }
+    verificar()
+
+    const { data: listener } = supabase.auth.onAuthStateChange(() => verificar())
+    return () => listener.subscription.unsubscribe()
+  }, [modulo])
+
+  if (sessao === undefined || perfil === undefined || nivel === undefined) return (
     <div style={{ minHeight:'100vh', background:'linear-gradient(135deg,#1a237e 0%,#283593 50%,#1565c0 100%)', display:'flex', alignItems:'center', justifyContent:'center' }}>
       <div style={{ color:'white', fontSize:'1.2rem' }}>Carregando...</div>
     </div>
@@ -57,9 +57,12 @@ function RotaProtegida({ children, perfisPermitidos }) {
 
   if (!sessao) return <Navigate to="/" replace />
 
-  if (perfisPermitidos && !perfisPermitidos.includes(perfil)) {
-    // Membro vai para portal, resto vai para dashboard
-    return <Navigate to={PERFIS_ADM.includes(perfil) ? '/dashboard' : '/membro'} replace />
+  if (apenasAdm && perfil !== 'ADM') {
+    return <Navigate to={PERFIS_MEMBRO.includes(perfil) ? '/membro' : '/dashboard'} replace />
+  }
+
+  if (modulo && nivel === 'bloqueado') {
+    return <Navigate to={PERFIS_MEMBRO.includes(perfil) ? '/membro' : '/dashboard'} replace />
   }
 
   return children
@@ -75,21 +78,23 @@ function App() {
         <Route path="/redefinir-senha" element={<RedefinirSenha />} />
 
         {/* Portal do Membro */}
-        <Route path="/membro" element={<RotaProtegida><PortalMembro /></RotaProtegida>} />
+        <Route path="/membro" element={<RotaProtegida modulo="/membro"><PortalMembro /></RotaProtegida>} />
         <Route path="/oficiais" element={<RotaProtegida><Oficiais /></RotaProtegida>} />
 
         {/* Rotas para todos os perfis logados */}
-        <Route path="/editar-perfil" element={<RotaProtegida><EditarPerfil /></RotaProtegida>} />
-        <Route path="/calendario" element={<RotaProtegida><Calendario /></RotaProtegida>} />
-        <Route path="/perfil/:id" element={<RotaProtegida><PerfilIrmao /></RotaProtegida>} />
+        <Route path="/editar-perfil" element={<RotaProtegida modulo="/editar-perfil"><EditarPerfil /></RotaProtegida>} />
+        <Route path="/calendario" element={<RotaProtegida modulo="/calendario"><Calendario /></RotaProtegida>} />
+        <Route path="/perfil/:id" element={<RotaProtegida modulo="/perfil/:id"><PerfilIrmao /></RotaProtegida>} />
 
-        {/* Rotas restritas a perfis ADM+ */}
-        <Route path="/dashboard" element={<RotaProtegida perfisPermitidos={PERFIS_ADM}><Dashboard /></RotaProtegida>} />
-        <Route path="/aprovacoes" element={<RotaProtegida perfisPermitidos={PERFIS_GESTAO}><Aprovacoes /></RotaProtegida>} />
-        <Route path="/membros" element={<RotaProtegida perfisPermitidos={PERFIS_ADM}><Membros /></RotaProtegida>} />
-        <Route path="/configuracoes" element={<RotaProtegida perfisPermitidos={PERFIS_GESTAO}><Configuracoes /></RotaProtegida>} />
-        <Route path="/templates-mensagens" element={<RotaProtegida perfisPermitidos={PERFIS_GESTAO}><TemplatesMensagens /></RotaProtegida>} />
-        <Route path="/gestao-cargos" element={<RotaProtegida perfisPermitidos={PERFIS_CARGOS}><GestaoCargos /></RotaProtegida>} />
+        {/* Rotas por permissao no banco */}
+        <Route path="/dashboard" element={<RotaProtegida modulo="/dashboard"><Dashboard /></RotaProtegida>} />
+        <Route path="/aprovacoes" element={<RotaProtegida modulo="/aprovacoes"><Aprovacoes /></RotaProtegida>} />
+        <Route path="/membros" element={<RotaProtegida modulo="/membros"><Membros /></RotaProtegida>} />
+        <Route path="/templates-mensagens" element={<RotaProtegida modulo="/templates-mensagens"><TemplatesMensagens /></RotaProtegida>} />
+        <Route path="/gestao-cargos" element={<RotaProtegida apenasAdm><GestaoCargos /></RotaProtegida>} />
+
+        {/* Configuracoes somente ADM */}
+        <Route path="/configuracoes" element={<RotaProtegida apenasAdm><Configuracoes /></RotaProtegida>} />
       </Routes>
     </BrowserRouter>
   )
