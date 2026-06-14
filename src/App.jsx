@@ -41,15 +41,12 @@ function RotaProtegida({ children, modulo, apenasAdm }) {
         setNivel(perm?.nivel || 'bloqueado')
       } catch(e) {
         console.error('RotaProtegida erro:', e.message)
-        setSessao(s => s === undefined ? null : s)
-        setPerfil(p => p === undefined ? 'Membro' : p)
-        setNivel(n => n === undefined ? 'bloqueado' : n)
+        setSessao(null)
+        setPerfil(null)
+        setNivel(null)
       }
     }
     verificar()
-
-    const { data: listener } = supabase.auth.onAuthStateChange(() => verificar())
-    return () => listener.subscription.unsubscribe()
   }, [modulo])
 
   if (sessao === undefined || perfil === undefined || nivel === undefined) return (
