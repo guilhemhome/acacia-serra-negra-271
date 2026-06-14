@@ -68,6 +68,16 @@ export default function Configuracoes() {
         perfisComNome.sort((a, b) => (a.associados?.nome_completo || '').localeCompare(b.associados?.nome_completo || ''))
         setPerfis(perfisComNome)
       }
+
+      const { data: perms } = await supabase.from('permissoes_perfil').select('*')
+      if (perms) {
+        const map = {}
+        perms.forEach(p => {
+          if (!map[p.perfil]) map[p.perfil] = {}
+          map[p.perfil][p.modulo] = p.nivel
+        })
+        setPermissoes(map)
+      }
     }
     carregar()
   }, [])
