@@ -82,10 +82,10 @@ export default function Calendario() {
   async function init() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) return
-    const { data: p } = await supabase.from('perfis_acesso').select('perfil').eq('user_id', session.user.id).single()
+    const { data: p } = await supabase.from('perfis_acesso').select('perfil').eq('user_id', session.user.id).maybeSingle()
     const perfilAtual = p?.perfil || 'membro'
     setPerfil(perfilAtual)
-    const { data: assoc } = await supabase.from('associados').select('id, grau:historico_graus(grau)').eq('user_id', session.user.id).single()
+    const { data: assoc } = await supabase.from('associados').select('id, grau:historico_graus(grau)').eq('user_id', session.user.id).maybeSingle()
     let aid = null
     let grauAtual = 'aprendiz'
     if (assoc) {

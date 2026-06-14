@@ -40,7 +40,7 @@ export default function EditarPerfil() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { navigate('/'); return }
       const uid = session.user.id
-      const { data: assoc } = await supabase.from('associados').select('*').eq('user_id', uid).single()
+      const { data: assoc } = await supabase.from('associados').select('*').eq('user_id', uid).maybeSingle()
       if (assoc) {
         setAssociadoId(assoc.id)
         setPessoal({ nome_completo: assoc.nome_completo||'', email: assoc.email||'', tel_celular: assoc.tel_celular||'', data_nascimento: assoc.data_nascimento||'', nome_pai: assoc.nome_pai||'', nome_mae: assoc.nome_mae||'', profissao: assoc.profissao||'', empresa: assoc.empresa||'', estado_civil: assoc.estado_civil||'', data_casamento: assoc.data_casamento||'' })

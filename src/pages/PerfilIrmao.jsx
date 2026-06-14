@@ -21,10 +21,10 @@ export default function PerfilIrmao() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { navigate('/'); return }
       const userId = session.user.id
-      const { data: perfilLogado } = await supabase.from('perfis_acesso').select('perfil').eq('user_id', userId).single()
+      const { data: perfilLogado } = await supabase.from('perfis_acesso').select('perfil').eq('user_id', userId).maybeSingle()
       if (perfilLogado?.perfil === 'ADM') setIsAdm(true)
       const [{ data: a }, { data: f }, { data: e }, { data: g }] = await Promise.all([
-        supabase.from('associados').select('*').eq('id', id).single(),
+        supabase.from('associados').select('*').eq('id', id).maybeSingle(),
         supabase.from('familiares').select('*').eq('associado_id', id),
         supabase.from('enderecos').select('*').eq('associado_id', id),
         supabase.from('historico_graus').select('*').eq('associado_id', id).order('data_concessao'),

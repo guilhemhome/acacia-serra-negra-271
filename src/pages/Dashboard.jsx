@@ -81,7 +81,7 @@ export default function Dashboard() {
       { data: fams }
     ] = await Promise.all([
       supabase.from('perfis_acesso').select('perfil').eq('user_id', user.id).maybeSingle(),
-      supabase.from('associados').select('nome_completo, id_acacia, email, grau:historico_graus(grau)').eq('user_id', user.id).single(),
+      supabase.from('associados').select('nome_completo, id_acacia, email, grau:historico_graus(grau)').eq('user_id', user.id).maybeSingle(),
       supabase.from('associados').select('*', { count: 'exact', head: true }).eq('status_cadastro', 'aprovado').eq('situacao', 'ativo'),
       supabase.from('associados').select('*', { count: 'exact', head: true }).eq('status_cadastro', 'pendente'),
       supabase.from('eventos').select('*').eq('status', 'ativo').gte('data_evento', hojeStr()).order('data_evento').limit(10),

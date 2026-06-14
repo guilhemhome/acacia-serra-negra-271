@@ -43,9 +43,9 @@ export default function PortalMembro() {
     if (!user) { setCarregando(false); return }
 
     const { data: assoc } = await supabase.from('associados')
-      .select('id, nome_completo, bodes_asfalto, bodes_asfalto_numero, bodes_asfalto_data_admissao').eq('user_id', user.id).single()
+      .select('id, nome_completo, bodes_asfalto, bodes_asfalto_numero, bodes_asfalto_data_admissao').eq('user_id', user.id).maybeSingle()
     const { data: perfil } = await supabase.from('perfis_acesso')
-      .select('perfil').eq('user_id', user.id).single()
+      .select('perfil').eq('user_id', user.id).maybeSingle()
 
     setUsuario({ nome: assoc?.nome_completo || user.email.split('@')[0], perfil: perfil?.perfil || 'Membro' })
     setAssociadoId(assoc?.id || null)
