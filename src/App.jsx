@@ -31,7 +31,7 @@ function RotaProtegida({ children, modulo, apenasAdm }) {
       if (!session) { setPerfil(null); setNivel(null); return }
 
       const { data: p } = await supabase.from('perfis_acesso')
-        .select('perfil').eq('user_id', session.user.id).single()
+        .select('perfil').eq('user_id', session.user.id).maybeSingle()
       const perfilAtual = p?.perfil || 'Membro'
       setPerfil(perfilAtual)
 
