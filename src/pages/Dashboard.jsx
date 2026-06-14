@@ -328,14 +328,21 @@ export default function Dashboard() {
         <p style={sec}>Ações rápidas</p>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           {[
-            { icon: '👥', label: 'Aprovações', rota: '/aprovacoes' },
-            { icon: '➕', label: 'Novo cadastro', rota: '/cadastro' },
-            { icon: '👨‍⚖️', label: 'Ver membros', rota: '/membros' },
-            { icon: '📅', label: 'Calendário', rota: '/calendario' },
-            { icon: '🎂', label: 'Aniversários', rota: '/calendario?aba=aniversarios' },
-            { icon: '🗓️', label: 'Eventos', rota: '/calendario' },
-            { icon: '⚙️', label: 'Configurações', rota: '/configuracoes' },
-            { icon: '✏️', label: 'Meu perfil', rota: '/editar-perfil' },
+            ...(usuario.perfil === 'ADM' ? [
+              { icon: '👥', label: 'Aprovações', rota: '/aprovacoes' },
+              { icon: '➕', label: 'Novo cadastro', rota: '/cadastro' },
+              { icon: '👨‍⚖️', label: 'Ver membros', rota: '/membros' },
+              { icon: '📅', label: 'Calendário', rota: '/calendario' },
+              { icon: '🎂', label: 'Aniversários', rota: '/calendario?aba=aniversarios' },
+              { icon: '🗓️', label: 'Eventos', rota: '/calendario' },
+              { icon: '⚙️', label: 'Configurações', rota: '/configuracoes' },
+              { icon: '✏️', label: 'Meu perfil', rota: '/editar-perfil' },
+            ] : [
+              { icon: '👥', label: 'Aprovações', rota: '/aprovacoes' },
+              { icon: '👨‍⚖️', label: 'Ver membros', rota: '/membros' },
+              { icon: '📅', label: 'Calendário', rota: '/calendario' },
+              { icon: '✏️', label: 'Meu perfil', rota: '/editar-perfil' },
+            ]),
           ].map(a => (
             <button key={a.rota} onClick={() => navigate(a.rota)}
               style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: 'rgba(255,255,255,0.95)', border: '1px solid #e2e8f0', borderRadius: 12, cursor: 'pointer', fontSize: 14, color: '#1e293b', fontWeight: 500, minHeight: 44 }}>
