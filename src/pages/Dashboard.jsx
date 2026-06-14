@@ -30,6 +30,7 @@ export default function Dashboard() {
   useEffect(() => { buscarTudo() }, [])
 
   async function buscarTudo() {
+    console.log('buscarTudo iniciado')
     // Verificar cache
     try {
       const raw = sessionStorage.getItem(CACHE_KEY)
@@ -131,6 +132,8 @@ export default function Dashboard() {
 
     } catch(queryErr) {
       console.error('Erro ao carregar dashboard:', queryErr)
+      alert('Erro: ' + queryErr.message)
+      setCarregando(false)
     } finally {
       setCarregando(false)
     }
