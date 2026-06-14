@@ -249,6 +249,7 @@ export default function Calendario() {
     setModal(null); carregarEventos()
   }
 
+  const isAdm = perfil === 'ADM' || perfil === 'Secretário'
   const podeEnviarWhatsApp = ['ADM', 'Secretário', 'Venerável Mestre'].includes(perfil)
   const hj = hoje()
   const proximos = eventos.filter(e => e.data_evento >= hj && e.status === 'ativo')
@@ -486,15 +487,10 @@ export default function Calendario() {
                       <p style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{a.nome_completo}</p>
                       <p style={{ margin:0, fontSize:12, color:'#64748b' }}>Dia {d}/{m}</p>
                     </div>
-                    {podeEnviarWhatsApp && (
-                    <a href={`https://wa.me/55${(a.tel_celular||'').replace(/\D/g,'')}?text=${encodeURIComponent(tplIrmao.replace('{nome}', a.nome_completo).replace('{loja}','Acácia de Serra Negra Nº 271'))}`} target="_blank" rel="noreferrer"
+                    {podeEnviarWhatsApp && (<a href={`https://wa.me/55${(a.tel_celular||'').replace(/\D/g,'')}?text=${encodeURIComponent(tplIrmao.replace('{nome}', a.nome_completo).replace('{loja}','Acácia de Serra Negra Nº 271'))}`} target="_blank" rel="noreferrer"
                       style={{ background:'#25d366', color:'#fff', borderRadius:8, padding:'6px 12px', fontSize:12, fontWeight:700, textDecoration:'none' }}>
                       WhatsApp
-                    </a>
-                    )}
-                      style={{ background:'#25d366', color:'#fff', borderRadius:8, padding:'6px 12px', fontSize:12, fontWeight:700, textDecoration:'none' }}>
-                      WhatsApp
-                    </a>
+                    </a>)}
                   </div>
                 )
               })}
@@ -514,15 +510,10 @@ export default function Calendario() {
                       <p style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{f.nome}</p>
                       <p style={{ margin:0, fontSize:12, color:'#64748b' }}>{f.parentesco} do Ir. {f.associados?.nome_completo} — Dia {d}/{m}</p>
                     </div>
-                    {podeEnviarWhatsApp && (
-                    <a href={`https://wa.me/55${(Array.isArray(f.associados) ? f.associados[0]?.tel_celular : f.associados?.tel_celular||'').replace(/\D/g,'')}?text=${encodeURIComponent(tplDependente.replace('{nome_irmao}', Array.isArray(f.associados)?f.associados[0]?.nome_completo:f.associados?.nome_completo||'').replace('{parentesco}',f.parentesco||'').replace('{nome_dependente}',f.nome||'').replace('{loja}','Acácia de Serra Negra Nº 271'))}`} target="_blank" rel="noreferrer"
+                    {podeEnviarWhatsApp && (<a href={`https://wa.me/55${(Array.isArray(f.associados) ? f.associados[0]?.tel_celular : f.associados?.tel_celular||'').replace(/\D/g,'')}?text=${encodeURIComponent(tplDependente.replace('{nome_irmao}', Array.isArray(f.associados)?f.associados[0]?.nome_completo:f.associados?.nome_completo||'').replace('{parentesco}',f.parentesco||'').replace('{nome_dependente}',f.nome||'').replace('{loja}','Acácia de Serra Negra Nº 271'))}`} target="_blank" rel="noreferrer"
                       style={{ background:'#25d366', color:'#fff', borderRadius:8, padding:'6px 12px', fontSize:12, fontWeight:700, textDecoration:'none' }}>
                       WhatsApp
-                    </a>
-                    )}
-                      style={{ background:'#25d366', color:'#fff', borderRadius:8, padding:'6px 12px', fontSize:12, fontWeight:700, textDecoration:'none' }}>
-                      WhatsApp
-                    </a>
+                    </a>)}
                   </div>
                 )
               })}
@@ -543,15 +534,10 @@ export default function Calendario() {
                       <p style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{a.nome_completo}</p>
                       <p style={{ margin:0, fontSize:12, color:'#64748b' }}>Dia {d}/{m} — {anos} {anos === 1 ? 'ano' : 'anos'} de união</p>
                     </div>
-                    {podeEnviarWhatsApp && (
-                    <a href={`https://wa.me/55${(a.tel_celular||'').replace(/\D/g,'')}?text=${encodeURIComponent('🌿 A Loja Acácia de Serra Negra Nº 271 parabeniza o Ir∴ ' + a.nome_completo + ' e sua cunhada pelos ' + anos + ' anos de união! Que o G∴A∴D∴U∴ abençoe sempre a família! 💍')}`} target="_blank" rel="noreferrer"
+                    {podeEnviarWhatsApp && (<a href={`https://wa.me/55${(a.tel_celular||'').replace(/\D/g,'')}?text=${encodeURIComponent('🌿 A Loja Acácia de Serra Negra Nº 271 parabeniza o Ir∴ ' + a.nome_completo + ' e sua cunhada pelos ' + anos + ' anos de união! Que o G∴A∴D∴U∴ abençoe sempre a família! 💍')}`} target="_blank" rel="noreferrer"
                       style={{ background:'#25d366', color:'#fff', borderRadius:8, padding:'6px 12px', fontSize:12, fontWeight:700, textDecoration:'none' }}>
                       WhatsApp
-                    </a>
-                    )}
-                      style={{ background:'#25d366', color:'#fff', borderRadius:8, padding:'6px 12px', fontSize:12, fontWeight:700, textDecoration:'none' }}>
-                      WhatsApp
-                    </a>
+                    </a>)}
                   </div>
                 )
               })}
@@ -572,15 +558,10 @@ export default function Calendario() {
                       <p style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{item.nome}</p>
                       <p style={{ margin:0, fontSize:12, color:'#64748b' }}>{emoji} {item.tipo} — Dia {d}/{m} — {item.anos} {item.anos === 1 ? 'ano' : 'anos'}</p>
                     </div>
-                    {podeEnviarWhatsApp && (
-                    <a href={`https://wa.me/55${(item.tel_celular||'').replace(/\D/g,'')}?text=${encodeURIComponent(emoji + ' A Loja Acácia de Serra Negra Nº 271 saúda o Ir∴ ' + item.nome + ' pelos ' + item.anos + ' anos de ' + item.tipo + '! Que o G∴A∴D∴U∴ ilumine sempre sua jornada fraterna! ⚒️')}`} target="_blank" rel="noreferrer"
+                    {podeEnviarWhatsApp && (<a href={`https://wa.me/55${(item.tel_celular||'').replace(/\D/g,'')}?text=${encodeURIComponent(emoji + ' A Loja Acácia de Serra Negra Nº 271 saúda o Ir∴ ' + item.nome + ' pelos ' + item.anos + ' anos de ' + item.tipo + '! Que o G∴A∴D∴U∴ ilumine sempre sua jornada fraterna! ⚒️')}`} target="_blank" rel="noreferrer"
                       style={{ background:'#25d366', color:'#fff', borderRadius:8, padding:'6px 12px', fontSize:12, fontWeight:700, textDecoration:'none' }}>
                       WhatsApp
-                    </a>
-                    )}
-                      style={{ background:'#25d366', color:'#fff', borderRadius:8, padding:'6px 12px', fontSize:12, fontWeight:700, textDecoration:'none' }}>
-                      WhatsApp
-                    </a>
+                    </a>)}
                   </div>
                 )
               })}
