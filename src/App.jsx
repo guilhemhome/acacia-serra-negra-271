@@ -26,23 +26,25 @@ function RotaProtegida({ children, modulo, apenasAdm }) {
 
   useEffect(() => {
     async function verificar() {
-      const { data: { session } } = await supabase.auth.getSession()
-      setSessao(session)
-      if (!session) { setPerfil(null); setNivel(null); return }
-
-      const { data: p } = await supabase.from('perfis_acesso')
-        .select('perfil').eq('user_id', session.user.id).maybeSingle()
-      const perfilAtual = p?.perfil || 'Membro'
-      setPerfil(perfilAtual)
-
-      if (perfilAtual === 'ADM') { setNivel('total'); return }
-
-      if (!modulo) { setNivel('total'); return }
-
-      const { data: perm, error: permErr } = await supabase.from('permissoes_perfil')
-        .select('nivel').eq('perfil', perfilAtual).eq('modulo', modulo).maybeSingle()
-      if (permErr) console.error('permissoes_perfil erro:', permErr.message)
-      setNivel(perm?.nivel || 'bloqueado')
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        setSessao(session)
+        if (!session) { setPerfil(null); setNivel(null); return }
+        const { data: p } = await supabase.from('perfis_acesso')
+          .select('perfil').eq('user_id', session.user.id).maybeSingle()
+        const perfilAtual = p?.perfil || 'Membro'
+        setPerfil(perfilAtual)
+        if (perfilAtual === 'ADM') { setNivel('total'); return }
+        if (!modulo) { setNivel('total'); return }
+        const { data: perm } = await supabase.from('permissoes_perfil')
+          .select('nivel').eq('perfil', perfilAtual).eq('modulo', modulo).maybeSingle()
+        setNivel(perm?.nivel || 'bloqueado')
+      } catch(e) {
+        console.error('RotaProtegida erro:', e.message)
+        setSessao(s => s === undefined ? null : s)
+        setPerfil(p => p === undefined ? 'Membro' : p)
+        setNivel(n => n === undefined ? 'bloqueado' : n)
+      }
     }
     verificar()
 
