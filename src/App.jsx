@@ -39,8 +39,9 @@ function RotaProtegida({ children, modulo, apenasAdm }) {
 
       if (!modulo) { setNivel('total'); return }
 
-      const { data: perm } = await supabase.from('permissoes_perfil')
-        .select('nivel').eq('perfil', perfilAtual).eq('modulo', modulo).single()
+      const { data: perm, error: permErr } = await supabase.from('permissoes_perfil')
+        .select('nivel').eq('perfil', perfilAtual).eq('modulo', modulo).maybeSingle()
+      if (permErr) console.error('permissoes_perfil erro:', permErr.message)
       setNivel(perm?.nivel || 'bloqueado')
     }
     verificar()
