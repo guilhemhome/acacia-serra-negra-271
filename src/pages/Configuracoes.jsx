@@ -26,6 +26,9 @@ export default function Configuracoes() {
   const [perfis, setPerfis] = useState([])
   const [mensagem, setMensagem] = useState('')
   const [salvando, setSalvando] = useState(false)
+  const [abaAtiva, setAbaAtiva] = useState('geral')
+  const [permissoes, setPermissoes] = useState({})
+  const [salvandoPerm, setSalvandoPerm] = useState(false)
 
   useEffect(() => {
     async function carregar() {
@@ -99,6 +102,45 @@ export default function Configuracoes() {
     }
   }
 
+  async function salvarPermissoes() {
+    setSalvandoPerm(true)
+    const entradas = []
+    Object.entries(permissoes).forEach(([perfil, modulos]) => {
+      Object.entries(modulos).forEach(([modulo, nivel]) => {
+        entradas.push({ perfil, modulo, nivel })
+      })
+    })
+    const { error } = await supabase.from('permissoes_perfil')
+      .upsert(entradas, { onConflict: 'perfil,modulo' })
+    if (error) msg('Erro ao salvar permissoes: ' + error.message)
+    else msg('Permissoes salvas!')
+    setSalvandoPerm(false)
+  }
+
+  function alterarNivel(perfil, modulo, nivel) {
+    setPermissoes(prev => ({
+      ...prev,
+      [perfil]: { ...prev[perfil], [modulo]: nivel }
+    }))
+  }
+
+
+  const MODULOS = [
+    { chave: '/dashboard', nome: 'Dashboard' },
+    { chave: '/membros', nome: 'Lista de Membros' },
+    { chave: '/perfil/:id', nome: 'Perfil do Irmão' },
+    { chave: 'presencas', nome: 'Presenças (painel)' },
+    { chave: '/aprovacoes', nome: 'Aprovações' },
+    { chave: '/calendario', nome: 'Calendário' },
+    { chave: '/configuracoes', nome: 'Configurações' },
+    { chave: '/membro', nome: 'Portal do Membro' },
+    { chave: '/templates-mensagens', nome: 'Templates Mensagens' },
+    { chave: '/editar-perfil', nome: 'Editar Perfil' },
+  ]
+  const PERFIS_EDITAVEIS = ['Venerável Mestre','Secretário','Financeiro','Administrativo','Membro','Ritualística','Hospitalaria']
+  const COR_NIVEL = { total: '#16a34a', leitura: '#1d4ed8', bloqueado: '#dc2626' }
+  const BG_NIVEL = { total: '#dcfce7', leitura: '#dbeafe', bloqueado: '#fee2e2' }
+
   const StatCard = ({ label, valor, cor }) => (
     <div style={{ background: '#f8fafc', borderRadius: 12, padding: '16px 20px', textAlign: 'center', borderLeft: `4px solid ${cor}` }}>
       <p style={{ margin:0, fontSize: 32, fontWeight: 800, color: cor }}>{valor}</p>
@@ -124,6 +166,26 @@ export default function Configuracoes() {
             {mensagem}
           </div>
         )}
+
+          {/* Barra de abas */}
+          <div style={{ display:'flex', gap:8, marginBottom:16, flexWrap:'wrap' }}>
+            {[
+              { id:'geral', label:'Geral' },
+              { id:'usuarios', label:'Usuarios' },
+              { id:'permissoes', label:'Permissoes' },
+            ].map(aba => (
+              <button key={aba.id} onClick={() => setAbaAtiva(aba.id)}
+                style={{ padding:'10px 20px', borderRadius:10, border:'none', cursor:'pointer', fontWeight:600, fontSize:13,
+                  background: abaAtiva === aba.id ? '#fff' : 'rgba(255,255,255,0.15)',
+                  color: abaAtiva === aba.id ? '#1e40af' : '#fff',
+                  boxShadow: abaAtiva === aba.id ? '0 2px 8px rgba(0,0,0,0.15)' : 'none',
+                }}>
+                {aba.label}
+              </button>
+            ))}
+          </div>
+
+          {abaAtiva === 'geral' && <>
 
         {/* Estatísticas */}
         <div style={{ background:'#fff', borderRadius:16, overflow:'hidden', boxShadow:'0 8px 32px rgba(0,0,0,0.2)', marginBottom:16 }}>
@@ -210,14 +272,127 @@ export default function Configuracoes() {
             <p style={{ margin:'0 0 16px', fontWeight:700, color:'#4f46e5', fontSize:13, textTransform:'uppercase', letterSpacing:1 }}>Mensagens</p>
             <button onClick={() => navigate('/gestao-cargos')}
               style={{ width:'100%', padding:'12px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#1a237e,#283593)', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer', marginBottom:10 }}>
-              ⚒️ Gestão de Cargos
+              Gestao de Cargos
             </button>
             <button onClick={() => navigate('/templates-mensagens')}
               style={{ width:'100%', padding:'12px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#1e40af,#4f46e5)', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
-              ✉️ Editar Templates de Aniversário
+              Editar Templates de Aniversario
             </button>
           </div>
         </div>
+
+        </>}
+
+        {abaAtiva === 'usuarios' && <>
+        <div style={{ background:'#fff', borderRadius:16, overflow:'hidden', boxShadow:'0 8px 32px rgba(0,0,0,0.2)', marginBottom:16 }}>
+          <div style={{ height:4, background:'linear-gradient(90deg,#1e40af,#4f46e5,#7c3aed)' }} />
+          <div style={{ padding:24 }}>
+            <p style={{ margin:'0 0 16px', fontWeight:700, color:'#4f46e5', fontSize:13, textTransform:'uppercase', letterSpacing:1 }}>Perfis de Acesso</p>
+            {perfis.length === 0 ? (
+              <p style={{ color:'#94a3b8', textAlign:'center' }}>Nenhum perfil configurado.</p>
+            ) : perfis.map((p, i) => (
+              <div key={i} style={{ background:'#f8fafc', borderRadius:10, padding:'14px 16px', marginBottom:10, border:'1px solid #e2e8f0' }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8, flexWrap:'wrap' }}>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <p style={{ margin:'0 0 2px', fontWeight:700, color:'#1e293b', fontSize:14 }}>{p.associados?.nome_completo || '---'}</p>
+                    <p style={{ margin:'0 0 1px', fontSize:12, color:'#64748b' }}>CPF: {p.associados?.cpf || '---'}</p>
+                    <p style={{ margin:0, fontSize:12, color:'#64748b' }}>E-mail: {p.associados?.email || '---'}</p>
+                  </div>
+                  <select value={p.perfil} onChange={e => alterarPerfil(p.user_id, e.target.value)}
+                    style={{ padding:'6px 10px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:13, background:'#fff', cursor:'pointer', flexShrink:0 }}>
+                    <option value="Membro">Membro</option>
+                    <option value="Ritualistica">Ritualistica</option>
+                    <option value="Hospitalaria">Hospitalaria</option>
+                    <option value="Secretario">Secretario</option>
+                    <option value="Financeiro">Financeiro</option>
+                    <option value="Administrativo">Administrativo</option>
+                    <option value="Veneravel Mestre">Veneravel Mestre</option>
+                    <option value="Total">Total</option>
+                    <option value="ADM">ADM</option>
+                  </select>
+                </div>
+                <div style={{ display:'flex', gap:8, marginTop:10 }}>
+                  <button onClick={() => p.associados?.id ? navigate('/perfil/' + p.associados.id) : msg('Associado sem perfil cadastrado.')}
+                    style={{ flex:1, padding:'6px 0', borderRadius:8, border:'1px solid #e2e8f0', background:'#fff', color:'#1a237e', fontSize:12, fontWeight:600, cursor:'pointer' }}>
+                    Ver perfil
+                  </button>
+                  <button onClick={() => resetarSenha(p.associados?.email)}
+                    style={{ flex:1, padding:'6px 0', borderRadius:8, border:'none', background:'#fef3c7', color:'#b45309', fontSize:12, fontWeight:600, cursor:'pointer' }}>
+                    Resetar senha
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        </>}
+
+        {abaAtiva === 'permissoes' && (
+          <div style={{ background:'#fff', borderRadius:16, overflow:'hidden', boxShadow:'0 8px 32px rgba(0,0,0,0.2)', marginBottom:16 }}>
+            <div style={{ height:4, background:'linear-gradient(90deg,#1e40af,#4f46e5,#7c3aed)' }} />
+            <div style={{ padding:24 }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16, flexWrap:'wrap', gap:8 }}>
+                <p style={{ margin:0, fontWeight:700, color:'#4f46e5', fontSize:13, textTransform:'uppercase', letterSpacing:1 }}>Permissoes por Perfil</p>
+                <button onClick={salvarPermissoes} disabled={salvandoPerm}
+                  style={{ padding:'8px 18px', borderRadius:8, border:'none', background:'linear-gradient(135deg,#4f46e5,#7c3aed)', color:'#fff', fontWeight:700, fontSize:13, cursor:'pointer' }}>
+                  {salvandoPerm ? 'Salvando...' : 'Salvar Permissoes'}
+                </button>
+              </div>
+              <div style={{ overflowX:'auto' }}>
+                <table style={{ width:'100%', borderCollapse:'collapse', minWidth:750 }}>
+                  <thead>
+                    <tr style={{ background:'#1e293b' }}>
+                      <th style={{ padding:'10px 12px', textAlign:'left', color:'#fff', fontSize:12, fontWeight:600, minWidth:150 }}>Modulo</th>
+                      <th style={{ padding:'10px 8px', textAlign:'center', color:'#fff', fontSize:11, fontWeight:600, minWidth:70 }}>ADM</th>
+                      {PERFIS_EDITAVEIS.map(p => (
+                        <th key={p} style={{ padding:'10px 8px', textAlign:'center', color:'#fff', fontSize:11, fontWeight:600, minWidth:100, whiteSpace:'nowrap' }}>{p}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {MODULOS.map((mod, mi) => (
+                      <tr key={mod.chave} style={{ background: mi % 2 === 0 ? '#f8fafc' : '#fff', borderBottom:'1px solid #e2e8f0' }}>
+                        <td style={{ padding:'8px 12px', fontSize:13, fontWeight:500, color:'#1e293b' }}>{mod.nome}</td>
+                        <td style={{ padding:'6px 8px', textAlign:'center' }}>
+                          <span style={{ background:'#dcfce7', color:'#16a34a', padding:'3px 8px', borderRadius:6, fontSize:11, fontWeight:600 }}>Total</span>
+                        </td>
+                        {PERFIS_EDITAVEIS.map(perf => {
+                          const bloqueadoFixo = mod.chave === '/configuracoes'
+                          const nivel = bloqueadoFixo ? 'bloqueado' : (permissoes[perf]?.[mod.chave] || 'bloqueado')
+                          return (
+                            <td key={perf} style={{ padding:'5px 6px', textAlign:'center' }}>
+                              <select
+                                disabled={bloqueadoFixo}
+                                value={nivel}
+                                onChange={e => alterarNivel(perf, mod.chave, e.target.value)}
+                                style={{
+                                  width:'100%', padding:'4px', borderRadius:6, fontSize:11,
+                                  cursor: bloqueadoFixo ? 'not-allowed' : 'pointer',
+                                  border: '1.5px solid ' + COR_NIVEL[nivel],
+                                  background: BG_NIVEL[nivel],
+                                  color: COR_NIVEL[nivel],
+                                  fontWeight:600,
+                                  opacity: bloqueadoFixo ? 0.5 : 1,
+                                }}>
+                                <option value="total">Total</option>
+                                <option value="leitura">Leitura</option>
+                                <option value="bloqueado">Bloqueado</option>
+                              </select>
+                            </td>
+                          )
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p style={{ margin:'12px 0 0', fontSize:11, color:'#94a3b8', textAlign:'center' }}>
+                Configuracoes sempre bloqueado para nao-ADM.
+              </p>
+            </div>
+          </div>
+        )}
+
         <MonitorContexto />
       </div>
     </div>
