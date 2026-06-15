@@ -250,7 +250,7 @@ export default function Calendario() {
   }
 
   const isAdm = perfil === 'ADM' || perfil === 'Secretário'
-  const podeEnviarWhatsApp = ['ADM', 'Secretário', 'Venerável Mestre'].includes(perfil)
+  const podeEnviarWhatsApp = ['ADM', 'Chanceler'].includes(perfil)
   const hj = hoje()
   const proximos = eventos.filter(e => e.data_evento >= hj && e.status === 'ativo')
   const realizados = eventos.filter(e => e.status === 'realizado')

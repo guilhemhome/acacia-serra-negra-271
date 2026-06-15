@@ -147,7 +147,7 @@ export default function Aprovacoes() {
                       style={{ flex:1, padding:'7px 0', borderRadius:8, border:'1px solid #e2e8f0', background:'#fff', color:'#1a237e', fontSize:13, fontWeight:600, cursor:'pointer' }}>
                       👤 Ver perfil
                     </button>
-                    {aba === 'Aprovado' && (
+                    {(perfilLogado === 'ADM' || c.user_id === userIdLogado) && aba === 'Aprovado' && (
                       <button onClick={() => navigate('/perfil/' + c.id)}
                         style={{ flex:1, padding:'7px 0', borderRadius:8, border:'none', background:'#e0f2fe', color:'#0369a1', fontSize:13, fontWeight:600, cursor:'pointer' }}>
                         ✏️ Editar cadastro
