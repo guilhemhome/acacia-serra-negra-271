@@ -100,13 +100,6 @@ export default function GestaoCargos() {
     if (jaOcupa) {
       await supabase.from('cargos_historico').update({ em_exercicio: false, data_fim: formAtribuir.data_inicio }).eq('id', jaOcupa.id)
     }
-    const cargoAnteriorAssoc = exercicio.find(e => e.associado_id === formAtribuir.associado_id)
-    if (cargoAnteriorAssoc) {
-      await supabase.from('cargos_historico').update({ em_exercicio: false, data_fim: formAtribuir.data_inicio }).eq('id', cargoAnteriorAssoc.id)
-    }
-    // Garantia extra: desativar qualquer duplicata remanescente
-    await supabase.from('cargos_historico').update({ em_exercicio: false }).eq('cargo', cargo).eq('em_exercicio', true)
-    await supabase.from('cargos_historico').update({ em_exercicio: false }).eq('associado_id', formAtribuir.associado_id).eq('em_exercicio', true)
     await supabase.from('cargos_historico').insert({
       associado_id: formAtribuir.associado_id,
       cargo,
