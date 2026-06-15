@@ -73,18 +73,7 @@ export default function EditarPerfil() {
 
   async function salvarPessoal() {
     setSalvando(true)
-    const { error } = await supabase.from('associados').update({
-      nome_completo: pessoal.nome_completo,
-      apelido: pessoal.apelido || null,
-      tel_celular: pessoal.tel_celular,
-      data_nascimento: pessoal.data_nascimento || null,
-      nome_pai: pessoal.nome_pai,
-      nome_mae: pessoal.nome_mae,
-      profissao: pessoal.profissao,
-      empresa: pessoal.empresa,
-      estado_civil: pessoal.estado_civil,
-      data_casamento: pessoal.data_casamento || null
-    }).eq('id', associadoId)
+    const { error } = await supabase.from('associados').update(pessoal).eq('id', associadoId)
     if (error) msg('Erro ao salvar.')
     else msg('Dados pessoais salvos! ✅')
     setSalvando(false)
