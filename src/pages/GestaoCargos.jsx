@@ -56,7 +56,7 @@ export default function GestaoCargos() {
   async function init() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return navigate('/')
-    const { data: perfil } = await supabase.from('perfis_acesso').select('perfil').eq('user_id', user.id).single()
+    const { data: perfil } = await supabase.from('perfis_acesso').select('perfil').eq('user_id', user.id).maybeSingle()
     if (!perfil || !['ADM','Venerável Mestre'].includes(perfil.perfil)) { navigate('/dashboard'); return }
     setNivelAcesso(perfil.perfil)
     await garantirCargosIniciais()
@@ -108,7 +108,7 @@ export default function GestaoCargos() {
     })
     // Atualizar nível de acesso automaticamente
     const novoPerfil = CARGO_PERFIL[cargo] || 'Membro'
-    const { data: assocUser } = await supabase.from('associados').select('user_id').eq('id', formAtribuir.associado_id).single()
+    const { data: assocUser } = await supabase.from('associados').select('user_id').eq('id', formAtribuir.associado_id).maybeSingle()
     if (assocUser?.user_id) {
       await supabase.from('perfis_acesso').upsert({ user_id: assocUser.user_id, perfil: novoPerfil }, { onConflict: 'user_id' })
     }
@@ -128,7 +128,7 @@ export default function GestaoCargos() {
     if (cargoAnterior) await supabase.from('cargos_historico').update({ em_exercicio: false, data_fim: data_inicio }).eq('id', cargoAnterior.id)
     await supabase.from('cargos_historico').insert({ associado_id, cargo, data_inicio, em_exercicio: true })
     const novoPerfil = CARGO_PERFIL[cargo] || 'Membro'
-    const { data: assocUser } = await supabase.from('associados').select('user_id').eq('id', associado_id).single()
+    const { data: assocUser } = await supabase.from('associados').select('user_id').eq('id', associado_id).maybeSingle()
     if (assocUser?.user_id) await supabase.from('perfis_acesso').upsert({ user_id: assocUser.user_id, perfil: novoPerfil }, { onConflict: 'user_id' })
     setMsg('Cargo atribuido! Nivel de acesso: ' + novoPerfil)
     setAtribuindo(null)
