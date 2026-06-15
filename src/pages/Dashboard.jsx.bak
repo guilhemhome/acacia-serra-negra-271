@@ -9,7 +9,7 @@ export default function Dashboard() {
   const [resumoPresencas, setResumoPresencas] = useState(null)
   const [aniversarios, setAniversarios] = useState([])
   const [anivHoje, setAnivHoje] = useState(0)
-  const [usuario, setUsuario] = useState({ email: '', perfil: 'Membro', nome: '', apelido: '', cargoAtual: '' })
+  const [usuario, setUsuario] = useState({ email: '', perfil: 'Membro', nome: '' })
   const [grauUsuario, setGrauUsuario] = useState(null)
   const [carregando, setCarregando] = useState(true)
   const [templates, setTemplates] = useState({})
@@ -81,7 +81,7 @@ export default function Dashboard() {
       { data: fams }
     ] = await Promise.all([
       supabase.from('perfis_acesso').select('perfil').eq('user_id', user.id).maybeSingle(),
-      supabase.from('associados').select('nome_completo, apelido, id_acacia, email, grau:historico_graus(grau)').eq('user_id', user.id).maybeSingle(),
+      supabase.from('associados').select('nome_completo, id_acacia, email, grau:historico_graus(grau)').eq('user_id', user.id).maybeSingle(),
       supabase.from('associados').select('*', { count: 'exact', head: true }).eq('status_cadastro', 'aprovado').eq('situacao', 'ativo'),
       supabase.from('associados').select('*', { count: 'exact', head: true }).eq('status_cadastro', 'pendente'),
       supabase.from('eventos').select('*').eq('status', 'ativo').gte('data_evento', hojeStr()).order('data_evento').limit(10),
@@ -92,17 +92,11 @@ export default function Dashboard() {
 
     const perfil = p?.perfil || 'Membro'
     const nome = assoc?.nome_completo || user.email.split('@')[0]
-    const apelido = assoc?.apelido || nome.split(' ')[0]
     const graus = assoc?.grau || []
     const temMestre = graus.some(g => g.grau === 'mestre')
     const temCompanheiro = graus.some(g => g.grau === 'companheiro')
     const grau = temMestre ? 'mestre' : temCompanheiro ? 'companheiro' : 'aprendiz'
-    let cargoAtual = ''
-    if (assoc?.id) {
-      const { data: chDash } = await supabase.from('cargos_historico').select('cargo').eq('em_exercicio', true).eq('associado_id', assoc.id).maybeSingle()
-      cargoAtual = chDash?.cargo || ''
-    }
-    const usuarioObj = { email: user.email, perfil, nome, apelido, cargoAtual, id_acacia: assoc?.id_acacia || '', email_assoc: assoc?.email || user.email }
+    const usuarioObj = { email: user.email, perfil, nome, id_acacia: assoc?.id_acacia || '', email_assoc: assoc?.email || user.email }
     setGrauUsuario(grau)
     setUsuario(usuarioObj)
     setStats({ ativos: ativos || 0, pendentes: pendentes || 0 })
@@ -232,8 +226,9 @@ export default function Dashboard() {
           <button onClick={async () => { await supabase.auth.signOut(); navigate('/') }}
             style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: 8, color: '#fff', padding: '8px 12px', cursor: 'pointer', fontSize: 16, minWidth: 44, minHeight: 44 }}>↩</button>
           <img src="/logo-acacia.png" alt="Logo" style={{ width: 64, height: 64, borderRadius: '50%', border: '3px solid rgba(255,255,255,0.5)', objectFit: 'cover', display: 'block', margin: '0 auto 8px' }} />
-          <h1 style={{ color: '#fff', fontSize: '1.4rem', fontWeight: 500, margin: '0 0 2px' }}>Olá, {usuario.cargoAtual ? `${usuario.cargoAtual} ${usuario.apelido}` : usuario.apelido}</h1>
-          <p style={{ color:'rgba(255,255,255,0.75)', fontSize:12, margin:'0 0 1px' }}>{usuario.id_acacia ? `Nº ${usuario.id_acacia} · ` : ''}{usuario.email_assoc || usuario.email}</p>
+          <h1 style={{ color: '#fff', fontSize: '1.4rem', fontWeight: 500, margin: '0 0 2px' }}>Olá, {usuario.nome}</h1>
+          {usuario.id_acacia && <p style={{ color:'rgba(255,255,255,0.75)', fontSize:12, margin:'0 0 1px' }}>Nº {usuario.id_acacia}</p>}
+          <p style={{ color:'rgba(255,255,255,0.65)', fontSize:11, margin:0 }}>{usuario.email_assoc || usuario.email}</p>
           <p style={{ color: 'rgba(255,255,255,0.65)', margin: 0, fontSize: 13 }}>{labelPerfil} · Acácia de Serra Negra Nº 271</p>
         </div>
 
