@@ -12,16 +12,11 @@ export default function Aprovacoes() {
   const [carregando, setCarregando] = useState(true)
   const [mensagem, setMensagem] = useState('')
   const [processando, setProcessando] = useState(null)
-  const [perfilLogado, setPerfilLogado] = useState('')
-  const [userIdLogado, setUserIdLogado] = useState('')
 
   useEffect(() => {
     async function verificarLogin() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { navigate('/'); return }
-      setUserIdLogado(session.user.id)
-      const { data: p } = await supabase.from('perfis_acesso').select('perfil').eq('user_id', session.user.id).maybeSingle()
-      setPerfilLogado(p?.perfil || 'Membro')
       buscarCadastros()
     }
     verificarLogin()
