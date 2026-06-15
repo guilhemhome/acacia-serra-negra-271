@@ -85,7 +85,7 @@ export default function Dashboard() {
       supabase.from('associados').select('*', { count: 'exact', head: true }).eq('status_cadastro', 'aprovado').eq('situacao', 'ativo'),
       supabase.from('associados').select('*', { count: 'exact', head: true }).eq('status_cadastro', 'pendente'),
       supabase.from('eventos').select('*').eq('status', 'ativo').gte('data_evento', hojeStr()).order('data_evento').limit(10),
-      supabase.from('mensagens_templates').select('tipo, conteudo').in('tipo', ['aniversario_irmao_whatsapp', 'aniversario_dependente_whatsapp']),
+      supabase.from('mensagens_templates').select('tipo, conteudo').in('tipo', ['aniversario_irmao_whatsapp', 'aniversario_dependente_whatsapp']).then(r => ({ data: r.data, error: r.error })).catch(() => ({ data: [], error: null })),
       supabase.from('associados').select('nome_completo, data_nascimento, tel_celular').eq('status_cadastro', 'aprovado').eq('situacao', 'ativo'),
       supabase.from('familiares').select('nome, data_nascimento, parentesco, associados(nome_completo, tel_celular)').not('data_nascimento', 'is', null),
     ])
