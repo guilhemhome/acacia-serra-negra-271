@@ -26,6 +26,7 @@ export default function Dashboard() {
     return Math.ceil((new Date(a, m - 1, d) - hoje) / 86400000)
   }
 
+  const CACHE_KEY = 'dashboard_cache'
   const CACHE_TTL = 5 * 60 * 1000 // 5 minutos
 
   useEffect(() => { buscarTudo() }, [])
@@ -34,8 +35,6 @@ export default function Dashboard() {
     console.log('buscarTudo iniciado')
     // Verificar cache
     try {
-      const { data: { user: userCache } } = await supabase.auth.getUser()
-      const CACHE_KEY = 'dashboard_cache_' + (userCache?.id || 'anon')
       const raw = sessionStorage.getItem(CACHE_KEY)
       if (raw) {
         const { ts, dados } = JSON.parse(raw)
@@ -82,7 +81,6 @@ export default function Dashboard() {
       user = u
     } catch(e) {}
     if (!user) { setCarregando(false); return }
-    const CACHE_KEY = 'dashboard_cache_' + user.id
 
     try {
     // Paralelizar todas as queries independentes
