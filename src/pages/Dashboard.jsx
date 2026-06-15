@@ -98,13 +98,12 @@ export default function Dashboard() {
     const temCompanheiro = graus.some(g => g.grau === 'companheiro')
     const grau = temMestre ? 'mestre' : temCompanheiro ? 'companheiro' : 'aprendiz'
     let cargoAtual = ''
-    console.log('assoc.id para cargo:', assoc?.id)
     if (assoc?.id) {
-      const { data: chDash, error: errCargo } = await supabase.from('cargos_historico').select('cargo').eq('em_exercicio', true).eq('associado_id', assoc.id).maybeSingle()
-      console.log('chDash:', chDash, 'errCargo:', errCargo)
-      cargoAtual = chDash?.cargo || ''
+      try {
+        const { data: chDash } = await supabase.from('cargos_historico').select('cargo').eq('em_exercicio', true).eq('associado_id', assoc.id).maybeSingle()
+        cargoAtual = chDash?.cargo || ''
+      } catch(e) { cargoAtual = '' }
     }
-    console.log('cargoAtual:', cargoAtual)
     const usuarioObj = { email: user.email, perfil, nome, apelido, cargoAtual, id_acacia: assoc?.id_acacia || '', email_assoc: assoc?.email || user.email }
     setGrauUsuario(grau)
     setUsuario(usuarioObj)
