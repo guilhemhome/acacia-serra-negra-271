@@ -244,7 +244,6 @@ export default function Dashboard() {
   const primeiroNome = usuario.nome.split(' ')[0] || usuario.email.split('@')[0].split('.')[0]
   const labelPerfil = { 'ADM': 'Administrador', 'Venerável Mestre': 'Venerável Mestre', 'Administrativo': 'Administrativo', 'Financeiro': 'Tesoureiro', 'Hospitalaria': 'Hospitaleiro', 'Total': 'Acesso Total' }[usuario.perfil] || 'Membro'
   const podeVerAniv = ['ADM', 'Venerável Mestre', 'Administrativo', 'Total'].includes(usuario.perfil)
-  const podeVerFinanceiro = ['ADM', 'Venerável Mestre', 'Financeiro'].includes(usuario.perfil)
   const diasEvento = proximoEvento ? diasParaData(proximoEvento.data_evento) : null
   const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
   const TIPOS = { sessao_ordinaria: 'Sessão Ordinária', sessao_magna: 'Sessão Magna', sessao_administrativa: 'Sessão Administrativa', evento_social: 'Evento Social' }
@@ -393,31 +392,6 @@ export default function Dashboard() {
                 <p style={{ color:'#64748b', fontSize:13 }}>Lista de pendentes disponível no calendário.</p>
               )}
             </div>
-          </div>
-        )}
-
-        {/* Card Financeiro */}
-        {podeVerFinanceiro && (
-          <div style={{ background:'rgba(255,255,255,0.95)', borderRadius:16, padding:'14px 16px', marginBottom:20 }}>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
-              <p style={{ margin:0, fontSize:12, fontWeight:700, color:'#1a237e', textTransform:'uppercase', letterSpacing:'0.05em' }}>💰 Situação Financeira</p>
-              <span style={{ fontSize:10, background:'#f1f5f9', color:'#64748b', borderRadius:20, padding:'2px 8px', fontWeight:600 }}>Em breve</span>
-            </div>
-            <div style={{ display:'flex', gap:8 }}>
-              <div style={{ flex:1, textAlign:'center', background:'#e8f5e9', borderRadius:10, padding:'10px 4px' }}>
-                <div style={{ fontSize:22, fontWeight:800, color:'#2e7d32' }}>—</div>
-                <div style={{ fontSize:11, color:'#2e7d32' }}>Quites</div>
-              </div>
-              <div style={{ flex:1, textAlign:'center', background:'#ffebee', borderRadius:10, padding:'10px 4px' }}>
-                <div style={{ fontSize:22, fontWeight:800, color:'#c62828' }}>—</div>
-                <div style={{ fontSize:11, color:'#c62828' }}>Pendentes</div>
-              </div>
-              <div style={{ flex:1, textAlign:'center', background:'#fff8e1', borderRadius:10, padding:'10px 4px' }}>
-                <div style={{ fontSize:22, fontWeight:800, color:'#f59e0b' }}>—</div>
-                <div style={{ fontSize:11, color:'#f59e0b' }}>Em atraso</div>
-              </div>
-            </div>
-            <p style={{ margin:'10px 0 0', fontSize:11, color:'#94a3b8', textAlign:'center' }}>Módulo financeiro em desenvolvimento</p>
           </div>
         )}
 
