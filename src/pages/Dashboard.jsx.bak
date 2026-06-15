@@ -50,23 +50,16 @@ export default function Dashboard() {
           setCarregando(false)
           // Buscar presencas sempre ao vivo (nao cachear)
           if (proximoEvento) {
-            Promise.all([
-              supabase.from('eventos_presencas').select('resposta, justificativa, associados(id, nome_completo, apelido)').eq('evento_id', proximoEvento.id),
-              supabase.from('cargos_historico').select('associado_id, cargo').eq('em_exercicio', true)
-            ]).then(([{ data: pres }, { data: cargosAtivos }]) => {
-                const cargoMap = {}
-                ;(cargosAtivos||[]).forEach(c => { cargoMap[c.associado_id] = c.cargo })
-                function nomeModal(p) {
-                  const assoc = p.associados
-                  const apelido = assoc?.apelido || assoc?.nome_completo?.split(' ')[0] || '?'
-                  const cargo = cargoMap[assoc?.id]
-                  return cargo ? `${cargo} ${apelido}` : `Ir\u2234 ${apelido}`
-                }
+            supabase.from('eventos_presencas')
+              .select('resposta, justificativa, associados(nome_completo, apelido)').eq('evento_id', proximoEvento.id)
+              .then(({ data: pres }) => {
                 const confirmados = (pres||[]).filter(p => p.resposta === 'presente').length
                 const ausentes = (pres||[]).filter(p => p.resposta === 'ausente').length
                 setResumoPresencas({ confirmados, ausentes, total: stats.ativos || 0 })
-                const confList = (pres||[]).filter(p => p.resposta === 'presente').map(p => ({ nome: nomeModal(p) }))
-                const ausList = (pres||[]).filter(p => p.resposta === 'ausente').map(p => ({ nome: nomeModal(p), motivo: p.justificativa || '' }))
+                const todosAtivos = stats.ativos || 0
+                const presMap = pres || []
+                const confList = presMap.filter(p => p.resposta === 'presente').map(p => ({ nome: p.associados?.apelido || p.associados?.nome_completo || '?' }))
+                const ausList = presMap.filter(p => p.resposta === 'ausente').map(p => ({ nome: p.associados?.apelido || p.associados?.nome_completo || '?', motivo: p.justificativa || '' }))
                 setListaPresencas({ confirmados: confList, ausentes: ausList, pendentes: [] })
               })
           }
@@ -136,22 +129,13 @@ export default function Dashboard() {
     // Buscar resumo de presencas do proximo evento
     if (proxEvento) {
       const { data: pres } = await supabase.from('eventos_presencas')
-        .select('resposta, justificativa, associados(id, nome_completo, apelido)')
+        .select('resposta, justificativa, associados(nome_completo, apelido)')
         .eq('evento_id', proxEvento.id)
-      const { data: cargosAtivos } = await supabase.from('cargos_historico').select('associado_id, cargo').eq('em_exercicio', true)
-      const cargoMap = {}
-      ;(cargosAtivos||[]).forEach(c => { cargoMap[c.associado_id] = c.cargo })
-      function nomeModal(p) {
-        const assoc = p.associados
-        const apelido = assoc?.apelido || assoc?.nome_completo?.split(' ')[0] || '?'
-        const cargo = cargoMap[assoc?.id]
-        return cargo ? `${cargo} ${apelido}` : `Ir\u2234 ${apelido}`
-      }
       const confirmados = (pres||[]).filter(p => p.resposta === 'presente').length
       const ausentes = (pres||[]).filter(p => p.resposta === 'ausente').length
       setResumoPresencas({ confirmados, ausentes, total: ativos || 0 })
-      const confList = (pres||[]).filter(p => p.resposta === 'presente').map(p => ({ nome: nomeModal(p) }))
-      const ausList = (pres||[]).filter(p => p.resposta === 'ausente').map(p => ({ nome: nomeModal(p), motivo: p.justificativa || '' }))
+      const confList = (pres||[]).filter(p => p.resposta === 'presente').map(p => ({ nome: p.associados?.apelido || p.associados?.nome_completo || '?' }))
+      const ausList = (pres||[]).filter(p => p.resposta === 'ausente').map(p => ({ nome: p.associados?.apelido || p.associados?.nome_completo || '?', motivo: p.justificativa || '' }))
       setListaPresencas({ confirmados: confList, ausentes: ausList, pendentes: [] })
     }
 
