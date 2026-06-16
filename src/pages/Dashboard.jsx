@@ -167,8 +167,8 @@ export default function Dashboard() {
     setAnivHoje(anivData.anivHoje)
     setAniversarios(anivData.lista)
 
-    // Salvar cache
-    try {
+    // Cache gravação desabilitada
+    if (false) try {
       sessionStorage.setItem(CACHE_KEY, JSON.stringify({
         ts: Date.now(),
         dados: { usuario: usuarioObj, grau, stats: { ativos: ativos || 0, pendentes: pendentes || 0 }, proximoEvento: proxEvento, templates: tObj, aniversarios: anivData.lista, anivHoje: anivData.anivHoje }
