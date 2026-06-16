@@ -40,7 +40,7 @@ export default function Dashboard() {
       const raw = sessionStorage.getItem(CACHE_KEY)
       if (raw) {
         const { ts, dados } = JSON.parse(raw)
-        if (false) { // cache desabilitado
+        if (Date.now() - ts < CACHE_TTL && dados.usuario?.cargoAtual !== undefined) {
           const { usuario, grau, stats, proximoEvento, templates, aniversarios, anivHoje } = dados
           setUsuario(usuario)
           setGrauUsuario(grau)
