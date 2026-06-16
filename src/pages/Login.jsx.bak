@@ -33,7 +33,7 @@ export default function Login() {
       }
       // Buscar email pelo CPF
       const { data: assocData, error: assocErr } = await supabase
-        .from('associados').select('id, email, user_id').eq('cpf', cpfLimpo).maybeSingle()
+        .from('associados').select('id, email, user_id').eq('cpf', cpfLimpo).single()
       if (assocErr || !assocData?.email) {
         setErro('CPF não encontrado.')
         setCarregando(false)
