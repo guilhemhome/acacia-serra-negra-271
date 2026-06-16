@@ -24,7 +24,7 @@ const GRUPOS_CARGOS = [
 const CARGO_PERFIL = {
   'Venerável Mestre': 'Venerável Mestre',
   'Tesoureiro': 'Financeiro',
-  'Secretário': 'Secretário',
+  'Secretário': 'Administrativo',
   'Chanceler': 'Administrativo',
   'Hospitaleiro': 'Hospitalaria',
   '1º Vigilante': 'Ritualística',
