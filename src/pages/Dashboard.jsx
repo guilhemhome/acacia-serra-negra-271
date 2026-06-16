@@ -29,7 +29,7 @@ export default function Dashboard() {
   const CACHE_TTL = 5 * 60 * 1000 // 5 minutos
 
   const iniciado = useRef(false)
-  useEffect(() => { if (!iniciado.current) { iniciado.current = true; buscarTudo() } }, [])
+  useEffect(() => { if (!iniciado.current) { iniciado.current = true; sessionStorage.clear(); buscarTudo() } }, [])
 
   async function buscarTudo() {
     console.log('buscarTudo iniciado')
