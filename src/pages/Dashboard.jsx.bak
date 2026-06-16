@@ -167,19 +167,23 @@ export default function Dashboard() {
     setAnivHoje(anivData.anivHoje)
     setAniversarios(anivData.lista)
 
+    } catch(queryErr) {
+      console.error('Erro ao carregar dashboard:', queryErr)
+      alert('Erro: ' + queryErr.message)
+      setCarregando(false)
+    } finally {
+      setCarregando(false)
+    }
+
     // Salvar cache
-    try {
+    try { // inner try para cache
       sessionStorage.setItem(CACHE_KEY, JSON.stringify({
         ts: Date.now(),
         dados: { usuario: usuarioObj, grau, stats: { ativos: ativos || 0, pendentes: pendentes || 0 }, proximoEvento: proxEvento, templates: tObj, aniversarios: anivData.lista, anivHoje: anivData.anivHoje }
       }))
     } catch(e) {}
 
-    } catch(queryErr) {
-      console.error('Erro ao carregar dashboard:', queryErr)
-    } finally {
-      setCarregando(false)
-    }
+    setCarregando(false)
   }
 
   function processarAniversarios(irmaos, fams) {
