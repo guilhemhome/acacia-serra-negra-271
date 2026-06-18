@@ -97,7 +97,7 @@ export default function Dashboard() {
       { data: irmaos },
       { data: fams }
     ] = await Promise.all([
-      supabase.from('perfis_acesso').select('perfil, is_admin').eq('user_id', user.id).maybeSingle(),
+      supabase.from('perfis_acesso').select('perfil').eq('user_id', user.id).maybeSingle(),
       supabase.from('associados').select('id, nome_completo, apelido, id_acacia, email, grau:historico_graus(grau)').eq('user_id', user.id).maybeSingle(),
       supabase.from('associados').select('*', { count: 'exact', head: true }).eq('status_cadastro', 'aprovado').eq('situacao', 'ativo'),
       supabase.from('associados').select('*', { count: 'exact', head: true }).eq('status_cadastro', 'pendente'),
@@ -107,7 +107,7 @@ export default function Dashboard() {
       supabase.from('familiares').select('nome, data_nascimento, parentesco, associados(nome_completo, tel_celular)').not('data_nascimento', 'is', null),
     ])
 
-    const perfil = p?.is_admin === true ? 'ADM' : (p?.perfil || 'Membro')
+    const perfil = p?.perfil || 'Membro'
     const nome = assoc?.nome_completo || user.email.split('@')[0]
     const apelido = assoc?.apelido || nome.split(' ')[0]
     const graus = assoc?.grau || []
