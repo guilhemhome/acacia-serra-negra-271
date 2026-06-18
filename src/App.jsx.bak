@@ -30,50 +30,9 @@ function RotaProtegida({ children, modulo, apenasAdm }) {
         const { data: { session } } = await supabase.auth.getSession()
         setSessao(session)
         if (!session) { setPerfil(null); setNivel(null); return }
-
-        // Buscar perfil de perfis_acesso
         const { data: p } = await supabase.from('perfis_acesso')
           .select('perfil').eq('user_id', session.user.id).maybeSingle()
-        let perfilAtual = p?.perfil || 'Membro'
-
-        // Se não é ADM, verificar se tem cargo ativo em cargos_historico
-        // e sincronizar com perfis_acesso se necessário
-        if (perfilAtual !== 'ADM') {
-          const { data: assoc } = await supabase.from('associados')
-            .select('id').eq('user_id', session.user.id).maybeSingle()
-          if (assoc?.id) {
-            const { data: cargo } = await supabase.from('cargos_historico')
-              .select('cargo').eq('associado_id', assoc.id).eq('em_exercicio', true).maybeSingle()
-            if (cargo?.cargo) {
-              // Cargo ativo encontrado — usar como perfil
-              const cargoMap = {
-                'Venerável Mestre': 'Venerável Mestre',
-                'Secretário': 'Secretário',
-                'Tesoureiro': 'Financeiro',
-                'Chanceler': 'Administrativo',
-                'Hospitaleiro': 'Hospitalaria',
-                '1º Vigilante': 'Ritualística',
-                '2º Vigilante': 'Ritualística',
-                'Orador': 'Ritualística',
-                'Mestre de Cerimônias': 'Ritualística',
-                'Mestre de Harmonia': 'Ritualística',
-                'Porta-Estandarte': 'Ritualística',
-                'Guarda Interno': 'Ritualística',
-                'Guarda Externo': 'Ritualística',
-              }
-              const perfilDoCargo = cargoMap[cargo.cargo]
-              if (perfilDoCargo && perfilDoCargo !== perfilAtual) {
-                // Sincronizar perfis_acesso automaticamente
-                await supabase.from('perfis_acesso')
-                  .upsert({ user_id: session.user.id, perfil: perfilDoCargo }, { onConflict: 'user_id' })
-                perfilAtual = perfilDoCargo
-              } else if (perfilDoCargo) {
-                perfilAtual = perfilDoCargo
-              }
-            }
-          }
-        }
-
+        const perfilAtual = p?.perfil || 'Membro'
         setPerfil(perfilAtual)
         if (perfilAtual === 'ADM') { setNivel('total'); return }
         if (!modulo) { setNivel('total'); return }
