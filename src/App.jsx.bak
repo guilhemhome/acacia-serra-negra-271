@@ -33,12 +33,8 @@ function RotaProtegida({ children, modulo, apenasAdm }) {
 
         // Buscar perfil de perfis_acesso
         const { data: p } = await supabase.from('perfis_acesso')
-          .select('perfil, is_admin').eq('user_id', session.user.id).maybeSingle()
+          .select('perfil').eq('user_id', session.user.id).maybeSingle()
         let perfilAtual = p?.perfil || 'Membro'
-        const isAdmin = p?.is_admin === true
-
-        // Se é admin do sistema, acesso total independente do cargo
-        if (isAdmin) { setPerfil('ADM'); setNivel('total'); return }
 
         // Se não é ADM, verificar se tem cargo ativo em cargos_historico
         // e sincronizar com perfis_acesso se necessário
