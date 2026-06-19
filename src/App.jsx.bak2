@@ -25,11 +25,9 @@ function RotaProtegida({ children, modulo, apenasAdm }) {
   const [nivel, setNivel] = useState(undefined)
 
   useEffect(() => {
-    let ativo = true
     async function verificar() {
       try {
         const { data: { session } } = await supabase.auth.getSession()
-        if (!ativo) return
         setSessao(session)
         if (!session) { setPerfil(null); setNivel(null); return }
 
@@ -39,15 +37,12 @@ function RotaProtegida({ children, modulo, apenasAdm }) {
         let perfilAtual = p?.perfil || 'Membro'
         const isAdmin = p?.is_admin === true
 
-        if (!ativo) return
-
         // Se é admin do sistema, acesso total independente do cargo
         if (isAdmin) { setPerfil('ADM'); setNivel('total'); return }
 
         // Verificar se cadastro está pendente — bloqueia tudo exceto editar-perfil
         const { data: assocStatus } = await supabase.from('associados')
           .select('status_cadastro').eq('user_id', session.user.id).maybeSingle()
-        if (!ativo) return
         if (assocStatus?.status_cadastro === 'pendente') {
           setPerfil('Pendente')
           setNivel(modulo === '/editar-perfil' ? 'total' : 'bloqueado')
@@ -92,16 +87,13 @@ function RotaProtegida({ children, modulo, apenasAdm }) {
           }
         }
 
-        if (!ativo) return
         setPerfil(perfilAtual)
         if (perfilAtual === 'ADM') { setNivel('total'); return }
         if (!modulo) { setNivel('total'); return }
         const { data: perm } = await supabase.from('permissoes_perfil')
           .select('nivel').eq('perfil', perfilAtual).eq('modulo', modulo).maybeSingle()
-        if (!ativo) return
         setNivel(perm?.nivel || 'bloqueado')
       } catch(e) {
-        if (!ativo) return
         console.error('RotaProtegida erro:', e.message)
         setSessao(null)
         setPerfil(null)
@@ -109,7 +101,6 @@ function RotaProtegida({ children, modulo, apenasAdm }) {
       }
     }
     verificar()
-    return () => { ativo = false }
   }, [modulo])
 
   if (sessao === undefined || perfil === undefined || nivel === undefined) return (
