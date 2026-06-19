@@ -69,7 +69,7 @@ function RotaProtegida({ children, modulo, apenasAdm }) {
               if (perfilDoCargo && perfilDoCargo !== perfilAtual) {
                 // Sincronizar perfis_acesso automaticamente
                 await supabase.from('perfis_acesso')
-                  .upsert({ user_id: session.user.id, perfil: perfilDoCargo }, { onConflict: 'user_id' })
+                  .update({ perfil: perfilDoCargo }).eq('user_id', session.user.id).eq('is_admin', false)
                 perfilAtual = perfilDoCargo
               } else if (perfilDoCargo) {
                 perfilAtual = perfilDoCargo

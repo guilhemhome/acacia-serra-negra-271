@@ -14,60 +14,6 @@ export default function Aprovacoes() {
   const [processando, setProcessando] = useState(null)
   const [perfilLogado, setPerfilLogado] = useState('')
   const [userIdLogado, setUserIdLogado] = useState('')
-  const [editandoCpf, setEditandoCpf] = useState(null)
-  const [novoCpf, setNovoCpf] = useState('')
-
-  function formatCpf(v) {
-    return v.replace(/\D/g,'').slice(0,11)
-      .replace(/(\d{3})(\d)/,'$1.$2')
-      .replace(/(\d{3})(\d)/,'$1.$2')
-      .replace(/(\d{3})(\d{1,2})$/,'$1-$2')
-  }
-
-  function cpfValido(cpf) {
-    cpf = cpf.replace(/\D/g, '')
-    if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false
-    let soma = 0
-    for (let i = 0; i < 9; i++) soma += parseInt(cpf[i]) * (10 - i)
-    let resto = (soma * 10) % 11
-    if (resto === 10 || resto === 11) resto = 0
-    if (resto !== parseInt(cpf[9])) return false
-    soma = 0
-    for (let i = 0; i < 10; i++) soma += parseInt(cpf[i]) * (11 - i)
-    resto = (soma * 10) % 11
-    if (resto === 10 || resto === 11) resto = 0
-    if (resto !== parseInt(cpf[10])) return false
-    return true
-  }
-
-  async function salvarCpfCorrigido(c) {
-    const cpfLimpo = novoCpf.replace(/\D/g, '')
-    if (cpfLimpo.length !== 11 || !cpfValido(cpfLimpo)) {
-      setMensagem('❌ CPF inválido. Verifique os números.')
-      setTimeout(() => setMensagem(''), 3000)
-      return
-    }
-    if (cpfLimpo === c.cpf) { setEditandoCpf(null); return }
-    const confirmou = window.confirm(
-      'Confirma a correção do CPF de ' + (c.nome_completo || c.email) + '?\n\n' +
-      'De: ' + (c.cpf || '—') + '\nPara: ' + formatCpf(cpfLimpo) + '\n\n' +
-      'Este CPF passará a ser usado para login do irmão.'
-    )
-    if (!confirmou) return
-    setProcessando(c.id)
-    const { data: existe } = await supabase.from('associados').select('id').eq('cpf', cpfLimpo).neq('id', c.id).maybeSingle()
-    if (existe) {
-      setMensagem('❌ Este CPF já está cadastrado em outro registro.')
-      setProcessando(null)
-      setTimeout(() => setMensagem(''), 4000)
-      return
-    }
-    const { error } = await supabase.from('associados').update({ cpf: cpfLimpo }).eq('id', c.id)
-    if (error) setMensagem('❌ Erro ao corrigir CPF: ' + error.message)
-    else { setMensagem('✅ CPF corrigido com sucesso.'); setEditandoCpf(null); buscarCadastros() }
-    setProcessando(null)
-    setTimeout(() => setMensagem(''), 4000)
-  }
 
   useEffect(() => {
     async function verificarLogin() {
@@ -99,26 +45,21 @@ export default function Aprovacoes() {
       .eq('id', c.id)
     if (errStatus) { setMensagem('Erro ao aprovar.'); setProcessando(null); return }
 
-    // Quem fez autocadastro (cadastro_proprio) ja tem conta Auth criada em /cadastro.
-    // So enviar convite por e-mail para quem NAO tem conta ainda (cadastro feito pelo ADM direto na planilha/Supabase).
-    if (c.cadastro_proprio || c.user_id) {
-      setMensagem('✅ Aprovado! ' + (c.nome_completo || c.email) + ' já pode acessar o sistema normalmente.')
+    const resp = await fetch(`${SUPABASE_URL}/auth/v1/invite`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SERVICE_KEY,
+        'Authorization': `Bearer ${SERVICE_KEY}`
+      },
+      body: JSON.stringify({ email: c.email, data: { associado_id: c.id } })
+    })
+
+    if (resp.ok) {
+      setMensagem('✅ Aprovado! Convite enviado para ' + c.email)
     } else {
-      const resp = await fetch(`${SUPABASE_URL}/auth/v1/invite`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SERVICE_KEY,
-          'Authorization': `Bearer ${SERVICE_KEY}`
-        },
-        body: JSON.stringify({ email: c.email, data: { associado_id: c.id } })
-      })
-      if (resp.ok) {
-        setMensagem('✅ Aprovado! Convite enviado para ' + c.email)
-      } else {
-        const errBody = await resp.json()
-        setMensagem('❌ Erro no invite: ' + JSON.stringify(errBody))
-      }
+      const errBody = await resp.json()
+      setMensagem('❌ Erro no invite: ' + JSON.stringify(errBody))
     }
     buscarCadastros()
     setProcessando(null)
@@ -185,26 +126,7 @@ export default function Aprovacoes() {
                       <p style={{ fontWeight:700, fontSize:'1.1rem', margin:'0 0 4px', color:'#1e293b' }}>{c.nome_completo}</p>
                       <p style={{ color:'#6b7280', margin:'0 0 2px', fontSize:'0.85rem' }}>📧 {c.email || '—'}</p>
                       <p style={{ color:'#6b7280', margin:'0 0 2px', fontSize:'0.85rem' }}>📱 {c.tel_celular || '—'}</p>
-                      {aba === 'Pendente' && editandoCpf === c.id ? (
-                        <div style={{ display:'flex', gap:6, alignItems:'center', margin:'4px 0 6px' }}>
-                          <input value={novoCpf} onChange={e => setNovoCpf(formatCpf(e.target.value))} maxLength={14}
-                            style={{ padding:'6px 10px', borderRadius:6, border:'1.5px solid #f59e0b', fontSize:13, width:140 }} />
-                          <button onClick={() => salvarCpfCorrigido(c)} disabled={processando === c.id}
-                            style={{ padding:'6px 10px', borderRadius:6, border:'none', background:'#16a34a', color:'#fff', fontSize:12, fontWeight:700, cursor:'pointer' }}>💾 Salvar</button>
-                          <button onClick={() => setEditandoCpf(null)}
-                            style={{ padding:'6px 10px', borderRadius:6, border:'1px solid #e2e8f0', background:'#fff', color:'#6b7280', fontSize:12, cursor:'pointer' }}>Cancelar</button>
-                        </div>
-                      ) : (
-                        <p style={{ color:'#6b7280', margin:'0 0 2px', fontSize:'0.85rem', display:'flex', alignItems:'center', gap:6 }}>
-                          🪪 CPF: {c.cpf || '—'}
-                          {aba === 'Pendente' && (
-                            <button onClick={() => { setEditandoCpf(c.id); setNovoCpf(c.cpf || '') }}
-                              style={{ background:'#fef3c7', border:'none', borderRadius:6, color:'#92400e', padding:'2px 8px', fontSize:11, fontWeight:600, cursor:'pointer' }}>
-                              ✏️ Corrigir
-                            </button>
-                          )}
-                        </p>
-                      )}
+                      <p style={{ color:'#6b7280', margin:'0 0 2px', fontSize:'0.85rem' }}>🪪 CPF: {c.cpf || '—'}</p>
                       {c.data_nascimento && (
                         <p style={{ color:'#6b7280', margin:'0 0 2px', fontSize:'0.85rem' }}>🎂 {c.data_nascimento.split('T')[0].split('-').reverse().join('/')}</p>
                       )}

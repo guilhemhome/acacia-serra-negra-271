@@ -19,7 +19,6 @@ export default function EditarPerfil() {
   const [salvando, setSalvando] = useState(false)
   const [mensagem, setMensagem] = useState('')
   const [associadoId, setAssociadoId] = useState(null)
-  const [statusCadastro, setStatusCadastro] = useState(null)
 
   const [pessoal, setPessoal] = useState({ nome_completo:'', apelido:'', email:'', tel_celular:'', data_nascimento:'', nome_pai:'', nome_mae:'', profissao:'', empresa:'', estado_civil:'', data_casamento:'' })
   const [cpf, setCpf] = useState('')
@@ -44,7 +43,6 @@ export default function EditarPerfil() {
       const { data: assoc } = await supabase.from('associados').select('*').eq('user_id', uid).maybeSingle()
       if (assoc) {
         setAssociadoId(assoc.id)
-        setStatusCadastro(assoc.status_cadastro || null)
         setPessoal({ nome_completo: assoc.nome_completo||'', apelido: assoc.apelido||'', email: assoc.email||'', tel_celular: assoc.tel_celular||'', data_nascimento: assoc.data_nascimento||'', nome_pai: assoc.nome_pai||'', nome_mae: assoc.nome_mae||'', profissao: assoc.profissao||'', empresa: assoc.empresa||'', estado_civil: assoc.estado_civil||'', data_casamento: assoc.data_casamento||'' })
         setCpf(assoc.cpf || '')
         setBodes({ bodes_asfalto: assoc.bodes_asfalto||false, bodes_asfalto_numero: assoc.bodes_asfalto_numero||'', bodes_asfalto_data_admissao: assoc.bodes_asfalto_data_admissao||'', _eraBode: assoc.bodes_asfalto||false })
@@ -198,24 +196,12 @@ export default function EditarPerfil() {
       <div style={{ maxWidth:700, margin:'0 auto' }}>
 
         <div style={{ position:'relative', textAlign:'center', marginBottom:24 }}>
-          {statusCadastro !== 'pendente' && (
-            <button onClick={() => navigate('/dashboard')}
-              style={{ position:'absolute', left:0, top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.15)', border:'none', borderRadius:8, color:'#fff', padding:'8px 14px', cursor:'pointer', fontSize:18 }}>←</button>
-          )}
+          <button onClick={() => navigate('/dashboard')}
+            style={{ position:'absolute', left:0, top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.15)', border:'none', borderRadius:8, color:'#fff', padding:'8px 14px', cursor:'pointer', fontSize:18 }}>←</button>
           <img src="/logo-acacia.png" alt="Logo" style={{ width:64, height:64, borderRadius:'50%', border:'3px solid rgba(255,255,255,0.5)', objectFit:'cover', display:'block', margin:'0 auto 8px' }} />
           <h1 style={{ color:'#fff', fontSize:'1.6rem', fontWeight:'bold', margin:0 }}>Meu Perfil</h1>
           <p style={{ color:'rgba(255,255,255,0.7)', margin:0, fontSize:14 }}>Acácia de Serra Negra Nº 271</p>
         </div>
-
-        {statusCadastro === 'pendente' && (
-          <div style={{ marginBottom:16, background:'#FFF8E1', border:'1px solid #F9A825', borderLeft:'4px solid #F57F17', borderRadius:12, padding:'14px 16px' }}>
-            <p style={{ margin:0, fontWeight:700, color:'#E65100', fontSize:13 }}>⏳ Cadastro pendente de aprovação</p>
-            <p style={{ margin:'4px 0 0', fontSize:12, color:'#5D4037', lineHeight:1.5 }}>
-              Complete todas as abas do seu perfil com atenção. Após salvar, seu cadastro será analisado pela administração da Loja.
-              Você será notificado quando for aprovado e terá acesso completo ao sistema.
-            </p>
-          </div>
-        )}
 
         {mensagem && <div style={{ marginBottom:16, background:'#dcfce7', color:'#166534', padding:'12px 16px', borderRadius:12, textAlign:'center', fontWeight:600 }}>{mensagem}</div>}
 

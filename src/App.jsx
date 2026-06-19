@@ -40,6 +40,15 @@ function RotaProtegida({ children, modulo, apenasAdm }) {
         // Se é admin do sistema, acesso total independente do cargo
         if (isAdmin) { setPerfil('ADM'); setNivel('total'); return }
 
+        // Verificar se cadastro está pendente — bloqueia tudo exceto editar-perfil
+        const { data: assocStatus } = await supabase.from('associados')
+          .select('status_cadastro').eq('user_id', session.user.id).maybeSingle()
+        if (assocStatus?.status_cadastro === 'pendente') {
+          setPerfil('Pendente')
+          setNivel(modulo === '/editar-perfil' ? 'total' : 'bloqueado')
+          return
+        }
+
         // Se não é ADM, verificar se tem cargo ativo em cargos_historico
         // e sincronizar com perfis_acesso se necessário
         if (perfilAtual !== 'ADM') {
@@ -101,6 +110,10 @@ function RotaProtegida({ children, modulo, apenasAdm }) {
   )
 
   if (!sessao) return <Navigate to="/" replace />
+
+  if (perfil === 'Pendente' && modulo !== '/editar-perfil') {
+    return <Navigate to="/editar-perfil" replace />
+  }
 
   if (apenasAdm && perfil !== 'ADM') {
     return <Navigate to={PERFIS_MEMBRO.includes(perfil) ? '/membro' : '/dashboard'} replace />

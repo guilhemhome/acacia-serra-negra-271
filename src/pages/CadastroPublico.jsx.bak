@@ -5,22 +5,6 @@ import { supabase } from '../lib/supabase'
 const bg = {background:'linear-gradient(135deg,#1a237e 0%,#283593 50%,#1565c0 100%)'}
 const inp = 'w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50 text-sm'
 
-function cpfValido(cpf) {
-  cpf = cpf.replace(/\D/g, '')
-  if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false
-  let soma = 0
-  for (let i = 0; i < 9; i++) soma += parseInt(cpf[i]) * (10 - i)
-  let resto = (soma * 10) % 11
-  if (resto === 10 || resto === 11) resto = 0
-  if (resto !== parseInt(cpf[9])) return false
-  soma = 0
-  for (let i = 0; i < 10; i++) soma += parseInt(cpf[i]) * (11 - i)
-  resto = (soma * 10) % 11
-  if (resto === 10 || resto === 11) resto = 0
-  if (resto !== parseInt(cpf[10])) return false
-  return true
-}
-
 export default function CadastroPublico() {
   const navigate = useNavigate()
   const [cpf, setCpf] = useState('')
@@ -31,7 +15,6 @@ export default function CadastroPublico() {
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState('')
   const [aceitou, setAceitou] = useState(false)
-  const [etapa, setEtapa] = useState('formulario') // 'formulario' | 'confirmacao'
 
   function formatCpf(v) {
     return v.replace(/\D/g,'').slice(0,11)
@@ -40,22 +23,15 @@ export default function CadastroPublico() {
       .replace(/(\d{3})(\d{1,2})$/,'$1-$2')
   }
 
-  const handleValidarFormulario = (e) => {
+  const handleCadastro = async (e) => {
     e.preventDefault()
     setErro('')
     const cpfLimpo = cpf.replace(/\D/g,'')
     if (cpfLimpo.length !== 11) return setErro('CPF inválido.')
-    if (!cpfValido(cpfLimpo)) return setErro('CPF inválido. Verifique os números digitados.')
     if (!email.includes('@')) return setErro('E-mail inválido.')
     if (senha.length < 8) return setErro('A senha deve ter ao menos 8 caracteres.')
     if (senha !== confirmar) return setErro('As senhas não coincidem.')
     if (!aceitou) return setErro('Você precisa aceitar a declaração de responsabilidade.')
-    setEtapa('confirmacao')
-  }
-
-  const handleCadastro = async () => {
-    setErro('')
-    const cpfLimpo = cpf.replace(/\D/g,'')
     setCarregando(true)
     try {
       // Verificar se CPF já existe
@@ -134,7 +110,7 @@ export default function CadastroPublico() {
               </p>
             </div>
 
-            <form onSubmit={handleValidarFormulario} style={{ display: etapa === 'formulario' ? 'block' : 'none' }}>
+            <form onSubmit={handleCadastro}>
               <div className="mb-3">
                 <label className="block text-sm font-semibold text-gray-700 mb-1">CPF <span style={{color:'#e53e3e'}}>*</span></label>
                 <input type="text" inputMode="numeric" className={inp}
@@ -177,54 +153,17 @@ export default function CadastroPublico() {
                 </span>
               </label>
 
-              {erro && etapa === 'formulario' && (
+              {erro && (
                 <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 mb-4 text-sm">
                   {erro}
                 </div>
               )}
 
-              <button type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-2xl font-bold hover:from-blue-700 hover:to-indigo-700 transition shadow-lg">
-                Continuar
+              <button type="submit" disabled={carregando}
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-2xl font-bold hover:from-blue-700 hover:to-indigo-700 transition shadow-lg disabled:opacity-50">
+                {carregando ? 'Criando acesso...' : 'Criar acesso'}
               </button>
             </form>
-
-            {etapa === 'confirmacao' && (
-              <div>
-                <div style={{background:'#FEF2F2', border:'2px solid #DC2626', borderRadius:12, padding:'16px', marginBottom:16}}>
-                  <p style={{fontSize:13, fontWeight:800, color:'#991B1B', marginBottom:10, display:'flex', alignItems:'center', gap:6}}>
-                    ⚠️ Confira seus dados com atenção
-                  </p>
-                  <div style={{background:'#fff', borderRadius:8, padding:'12px 14px', marginBottom:10}}>
-                    <p style={{fontSize:11, color:'#6b7280', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:2}}>CPF</p>
-                    <p style={{fontSize:18, fontWeight:800, color:'#1f2937', letterSpacing:'0.02em', margin:0}}>{cpf}</p>
-                  </div>
-                  <div style={{background:'#fff', borderRadius:8, padding:'12px 14px', marginBottom:10}}>
-                    <p style={{fontSize:11, color:'#6b7280', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:2}}>E-mail</p>
-                    <p style={{fontSize:15, fontWeight:700, color:'#1f2937', margin:0}}>{email}</p>
-                  </div>
-                  <p style={{fontSize:12, color:'#991B1B', lineHeight:1.6, margin:0, fontWeight:600}}>
-                    O CPF não poderá ser alterado por você após a criação do acesso — apenas a administração da Loja pode corrigi-lo.
-                    Verifique se está exatamente igual ao seu documento antes de confirmar.
-                  </p>
-                </div>
-
-                {erro && (
-                  <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 mb-4 text-sm">
-                    {erro}
-                  </div>
-                )}
-
-                <button onClick={handleCadastro} disabled={carregando}
-                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 rounded-2xl font-bold hover:from-green-700 hover:to-emerald-700 transition shadow-lg disabled:opacity-50 mb-3">
-                  {carregando ? 'Criando acesso...' : '✅ Confirmar, os dados estão corretos'}
-                </button>
-                <button onClick={() => { setEtapa('formulario'); setErro('') }} disabled={carregando}
-                  className="w-full bg-gray-100 text-gray-700 py-3 rounded-2xl font-semibold hover:bg-gray-200 transition disabled:opacity-50">
-                  ← Voltar e corrigir
-                </button>
-              </div>
-            )}
 
             <p className="text-center text-sm text-gray-400 mt-4">
               Já tem acesso?{' '}
