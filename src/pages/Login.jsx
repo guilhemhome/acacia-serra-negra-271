@@ -139,6 +139,15 @@ export default function Login() {
               <span onClick={() => navigate('/recuperar-senha')} style={{ cursor:'pointer', color:'#6366f1' }}>Esqueci minha senha</span>
             </p>
 
+            <div style={{ borderTop:'1px solid #e5e7eb', marginTop:16, paddingTop:14, textAlign:'center' }}>
+              <p style={{ fontSize:13, color:'#6b7280', margin:0 }}>
+                Ainda não tem acesso?{' '}
+                <span onClick={() => navigate('/cadastro')} style={{ cursor:'pointer', color:'#4f46e5', fontWeight:700 }}>
+                  Cadastre-se aqui
+                </span>
+              </p>
+            </div>
+
           </div>
         </div>
 
