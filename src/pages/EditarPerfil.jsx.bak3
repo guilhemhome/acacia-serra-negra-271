@@ -204,7 +204,7 @@ export default function EditarPerfil() {
           ) : (
             <button onClick={async () => { await supabase.auth.signOut(); navigate('/') }}
               style={{ position:'absolute', right:0, top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.15)', border:'none', borderRadius:8, color:'#fff', padding:'8px 14px', cursor:'pointer', fontSize:13, fontWeight:600 }}>
-              ✅ Salvar e sair
+              Sair
             </button>
           )}
           <img src="/logo-acacia.png" alt="Logo" style={{ width:64, height:64, borderRadius:'50%', border:'3px solid rgba(255,255,255,0.5)', objectFit:'cover', display:'block', margin:'0 auto 8px' }} />
@@ -216,11 +216,8 @@ export default function EditarPerfil() {
           <div style={{ marginBottom:16, background:'#FFF8E1', border:'1px solid #F9A825', borderLeft:'4px solid #F57F17', borderRadius:12, padding:'14px 16px' }}>
             <p style={{ margin:0, fontWeight:700, color:'#E65100', fontSize:13 }}>⏳ Cadastro pendente de aprovação</p>
             <p style={{ margin:'4px 0 0', fontSize:12, color:'#5D4037', lineHeight:1.5 }}>
-              Preencha cada aba abaixo (Pessoal, Familiares, Endereço, Maçônico e Filosófico) e clique no botão <strong>💾 Salvar</strong>
-              ao final de cada uma — cada aba é salva separadamente. Não é necessário preencher tudo de uma vez: você pode sair e
-              voltar depois para continuar de onde parou. Quando terminar, use o botão <strong>"Salvar e sair"</strong> no topo da tela.
-              Seu cadastro será analisado pela administração da Loja, e você será notificado quando for aprovado, passando a ter
-              acesso completo ao sistema.
+              Complete todas as abas do seu perfil com atenção. Após salvar, seu cadastro será analisado pela administração da Loja.
+              Você será notificado quando for aprovado e terá acesso completo ao sistema.
             </p>
           </div>
         )}
