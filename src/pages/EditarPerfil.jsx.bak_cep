@@ -25,30 +25,6 @@ export default function EditarPerfil() {
   const [cpf, setCpf] = useState('')
   const [endereco, setEndereco] = useState({ tipo:'residencial', logradouro:'', numero:'', complemento:'', bairro:'', cidade:'', uf:'', cep:'' })
   const [enderecoComercial, setEnderecoComercial] = useState({ logradouro:'', numero:'', complemento:'', bairro:'', cidade:'', uf:'', cep:'' })
-  const [buscandoCep, setBuscandoCep] = useState(false)
-  const [buscandoCepComercial, setBuscandoCepComercial] = useState(false)
-
-  async function buscarCep(cepDigitado, tipo) {
-    const cepLimpo = cepDigitado.replace(/\D/g, '')
-    if (cepLimpo.length !== 8) return
-    if (tipo === 'comercial') setBuscandoCepComercial(true)
-    else setBuscandoCep(true)
-    try {
-      const resp = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`)
-      const data = await resp.json()
-      if (!data.erro) {
-        const preenchido = { logradouro: data.logradouro || '', bairro: data.bairro || '', cidade: data.localidade || '', uf: data.uf || '' }
-        if (tipo === 'comercial') setEnderecoComercial(prev => ({ ...prev, ...preenchido }))
-        else setEndereco(prev => ({ ...prev, ...preenchido }))
-      }
-      // Se nao encontrar (data.erro === true), nao faz nada — campos continuam editaveis manualmente
-    } catch (e) {
-      // Falha de rede — segue com preenchimento manual, sem bloquear o usuario
-    } finally {
-      if (tipo === 'comercial') setBuscandoCepComercial(false)
-      else setBuscandoCep(false)
-    }
-  }
   const [familiares, setFamiliares] = useState([])
   const [novoFamiliar, setNovoFamiliar] = useState({ nome:'', parentesco:'', data_nascimento:'' })
   const [editandoFamiliar, setEditandoFamiliar] = useState(null)
@@ -370,17 +346,7 @@ export default function EditarPerfil() {
             {aba === 2 && (
               <div>
                 <Secao titulo="Endereço Residencial" />
-                <div style={{ marginBottom: 14 }}>
-                  <label style={{ display:'block', fontSize:12, fontWeight:600, color:'#64748b', marginBottom:4, textTransform:'uppercase', letterSpacing:0.5 }}>
-                    CEP {buscandoCep && <span style={{ color:'#4f46e5', fontWeight:400, textTransform:'none' }}>(buscando endereço...)</span>}
-                  </label>
-                  <input value={endereco.cep}
-                    onChange={e => setEndereco({...endereco, cep:e.target.value})}
-                    onBlur={e => buscarCep(e.target.value, 'residencial')}
-                    placeholder="00000-000"
-                    style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box', outline:'none' }} />
-                  <p style={{ margin:'4px 0 0', fontSize:11, color:'#94a3b8' }}>Digite o CEP e os campos abaixo serão preenchidos automaticamente. Se não encontrado, preencha manualmente.</p>
-                </div>
+                <Input label="CEP" value={endereco.cep} onChange={v => setEndereco({...endereco, cep:v})} />
                 <Input label="Logradouro" value={endereco.logradouro} onChange={v => setEndereco({...endereco, logradouro:v})} />
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0 16px' }}>
                   <Input label="Número" value={endereco.numero} onChange={v => setEndereco({...endereco, numero:v})} />
@@ -392,16 +358,7 @@ export default function EditarPerfil() {
                   <Input label="Estado" value={endereco.uf} onChange={v => setEndereco({...endereco, uf:v})} />
                 </div>
                 <Secao titulo="Endereço Comercial" />
-                <div style={{ marginBottom: 14 }}>
-                  <label style={{ display:'block', fontSize:12, fontWeight:600, color:'#64748b', marginBottom:4, textTransform:'uppercase', letterSpacing:0.5 }}>
-                    CEP {buscandoCepComercial && <span style={{ color:'#4f46e5', fontWeight:400, textTransform:'none' }}>(buscando endereço...)</span>}
-                  </label>
-                  <input value={enderecoComercial.cep}
-                    onChange={e => setEnderecoComercial({...enderecoComercial, cep:e.target.value})}
-                    onBlur={e => buscarCep(e.target.value, 'comercial')}
-                    placeholder="00000-000"
-                    style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box', outline:'none' }} />
-                </div>
+                <Input label="CEP" value={enderecoComercial.cep} onChange={v => setEnderecoComercial({...enderecoComercial, cep:v})} />
                 <Input label="Logradouro" value={enderecoComercial.logradouro} onChange={v => setEnderecoComercial({...enderecoComercial, logradouro:v})} />
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0 16px' }}>
                   <Input label="Número" value={enderecoComercial.numero} onChange={v => setEnderecoComercial({...enderecoComercial, numero:v})} />
