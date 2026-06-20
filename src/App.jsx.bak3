@@ -30,17 +30,14 @@ function RotaProtegida({ children, modulo, apenasAdm }) {
       try {
         const { data: { session } } = await supabase.auth.getSession()
         if (!ativo) return
-        console.log('[DEBUG] modulo:', modulo, '| session user_id:', session?.user?.id)
         setSessao(session)
         if (!session) { setPerfil(null); setNivel(null); return }
 
         // Buscar perfil de perfis_acesso
         const { data: p } = await supabase.from('perfis_acesso')
           .select('perfil, is_admin').eq('user_id', session.user.id).maybeSingle()
-        console.log('[DEBUG] perfis_acesso retornou:', p)
         let perfilAtual = p?.perfil || 'Membro'
         const isAdmin = p?.is_admin === true
-        console.log('[DEBUG] perfilAtual:', perfilAtual, '| isAdmin:', isAdmin)
 
         if (!ativo) return
 
@@ -51,9 +48,7 @@ function RotaProtegida({ children, modulo, apenasAdm }) {
         const { data: assocStatus } = await supabase.from('associados')
           .select('status_cadastro').eq('user_id', session.user.id).maybeSingle()
         if (!ativo) return
-        console.log('[DEBUG] assocStatus:', assocStatus)
         if (assocStatus?.status_cadastro === 'pendente') {
-          console.log('[DEBUG] -> ENTROU no bloco pendente, modulo recebido:', modulo)
           setPerfil('Pendente')
           setNivel(modulo === '/editar-perfil' ? 'total' : 'bloqueado')
           return
@@ -98,7 +93,6 @@ function RotaProtegida({ children, modulo, apenasAdm }) {
         }
 
         if (!ativo) return
-        console.log('[DEBUG] -> NAO entrou no bloco pendente, seguindo fluxo normal com perfilAtual:', perfilAtual)
         setPerfil(perfilAtual)
         if (perfilAtual === 'ADM') { setNivel('total'); return }
         if (!modulo) { setNivel('total'); return }
