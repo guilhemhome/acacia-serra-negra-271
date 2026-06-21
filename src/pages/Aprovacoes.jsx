@@ -179,60 +179,60 @@ export default function Aprovacoes() {
               </div>
             ) : (
               filtrados.map(c => (
-                <div key={c.id} style={{ background:'#f9fafb', borderRadius:12, padding:16, marginBottom:12, border:'1px solid #e5e7eb' }}>
-                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexWrap:'wrap', gap:8, marginBottom:10 }}>
+                <div key={c.id} style={{ background:'#f9fafb', borderRadius:10, padding:'12px 14px', marginBottom:8, border:'1px solid #e5e7eb' }}>
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexWrap:'wrap', gap:8 }}>
                     <div style={{ flex:1, minWidth:0 }}>
-                      <p style={{ fontWeight:700, fontSize:'1.1rem', margin:'0 0 4px', color:'#1e293b' }}>{c.nome_completo}</p>
-                      <p style={{ color:'#6b7280', margin:'0 0 2px', fontSize:'0.85rem' }}>📧 {c.email || '—'}</p>
-                      <p style={{ color:'#6b7280', margin:'0 0 2px', fontSize:'0.85rem' }}>📱 {c.tel_celular || '—'}</p>
-                      {(aba === 'Pendente' || aba === 'Aprovado') && editandoCpf === c.id ? (
-                        <div style={{ display:'flex', gap:6, alignItems:'center', margin:'4px 0 6px' }}>
-                          <input value={novoCpf} onChange={e => setNovoCpf(formatCpf(e.target.value))} maxLength={14}
-                            style={{ padding:'6px 10px', borderRadius:6, border:'1.5px solid #f59e0b', fontSize:13, width:140 }} />
-                          <button onClick={() => salvarCpfCorrigido(c)} disabled={processando === c.id}
-                            style={{ padding:'6px 10px', borderRadius:6, border:'none', background:'#16a34a', color:'#fff', fontSize:12, fontWeight:700, cursor:'pointer' }}>💾 Salvar</button>
-                          <button onClick={() => setEditandoCpf(null)}
-                            style={{ padding:'6px 10px', borderRadius:6, border:'1px solid #e2e8f0', background:'#fff', color:'#6b7280', fontSize:12, cursor:'pointer' }}>Cancelar</button>
-                        </div>
-                      ) : (
-                        <p style={{ color:'#6b7280', margin:'0 0 2px', fontSize:'0.85rem', display:'flex', alignItems:'center', gap:6 }}>
-                          🪪 CPF: {c.cpf || '—'}
-                          {(aba === 'Pendente' || aba === 'Aprovado') && (
-                            <button onClick={() => { setEditandoCpf(c.id); setNovoCpf(c.cpf || '') }}
-                              style={{ background:'#fef3c7', border:'none', borderRadius:6, color:'#92400e', padding:'2px 8px', fontSize:11, fontWeight:600, cursor:'pointer' }}>
-                              ✏️ Corrigir
-                            </button>
-                          )}
-                        </p>
-                      )}
-                      {c.data_nascimento && (
-                        <p style={{ color:'#6b7280', margin:'0 0 2px', fontSize:'0.85rem' }}>🎂 {c.data_nascimento.split('T')[0].split('-').reverse().join('/')}</p>
-                      )}
-                      {c.cidade && (
-                        <p style={{ color:'#6b7280', margin:0, fontSize:'0.85rem' }}>📍 {c.cidade}{c.uf ? ' — ' + c.uf : ''}</p>
-                      )}
+                      <p style={{ fontWeight:700, fontSize:14, margin:'0 0 3px', color:'#1e293b' }}>{c.nome_completo || '—'}</p>
+                      <div style={{ display:'flex', flexWrap:'wrap', alignItems:'center', gap:6, fontSize:12, color:'#6b7280' }}>
+                        <span>📧 {c.email || '—'}</span>
+                        <span style={{ color:'#cbd5e1' }}>·</span>
+                        <span>📱 {c.tel_celular || '—'}</span>
+                        <span style={{ color:'#cbd5e1' }}>·</span>
+                        {(aba === 'Pendente' || aba === 'Aprovado') && editandoCpf === c.id ? (
+                          <span style={{ display:'flex', gap:6, alignItems:'center' }}>
+                            <input value={novoCpf} onChange={e => setNovoCpf(formatCpf(e.target.value))} maxLength={14}
+                              style={{ padding:'4px 8px', borderRadius:6, border:'1.5px solid #f59e0b', fontSize:12, width:130 }} />
+                            <button onClick={() => salvarCpfCorrigido(c)} disabled={processando === c.id}
+                              style={{ padding:'4px 8px', borderRadius:6, border:'none', background:'#16a34a', color:'#fff', fontSize:11, fontWeight:700, cursor:'pointer' }}>💾</button>
+                            <button onClick={() => setEditandoCpf(null)}
+                              style={{ padding:'4px 8px', borderRadius:6, border:'1px solid #e2e8f0', background:'#fff', color:'#6b7280', fontSize:11, cursor:'pointer' }}>✕</button>
+                          </span>
+                        ) : (
+                          <span style={{ display:'flex', alignItems:'center', gap:4 }}>
+                            🪪 {c.cpf || '—'}
+                            {(aba === 'Pendente' || aba === 'Aprovado') && (
+                              <button onClick={() => { setEditandoCpf(c.id); setNovoCpf(c.cpf || '') }}
+                                style={{ background:'#fef3c7', border:'none', borderRadius:6, color:'#92400e', padding:'1px 6px', fontSize:10, fontWeight:600, cursor:'pointer' }}>
+                                ✏️
+                              </button>
+                            )}
+                          </span>
+                        )}
+                        {c.data_nascimento && (<><span style={{ color:'#cbd5e1' }}>·</span><span>🎂 {c.data_nascimento.split('T')[0].split('-').reverse().join('/')}</span></>)}
+                        {c.cidade && (<><span style={{ color:'#cbd5e1' }}>·</span><span>📍 {c.cidade}{c.uf ? ' — ' + c.uf : ''}</span></>)}
+                      </div>
                     </div>
                     {aba === 'Pendente' && (
-                      <div style={{ display:'flex', gap:8, flexShrink:0 }}>
+                      <div style={{ display:'flex', gap:6, flexShrink:0 }}>
                         <button onClick={() => aprovar(c)} disabled={processando === c.id}
-                          style={{ padding:'10px 16px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#16a34a,#15803d)', color:'white', fontWeight:700, cursor:'pointer' }}>
+                          style={{ padding:'7px 12px', borderRadius:8, border:'none', background:'linear-gradient(135deg,#16a34a,#15803d)', color:'white', fontWeight:700, fontSize:12, cursor:'pointer' }}>
                           ✓ Aprovar
                         </button>
                         <button onClick={() => rejeitar(c.id)} disabled={processando === c.id}
-                          style={{ padding:'10px 16px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#dc2626,#b91c1c)', color:'white', fontWeight:700, cursor:'pointer' }}>
+                          style={{ padding:'7px 12px', borderRadius:8, border:'none', background:'linear-gradient(135deg,#dc2626,#b91c1c)', color:'white', fontWeight:700, fontSize:12, cursor:'pointer' }}>
                           ✗ Rejeitar
                         </button>
                       </div>
                     )}
                   </div>
-                  <div style={{ display:'flex', gap:8, borderTop:'1px solid #e5e7eb', paddingTop:10 }}>
+                  <div style={{ display:'flex', gap:6, marginTop:8 }}>
                     <button onClick={() => navigate('/perfil/' + c.id)}
-                      style={{ flex:1, padding:'7px 0', borderRadius:8, border:'1px solid #e2e8f0', background:'#fff', color:'#1a237e', fontSize:13, fontWeight:600, cursor:'pointer' }}>
+                      style={{ flex:1, padding:'6px 0', borderRadius:6, border:'1px solid #e2e8f0', background:'#fff', color:'#1a237e', fontSize:12, fontWeight:600, cursor:'pointer' }}>
                       👤 Ver perfil
                     </button>
                     {(perfilLogado === 'ADM' || c.user_id === userIdLogado) && aba === 'Aprovado' && (
                       <button onClick={() => navigate('/perfil/' + c.id)}
-                        style={{ flex:1, padding:'7px 0', borderRadius:8, border:'none', background:'#e0f2fe', color:'#0369a1', fontSize:13, fontWeight:600, cursor:'pointer' }}>
+                        style={{ flex:1, padding:'6px 0', borderRadius:6, border:'none', background:'#e0f2fe', color:'#0369a1', fontSize:12, fontWeight:600, cursor:'pointer' }}>
                         ✏️ Editar cadastro
                       </button>
                     )}
