@@ -29,6 +29,8 @@ export default function Configuracoes() {
   const [abaAtiva, setAbaAtiva] = useState('geral')
   const [permissoes, setPermissoes] = useState({})
   const [salvandoPerm, setSalvandoPerm] = useState(false)
+  const [secaoAberta, setSecaoAberta] = useState(null) // 'stats' | 'dados' | 'mensagens' | 'perfis'
+  const [irmaoExpandido, setIrmaoExpandido] = useState(null)
 
   useEffect(() => {
     async function carregar() {
@@ -197,143 +199,128 @@ export default function Configuracoes() {
 
           {abaAtiva === 'geral' && <>
 
-        {/* Estatísticas */}
-        <div style={{ background:'#fff', borderRadius:16, overflow:'hidden', boxShadow:'0 8px 32px rgba(0,0,0,0.2)', marginBottom:16 }}>
-          <div style={{ height:4, background:'linear-gradient(90deg,#1e40af,#4f46e5,#7c3aed)' }} />
-          <div style={{ padding:24 }}>
-            <p style={{ margin:'0 0 16px', fontWeight:700, color:'#4f46e5', fontSize:13, textTransform:'uppercase', letterSpacing:1 }}>Estatísticas da Loja</p>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-              <StatCard label="Total de Irmãos" valor={stats.total} cor="#4f46e5" />
-              <StatCard label="Aprovados" valor={stats.aprovados} cor="#16a34a" />
-              <StatCard label="Pendentes" valor={stats.pendentes} cor="#d97706" />
-              <StatCard label="Rejeitados" valor={stats.rejeitados} cor="#dc2626" />
-            </div>
+        {/* Estatísticas — acordeao */}
+        <div style={{ background:'#fff', borderRadius:16, overflow:'hidden', boxShadow:'0 8px 32px rgba(0,0,0,0.2)', marginBottom:12 }}>
+          <div onClick={() => setSecaoAberta(secaoAberta === 'stats' ? null : 'stats')}
+            style={{ padding:'16px 24px', display:'flex', justifyContent:'space-between', alignItems:'center', cursor:'pointer' }}>
+            <span style={{ fontWeight:700, color:'#1e293b', fontSize:14 }}>📊 Estatísticas da Loja</span>
+            <span style={{ fontSize:13, color:'#94a3b8', transform: secaoAberta === 'stats' ? 'rotate(180deg)' : 'none', transition:'transform 0.15s' }}>▾</span>
           </div>
-        </div>
-
-        {/* Dados da Loja */}
-        <div style={{ background:'#fff', borderRadius:16, overflow:'hidden', boxShadow:'0 8px 32px rgba(0,0,0,0.2)', marginBottom:16 }}>
-          <div style={{ height:4, background:'linear-gradient(90deg,#1e40af,#4f46e5,#7c3aed)' }} />
-          <div style={{ padding:24 }}>
-            <p style={{ margin:'0 0 16px', fontWeight:700, color:'#4f46e5', fontSize:13, textTransform:'uppercase', letterSpacing:1 }}>Dados da Loja</p>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0 16px' }}>
-              <Input label="Nome da Loja" value={config.nome_loja} onChange={v => setConfig({...config, nome_loja:v})} />
-              <Input label="Número" value={config.numero_loja} onChange={v => setConfig({...config, numero_loja:v})} />
-              <Input label="Potência" value={config.potencia} onChange={v => setConfig({...config, potencia:v})} />
-              <Input label="Rito" value={config.rito} onChange={v => setConfig({...config, rito:v})} />
-              <Input label="Cidade" value={config.cidade} onChange={v => setConfig({...config, cidade:v})} />
-              <Input label="Estado" value={config.estado} onChange={v => setConfig({...config, estado:v})} />
-            </div>
-            <Input label="Data de Fundação" value={config.data_fundacao} onChange={v => setConfig({...config, data_fundacao:v})} />
-            <button onClick={salvarConfig} disabled={salvando}
-              style={{ width:'100%', padding:'12px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#4f46e5,#7c3aed)', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
-              {salvando ? 'Salvando...' : '💾 Salvar Configurações'}
-            </button>
-          </div>
-        </div>
-
-        {/* Perfis de Acesso */}
-        <div style={{ background:'#fff', borderRadius:16, overflow:'hidden', boxShadow:'0 8px 32px rgba(0,0,0,0.2)', marginBottom:16 }}>
-          <div style={{ height:4, background:'linear-gradient(90deg,#1e40af,#4f46e5,#7c3aed)' }} />
-          <div style={{ padding:24 }}>
-            <p style={{ margin:'0 0 16px', fontWeight:700, color:'#4f46e5', fontSize:13, textTransform:'uppercase', letterSpacing:1 }}>Perfis de Acesso</p>
-            {perfis.length === 0 ? (
-              <p style={{ color:'#94a3b8', textAlign:'center' }}>Nenhum perfil configurado.</p>
-            ) : perfis.map((p, i) => (
-              <div key={i} style={{ background:'#f8fafc', borderRadius:10, padding:'14px 16px', marginBottom:10, border:'1px solid #e2e8f0' }}>
-                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8, flexWrap:'wrap' }}>
-                  <div style={{ flex:1, minWidth:0 }}>
-                    <p style={{ margin:'0 0 2px', fontWeight:700, color:'#1e293b', fontSize:14 }}>{p.associados?.nome_completo || '—'}</p>
-                    <p style={{ margin:'0 0 1px', fontSize:12, color:'#64748b' }}>CPF: {p.associados?.cpf || '—'}</p>
-                    <p style={{ margin:0, fontSize:12, color:'#64748b' }}>E-mail: {p.associados?.email || '—'}</p>
-                  </div>
-                  <select value={p.perfil} onChange={e => alterarPerfil(p.user_id, e.target.value)}
-                    style={{ padding:'6px 10px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:13, background:'#fff', cursor:'pointer', flexShrink:0 }}>
-                    <option value="Membro">Membro</option>
-                    <option value="Ritualística">Ritualística</option>
-                    <option value="Hospitalaria">Hospitalaria</option>
-                    <option value="Secretário">Secretário</option>
-                    <option value="Financeiro">Financeiro</option>
-                    <option value="Administrativo">Administrativo</option>
-                    <option value="Venerável Mestre">Venerável Mestre</option>
-                    <option value="Total">Total</option>
-                    <option value="ADM">ADM</option>
-                  </select>
-                </div>
-                <div style={{ display:'flex', gap:8, marginTop:10 }}>
-                  <button onClick={() => p.associados?.id ? navigate('/perfil/' + p.associados.id) : msg('Associado sem perfil cadastrado.')}
-                    style={{ flex:1, padding:'6px 0', borderRadius:8, border:'1px solid #e2e8f0', background:'#fff', color:'#1a237e', fontSize:12, fontWeight:600, cursor:'pointer' }}>
-                    👤 Ver perfil
-                  </button>
-                  <button onClick={() => resetarSenha(p.associados?.email)}
-                    style={{ flex:1, padding:'6px 0', borderRadius:8, border:'none', background:'#fef3c7', color:'#b45309', fontSize:12, fontWeight:600, cursor:'pointer' }}>
-                    🔑 Resetar senha
-                  </button>
-                </div>
+          {secaoAberta === 'stats' && (
+            <div style={{ padding:'0 24px 24px' }}>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                <StatCard label="Total de Irmãos" valor={stats.total} cor="#4f46e5" />
+                <StatCard label="Aprovados" valor={stats.aprovados} cor="#16a34a" />
+                <StatCard label="Pendentes" valor={stats.pendentes} cor="#d97706" />
+                <StatCard label="Rejeitados" valor={stats.rejeitados} cor="#dc2626" />
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
 
-        {/* Templates de Mensagens */}
-        <div style={{ background:'#fff', borderRadius:16, overflow:'hidden', boxShadow:'0 8px 32px rgba(0,0,0,0.2)', marginBottom:16 }}>
-          <div style={{ height:4, background:'linear-gradient(90deg,#1e40af,#4f46e5,#7c3aed)' }} />
-          <div style={{ padding:24 }}>
-            <p style={{ margin:'0 0 16px', fontWeight:700, color:'#4f46e5', fontSize:13, textTransform:'uppercase', letterSpacing:1 }}>Mensagens</p>
-            <button onClick={() => navigate('/gestao-cargos')}
-              style={{ width:'100%', padding:'12px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#1a237e,#283593)', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer', marginBottom:10 }}>
-              Gestao de Cargos
-            </button>
-            <button onClick={() => navigate('/templates-mensagens')}
-              style={{ width:'100%', padding:'12px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#1e40af,#4f46e5)', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
-              Editar Templates de Aniversario
-            </button>
+        {/* Dados da Loja — acordeao */}
+        <div style={{ background:'#fff', borderRadius:16, overflow:'hidden', boxShadow:'0 8px 32px rgba(0,0,0,0.2)', marginBottom:12 }}>
+          <div onClick={() => setSecaoAberta(secaoAberta === 'dados' ? null : 'dados')}
+            style={{ padding:'16px 24px', display:'flex', justifyContent:'space-between', alignItems:'center', cursor:'pointer' }}>
+            <span style={{ fontWeight:700, color:'#1e293b', fontSize:14 }}>🏛️ Dados da Loja</span>
+            <span style={{ fontSize:13, color:'#94a3b8', transform: secaoAberta === 'dados' ? 'rotate(180deg)' : 'none', transition:'transform 0.15s' }}>▾</span>
           </div>
+          {secaoAberta === 'dados' && (
+            <div style={{ padding:'0 24px 24px' }}>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0 16px' }}>
+                <Input label="Nome da Loja" value={config.nome_loja} onChange={v => setConfig({...config, nome_loja:v})} />
+                <Input label="Número" value={config.numero_loja} onChange={v => setConfig({...config, numero_loja:v})} />
+                <Input label="Potência" value={config.potencia} onChange={v => setConfig({...config, potencia:v})} />
+                <Input label="Rito" value={config.rito} onChange={v => setConfig({...config, rito:v})} />
+                <Input label="Cidade" value={config.cidade} onChange={v => setConfig({...config, cidade:v})} />
+                <Input label="Estado" value={config.estado} onChange={v => setConfig({...config, estado:v})} />
+              </div>
+              <Input label="Data de Fundação" value={config.data_fundacao} onChange={v => setConfig({...config, data_fundacao:v})} />
+              <button onClick={salvarConfig} disabled={salvando}
+                style={{ width:'100%', padding:'12px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#4f46e5,#7c3aed)', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
+                {salvando ? 'Salvando...' : '💾 Salvar Configurações'}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Mensagens — acordeao */}
+        <div style={{ background:'#fff', borderRadius:16, overflow:'hidden', boxShadow:'0 8px 32px rgba(0,0,0,0.2)', marginBottom:12 }}>
+          <div onClick={() => setSecaoAberta(secaoAberta === 'mensagens' ? null : 'mensagens')}
+            style={{ padding:'16px 24px', display:'flex', justifyContent:'space-between', alignItems:'center', cursor:'pointer' }}>
+            <span style={{ fontWeight:700, color:'#1e293b', fontSize:14 }}>💬 Mensagens</span>
+            <span style={{ fontSize:13, color:'#94a3b8', transform: secaoAberta === 'mensagens' ? 'rotate(180deg)' : 'none', transition:'transform 0.15s' }}>▾</span>
+          </div>
+          {secaoAberta === 'mensagens' && (
+            <div style={{ padding:'0 24px 24px' }}>
+              <button onClick={() => navigate('/gestao-cargos')}
+                style={{ width:'100%', padding:'12px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#1a237e,#283593)', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer', marginBottom:10 }}>
+                Gestao de Cargos
+              </button>
+              <button onClick={() => navigate('/templates-mensagens')}
+                style={{ width:'100%', padding:'12px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#1e40af,#4f46e5)', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
+                Editar Templates de Aniversario
+              </button>
+            </div>
+          )}
         </div>
 
         </>}
 
         {abaAtiva === 'usuarios' && <>
         <div style={{ background:'#fff', borderRadius:16, overflow:'hidden', boxShadow:'0 8px 32px rgba(0,0,0,0.2)', marginBottom:16 }}>
-          <div style={{ height:4, background:'linear-gradient(90deg,#1e40af,#4f46e5,#7c3aed)' }} />
-          <div style={{ padding:24 }}>
-            <p style={{ margin:'0 0 16px', fontWeight:700, color:'#4f46e5', fontSize:13, textTransform:'uppercase', letterSpacing:1 }}>Perfis de Acesso</p>
-            {perfis.length === 0 ? (
-              <p style={{ color:'#94a3b8', textAlign:'center' }}>Nenhum perfil configurado.</p>
-            ) : perfis.map((p, i) => (
-              <div key={i} style={{ background:'#f8fafc', borderRadius:10, padding:'14px 16px', marginBottom:10, border:'1px solid #e2e8f0' }}>
-                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8, flexWrap:'wrap' }}>
-                  <div style={{ flex:1, minWidth:0 }}>
-                    <p style={{ margin:'0 0 2px', fontWeight:700, color:'#1e293b', fontSize:14 }}>{p.associados?.nome_completo || '---'}</p>
-                    <p style={{ margin:'0 0 1px', fontSize:12, color:'#64748b' }}>CPF: {p.associados?.cpf || '---'}</p>
-                    <p style={{ margin:0, fontSize:12, color:'#64748b' }}>E-mail: {p.associados?.email || '---'}</p>
-                  </div>
-                  <select value={p.perfil} onChange={e => alterarPerfil(p.user_id, e.target.value)}
-                    style={{ padding:'6px 10px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:13, background:'#fff', cursor:'pointer', flexShrink:0 }}>
-                    <option value="Membro">Membro</option>
-                    <option value="Ritualística">Ritualística</option>
-                    <option value="Hospitalaria">Hospitalaria</option>
-                    <option value="Secretário">Secretário</option>
-                    <option value="Financeiro">Financeiro</option>
-                    <option value="Administrativo">Administrativo</option>
-                    <option value="Venerável Mestre">Venerável Mestre</option>
-                    <option value="Total">Total</option>
-                    <option value="ADM">ADM</option>
-                  </select>
-                </div>
-                <div style={{ display:'flex', gap:8, marginTop:10 }}>
-                  <button onClick={() => p.associados?.id ? navigate('/perfil/' + p.associados.id) : msg('Associado sem perfil cadastrado.')}
-                    style={{ flex:1, padding:'6px 0', borderRadius:8, border:'1px solid #e2e8f0', background:'#fff', color:'#1a237e', fontSize:12, fontWeight:600, cursor:'pointer' }}>
-                    Ver perfil
-                  </button>
-                  <button onClick={() => resetarSenha(p.associados?.email)}
-                    style={{ flex:1, padding:'6px 0', borderRadius:8, border:'none', background:'#fef3c7', color:'#b45309', fontSize:12, fontWeight:600, cursor:'pointer' }}>
-                    Resetar senha
-                  </button>
-                </div>
-              </div>
-            ))}
+          <div onClick={() => setSecaoAberta(secaoAberta === 'perfis' ? null : 'perfis')}
+            style={{ padding:'16px 24px', display:'flex', justifyContent:'space-between', alignItems:'center', cursor:'pointer' }}>
+            <span style={{ fontWeight:700, color:'#1e293b', fontSize:14 }}>👥 Perfis de Acesso <span style={{ color:'#94a3b8', fontWeight:400 }}>({perfis.length} {perfis.length === 1 ? 'irmão' : 'irmãos'})</span></span>
+            <span style={{ fontSize:13, color:'#94a3b8', transform: secaoAberta === 'perfis' ? 'rotate(180deg)' : 'none', transition:'transform 0.15s' }}>▾</span>
           </div>
+          {secaoAberta === 'perfis' && (
+            <div style={{ padding:'0 24px 24px' }}>
+              {perfis.length === 0 ? (
+                <p style={{ color:'#94a3b8', textAlign:'center' }}>Nenhum perfil configurado.</p>
+              ) : perfis.map((p, i) => {
+                const expandido = irmaoExpandido === (p.user_id || i)
+                return (
+                <div key={i} style={{ background:'#f8fafc', borderRadius:10, marginBottom:8, border:'1px solid #e2e8f0', overflow:'hidden' }}>
+                  <div onClick={() => setIrmaoExpandido(expandido ? null : (p.user_id || i))}
+                    style={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:8, padding:'10px 14px', cursor:'pointer' }}>
+                    <span style={{ fontWeight:600, color:'#1e293b', fontSize:13, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', flex:1, minWidth:0 }}>
+                      {p.associados?.nome_completo || '—'}
+                    </span>
+                    <select value={p.perfil} onClick={e => e.stopPropagation()} onChange={e => alterarPerfil(p.user_id, e.target.value)}
+                      style={{ padding:'5px 8px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:12, background:'#fff', cursor:'pointer', flexShrink:0 }}>
+                      <option value="Membro">Membro</option>
+                      <option value="Ritualística">Ritualística</option>
+                      <option value="Hospitalaria">Hospitalaria</option>
+                      <option value="Secretário">Secretário</option>
+                      <option value="Financeiro">Financeiro</option>
+                      <option value="Administrativo">Administrativo</option>
+                      <option value="Venerável Mestre">Venerável Mestre</option>
+                      <option value="Total">Total</option>
+                      <option value="ADM">ADM</option>
+                    </select>
+                    <span style={{ fontSize:11, color:'#94a3b8', transform: expandido ? 'rotate(180deg)' : 'none', flexShrink:0 }}>▾</span>
+                  </div>
+                  {expandido && (
+                    <div style={{ padding:'0 14px 14px' }}>
+                      <p style={{ margin:'0 0 1px', fontSize:12, color:'#64748b' }}>CPF: {p.associados?.cpf || '—'}</p>
+                      <p style={{ margin:'0 0 10px', fontSize:12, color:'#64748b' }}>E-mail: {p.associados?.email || '—'}</p>
+                      <div style={{ display:'flex', gap:8 }}>
+                        <button onClick={() => p.associados?.id ? navigate('/perfil/' + p.associados.id) : msg('Associado sem perfil cadastrado.')}
+                          style={{ flex:1, padding:'6px 0', borderRadius:8, border:'1px solid #e2e8f0', background:'#fff', color:'#1a237e', fontSize:12, fontWeight:600, cursor:'pointer' }}>
+                          Ver perfil
+                        </button>
+                        <button onClick={() => resetarSenha(p.associados?.email)}
+                          style={{ flex:1, padding:'6px 0', borderRadius:8, border:'none', background:'#fef3c7', color:'#b45309', fontSize:12, fontWeight:600, cursor:'pointer' }}>
+                          Resetar senha
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )})}
+            </div>
+          )}
         </div>
         </>}
 
