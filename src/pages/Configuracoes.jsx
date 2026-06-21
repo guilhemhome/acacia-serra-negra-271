@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 const Input = ({ label, value, onChange }) => (
-  <div style={{ marginBottom: 16 }}>
-    <label style={{ display:'block', fontSize:11, fontWeight:600, color:'#94a3b8', textTransform:'uppercase', letterSpacing:1, marginBottom:4 }}>{label}</label>
+  <div style={{ marginBottom: 10 }}>
+    <label style={{ display:'block', fontSize:10, fontWeight:600, color:'#94a3b8', textTransform:'uppercase', letterSpacing:0.5, marginBottom:3 }}>{label}</label>
     <input value={value} onChange={e => onChange(e.target.value)}
-      style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box', outline:'none' }} />
+      style={{ width:'100%', padding:'7px 10px', borderRadius:7, border:'1.5px solid #e2e8f0', fontSize:13, boxSizing:'border-box', outline:'none' }} />
   </div>
 )
 
@@ -233,18 +233,22 @@ export default function Configuracoes() {
             <span style={{ fontSize:13, color:'#94a3b8', transform: secaoAberta === 'dados' ? 'rotate(180deg)' : 'none', transition:'transform 0.15s' }}>▾</span>
           </div>
           {secaoAberta === 'dados' && (
-            <div style={{ padding:'0 24px 24px' }}>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0 16px' }}>
+            <div style={{ padding:'0 24px 20px' }}>
+              <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:'0 10px' }}>
                 <Input label="Nome da Loja" value={config.nome_loja} onChange={v => setConfig({...config, nome_loja:v})} />
                 <Input label="Número" value={config.numero_loja} onChange={v => setConfig({...config, numero_loja:v})} />
+              </div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'0 10px' }}>
                 <Input label="Potência" value={config.potencia} onChange={v => setConfig({...config, potencia:v})} />
                 <Input label="Rito" value={config.rito} onChange={v => setConfig({...config, rito:v})} />
-                <Input label="Cidade" value={config.cidade} onChange={v => setConfig({...config, cidade:v})} />
                 <Input label="Estado" value={config.estado} onChange={v => setConfig({...config, estado:v})} />
               </div>
-              <Input label="Data de Fundação" value={config.data_fundacao} onChange={v => setConfig({...config, data_fundacao:v})} />
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0 10px' }}>
+                <Input label="Cidade" value={config.cidade} onChange={v => setConfig({...config, cidade:v})} />
+                <Input label="Data de Fundação" value={config.data_fundacao} onChange={v => setConfig({...config, data_fundacao:v})} />
+              </div>
               <button onClick={salvarConfig} disabled={salvando}
-                style={{ width:'100%', padding:'12px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#4f46e5,#7c3aed)', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
+                style={{ width:'100%', padding:'10px', borderRadius:9, border:'none', background:'linear-gradient(135deg,#4f46e5,#7c3aed)', color:'#fff', fontWeight:700, fontSize:14, cursor:'pointer', marginTop:4 }}>
                 {salvando ? 'Salvando...' : '💾 Salvar Configurações'}
               </button>
             </div>
@@ -309,9 +313,10 @@ export default function Configuracoes() {
                     <span style={{ fontSize:11, color:'#94a3b8', transform: expandido ? 'rotate(180deg)' : 'none', flexShrink:0 }}>▾</span>
                   </div>
                   {expandido && (
-                    <div style={{ padding:'0 14px 14px' }}>
-                      <p style={{ margin:'0 0 1px', fontSize:12, color:'#64748b' }}>CPF: {p.associados?.cpf || '—'}</p>
-                      <p style={{ margin:'0 0 10px', fontSize:12, color:'#64748b' }}>E-mail: {p.associados?.email || '—'}</p>
+                    <div style={{ padding:'0 14px 12px' }}>
+                      <p style={{ margin:'0 0 8px', fontSize:12, color:'#64748b' }}>
+                        🪪 {p.associados?.cpf || '—'} <span style={{ margin:'0 4px', color:'#cbd5e1' }}>·</span> 📧 {p.associados?.email || '—'}
+                      </p>
                       <div style={{ display:'flex', gap:8 }}>
                         <button onClick={() => p.associados?.id ? navigate('/perfil/' + p.associados.id) : msg('Associado sem perfil cadastrado.')}
                           style={{ flex:1, padding:'6px 0', borderRadius:8, border:'1px solid #e2e8f0', background:'#fff', color:'#1a237e', fontSize:12, fontWeight:600, cursor:'pointer' }}>
