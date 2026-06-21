@@ -75,6 +75,7 @@ export default function Calendario() {
   const [justifAberta, setJustifAberta] = useState(null)
   const [textoJustif, setTextoJustif] = useState('')
   const [aba, setAba] = useState(() => new URLSearchParams(location.search).get('aba') === 'aniversarios' ? 'aniversarios' : 'eventos')
+  const [eventoExpandido, setEventoExpandido] = useState(null)
 
   useEffect(() => { init() }, [])
   useEffect(() => { carregarEventos() }, [filtroMes])
@@ -338,16 +339,45 @@ export default function Calendario() {
             const vis = visInfo(ev.visibilidade)
             const resp = RESPOSTAS[ev.minhaResposta] || RESPOSTAS.pendente
             const passado = ev.data_evento < hj
+            const expandido = eventoExpandido === ev.id
+            const [diaNum, mesNum] = ev.data_evento ? [ev.data_evento.split('-')[2], ev.data_evento.split('-')[1]] : ['--','--']
+            const nomeMes = ev.data_evento ? new Date(ev.data_evento+'T00:00:00').toLocaleString('pt-BR',{month:'short'}).replace('.','') : ''
             return (
-              <div key={ev.id} style={{ background:'rgba(255,255,255,0.95)', borderRadius:12, padding:16, marginBottom:12, borderLeft:'5px solid '+st.cor }}>
-                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8 }}>
-                  <div style={{ flex:1 }}>
-                    <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4, flexWrap:'wrap' }}>
-                      <span style={{ fontSize:18 }}>{tp.emoji}</span>
-                      <span style={{ fontWeight:700, color:'#1e293b', fontSize:15 }}>{ev.titulo}</span>
-                      <span style={{ fontSize:11, color:'#94a3b8' }}>{vis.emoji} {vis.label}</span>
+              <div key={ev.id} style={{ background:'rgba(255,255,255,0.95)', borderRadius:12, marginBottom:10, overflow:'hidden' }}>
+
+                {/* Cabecalho compacto — clicavel */}
+                <div onClick={() => setEventoExpandido(expandido ? null : ev.id)}
+                  style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', cursor:'pointer' }}>
+
+                  <div style={{ width:42, height:42, borderRadius:8, background:'#f1f5f9', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    <span style={{ fontSize:9, fontWeight:700, color:'#64748b', textTransform:'uppercase', lineHeight:1 }}>{nomeMes}</span>
+                    <span style={{ fontSize:15, fontWeight:700, color:'#1e293b', lineHeight:1.3 }}>{diaNum}</span>
+                  </div>
+
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap' }}>
+                      <span style={{ fontWeight:700, color:'#1e293b', fontSize:14, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:240 }}>{tp.emoji} {ev.titulo}</span>
                     </div>
-                    <div style={{ fontSize:12, color:'#64748b', marginBottom:6 }}>{tp.label}</div>
+                    <p style={{ margin:'2px 0 0', fontSize:11.5, color:'#64748b', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
+                      {ev.hora && <>🕐 {ev.hora}</>}
+                      {ev.local && <> · 📍 {ev.local}</>}
+                      {!ev.hora && !ev.local && tp.label}
+                    </p>
+                  </div>
+
+                  <span style={{ background:st.bg, color:st.cor, borderRadius:20, padding:'3px 10px', fontSize:10.5, fontWeight:700, whiteSpace:'nowrap', flexShrink:0 }}>
+                    {st.label}
+                  </span>
+
+                  <span style={{ fontSize:14, color:'#94a3b8', flexShrink:0, transform: expandido ? 'rotate(180deg)' : 'none', transition:'transform 0.15s' }}>▾</span>
+                </div>
+
+                {/* Corpo expandido */}
+                {expandido && (
+                  <div style={{ padding:'0 16px 16px' }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8 }}>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontSize:12, color:'#94a3b8', marginBottom:6 }}>{vis.emoji} {vis.label}</div>
                     <div style={{ display:'flex', flexWrap:'wrap', gap:8, fontSize:13, color:'#475569', marginBottom:8 }}>
                       <span>📅 {formatarData(ev.data_evento)}</span>
                       {ev.hora && <span>🕐 {ev.hora}</span>}
@@ -444,9 +474,6 @@ export default function Calendario() {
                   </div>
 
                   <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:6 }}>
-                    <span style={{ background:st.bg, color:st.cor, borderRadius:20, padding:'3px 10px', fontSize:11, fontWeight:700, whiteSpace:'nowrap' }}>
-                      {st.label}
-                    </span>
                     {isAdm && (
                       <div style={{ display:'flex', flexDirection:'column', gap:4, marginTop:4 }}>
                         <button onClick={() => abrirEditar(ev)}
@@ -465,6 +492,8 @@ export default function Calendario() {
                     )}
                   </div>
                 </div>
+                  </div>
+                )}
               </div>
             )
           })}
