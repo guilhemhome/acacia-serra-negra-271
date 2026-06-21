@@ -207,12 +207,19 @@ export default function Configuracoes() {
             <span style={{ fontSize:13, color:'#94a3b8', transform: secaoAberta === 'stats' ? 'rotate(180deg)' : 'none', transition:'transform 0.15s' }}>▾</span>
           </div>
           {secaoAberta === 'stats' && (
-            <div style={{ padding:'0 24px 24px' }}>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-                <StatCard label="Total de Irmãos" valor={stats.total} cor="#4f46e5" />
-                <StatCard label="Aprovados" valor={stats.aprovados} cor="#16a34a" />
-                <StatCard label="Pendentes" valor={stats.pendentes} cor="#d97706" />
-                <StatCard label="Rejeitados" valor={stats.rejeitados} cor="#dc2626" />
+            <div style={{ padding:'0 24px 20px' }}>
+              <div style={{ display:'flex', border:'1px solid #e2e8f0', borderRadius:10, overflow:'hidden' }}>
+                {[
+                  { label:'Total', valor:stats.total, cor:'#4f46e5' },
+                  { label:'Aprovados', valor:stats.aprovados, cor:'#16a34a' },
+                  { label:'Pendentes', valor:stats.pendentes, cor:'#d97706' },
+                  { label:'Rejeitados', valor:stats.rejeitados, cor:'#dc2626' },
+                ].map((s, i) => (
+                  <div key={s.label} style={{ flex:1, textAlign:'center', padding:'10px 4px', borderRight: i < 3 ? '1px solid #e2e8f0' : 'none' }}>
+                    <div style={{ fontSize:18, fontWeight:800, color:s.cor }}>{s.valor}</div>
+                    <div style={{ fontSize:9.5, color:'#64748b', textTransform:'uppercase', letterSpacing:0.3 }}>{s.label}</div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -281,9 +288,9 @@ export default function Configuracoes() {
               ) : perfis.map((p, i) => {
                 const expandido = irmaoExpandido === (p.user_id || i)
                 return (
-                <div key={i} style={{ background:'#f8fafc', borderRadius:10, marginBottom:8, border:'1px solid #e2e8f0', overflow:'hidden' }}>
+                <div key={i} style={{ background:'#f8fafc', borderRadius:8, marginBottom:5, border:'1px solid #e2e8f0', overflow:'hidden' }}>
                   <div onClick={() => setIrmaoExpandido(expandido ? null : (p.user_id || i))}
-                    style={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:8, padding:'10px 14px', cursor:'pointer' }}>
+                    style={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:8, padding:'7px 12px', cursor:'pointer' }}>
                     <span style={{ fontWeight:600, color:'#1e293b', fontSize:13, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', flex:1, minWidth:0 }}>
                       {p.associados?.nome_completo || '—'}
                     </span>
