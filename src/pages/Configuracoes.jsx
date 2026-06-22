@@ -3,6 +3,24 @@ import MonitorContexto from '../components/MonitorContexto'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
+function formatarDataBR(iso) {
+  if (!iso) return ''
+  const [a,m,d] = iso.split('-')
+  if (!a || !m || !d) return iso
+  return d+'/'+m+'/'+a
+}
+function isoParaData(br) {
+  const nums = br.replace(/\D/g,'')
+  if (nums.length !== 8) return br
+  const d = nums.slice(0,2), m = nums.slice(2,4), a = nums.slice(4,8)
+  return a+'-'+m+'-'+d
+}
+function formatarDataInput(v) {
+  return v.replace(/\D/g,'').slice(0,8)
+    .replace(/(\d{2})(\d)/,'$1/$2')
+    .replace(/(\d{2})(\d)/,'$1/$2')
+}
+
 const Input = ({ label, value, onChange }) => (
   <div style={{ marginBottom: 10 }}>
     <label style={{ display:'block', fontSize:10, fontWeight:600, color:'#94a3b8', textTransform:'uppercase', letterSpacing:0.5, marginBottom:3 }}>{label}</label>
@@ -21,7 +39,28 @@ export default function Configuracoes() {
     data_fundacao: '1983-11-15',
     cidade: 'Serra Negra',
     estado: 'SP',
+    cep: '',
+    rua: '',
+    numero_endereco: '',
   })
+  const [buscandoCepLoja, setBuscandoCepLoja] = useState(false)
+
+  async function buscarCepLoja(cepDigitado) {
+    const cepLimpo = cepDigitado.replace(/\D/g, '')
+    if (cepLimpo.length !== 8) return
+    setBuscandoCepLoja(true)
+    try {
+      const resp = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`)
+      const data = await resp.json()
+      if (!data.erro) {
+        setConfig(prev => ({ ...prev, rua: data.logradouro || prev.rua, cidade: data.localidade || prev.cidade, estado: data.uf || prev.estado }))
+      }
+    } catch (e) {
+      // Falha de rede — segue com preenchimento manual
+    } finally {
+      setBuscandoCepLoja(false)
+    }
+  }
   const [stats, setStats] = useState({ total:0, aprovados:0, pendentes:0, rejeitados:0 })
   const [perfis, setPerfis] = useState([])
   const [mensagem, setMensagem] = useState('')
@@ -234,6 +273,7 @@ export default function Configuracoes() {
           </div>
           {secaoAberta === 'dados' && (
             <div style={{ padding:'0 24px 20px' }}>
+              <p style={{ margin:'4px 0 8px', fontSize:11, fontWeight:700, color:'#94a3b8', textTransform:'uppercase', letterSpacing:0.5 }}>Institucional</p>
               <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:'0 10px' }}>
                 <Input label="Nome da Loja" value={config.nome_loja} onChange={v => setConfig({...config, nome_loja:v})} />
                 <Input label="Número" value={config.numero_loja} onChange={v => setConfig({...config, numero_loja:v})} />
@@ -241,14 +281,31 @@ export default function Configuracoes() {
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'0 10px' }}>
                 <Input label="Potência" value={config.potencia} onChange={v => setConfig({...config, potencia:v})} />
                 <Input label="Rito" value={config.rito} onChange={v => setConfig({...config, rito:v})} />
+                <Input label="Data de Fundação" value={formatarDataBR(config.data_fundacao)}
+                  onChange={v => setConfig({...config, data_fundacao: isoParaData(formatarDataInput(v))})} />
+              </div>
+
+              <p style={{ margin:'10px 0 8px', fontSize:11, fontWeight:700, color:'#94a3b8', textTransform:'uppercase', letterSpacing:0.5 }}>Endereço</p>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'0 10px' }}>
+                <div style={{ marginBottom:10 }}>
+                  <label style={{ display:'block', fontSize:10, fontWeight:600, color:'#94a3b8', textTransform:'uppercase', letterSpacing:0.5, marginBottom:3 }}>
+                    CEP {buscandoCepLoja && <span style={{ color:'#4f46e5', fontWeight:400, textTransform:'none' }}>(buscando...)</span>}
+                  </label>
+                  <input value={config.cep} placeholder="00000-000"
+                    onChange={e => setConfig({...config, cep:e.target.value})}
+                    onBlur={e => buscarCepLoja(e.target.value)}
+                    style={{ width:'100%', padding:'7px 10px', borderRadius:7, border:'1.5px solid #e2e8f0', fontSize:13, boxSizing:'border-box', outline:'none' }} />
+                </div>
                 <Input label="Estado" value={config.estado} onChange={v => setConfig({...config, estado:v})} />
-              </div>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0 10px' }}>
                 <Input label="Cidade" value={config.cidade} onChange={v => setConfig({...config, cidade:v})} />
-                <Input label="Data de Fundação" value={config.data_fundacao} onChange={v => setConfig({...config, data_fundacao:v})} />
               </div>
+              <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:'0 10px' }}>
+                <Input label="Rua" value={config.rua} onChange={v => setConfig({...config, rua:v})} />
+                <Input label="Número" value={config.numero_endereco} onChange={v => setConfig({...config, numero_endereco:v})} />
+              </div>
+
               <button onClick={salvarConfig} disabled={salvando}
-                style={{ width:'100%', padding:'10px', borderRadius:9, border:'none', background:'linear-gradient(135deg,#4f46e5,#7c3aed)', color:'#fff', fontWeight:700, fontSize:14, cursor:'pointer', marginTop:4 }}>
+                style={{ width:'100%', padding:'10px', borderRadius:9, border:'none', background:'linear-gradient(135deg,#4f46e5,#7c3aed)', color:'#fff', fontWeight:700, fontSize:14, cursor:'pointer', marginTop:6 }}>
                 {salvando ? 'Salvando...' : '💾 Salvar Configurações'}
               </button>
             </div>
