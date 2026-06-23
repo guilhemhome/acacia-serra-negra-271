@@ -263,6 +263,9 @@ export default function Dashboard() {
             style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: 8, color: '#fff', padding: '8px 12px', cursor: 'pointer', fontSize: 16, minWidth: 44, minHeight: 44 }}>↩</button>
           <img src="/logo-acacia.png" alt="Logo" style={{ width: 64, height: 64, borderRadius: '50%', border: '3px solid rgba(255,255,255,0.5)', objectFit: 'cover', display: 'block', margin: '0 auto 8px' }} />
           <h1 style={{ color: '#fff', fontSize: '1.4rem', fontWeight: 500, margin: '0 0 2px' }}>Olá, {usuario.cargoAtual ? `${usuario.cargoAtual} ${usuario.apelido}` : usuario.apelido}</h1>
+          {usuario.perfil === 'ADM' && (
+            <span style={{ display: 'inline-block', background: 'rgba(255,255,255,0.15)', color: '#fff', fontSize: 10, fontWeight: 600, letterSpacing: 0.5, padding: '2px 8px', borderRadius: 6, margin: '0 0 4px', textTransform: 'uppercase' }}>Administrador</span>
+          )}
           <p style={{ color:'rgba(255,255,255,0.75)', fontSize:12, margin:'0 0 1px' }}>{usuario.id_acacia ? `Nº ${usuario.id_acacia} · ` : ''}{usuario.email_assoc || usuario.email}</p>
           {usuario.perfil === 'ADM' && usuario.cargoMaconico && <p style={{ color:'rgba(255,255,255,0.55)', fontSize:11, margin:'0' }}>Cargo na loja: {usuario.cargoMaconico}</p>}
         </div>
@@ -432,8 +435,6 @@ export default function Dashboard() {
               { icon: '➕', label: 'Novo cadastro', rota: '/cadastro' },
               { icon: '👨‍⚖️', label: 'Ver membros', rota: '/membros' },
               { icon: '📅', label: 'Calendário', rota: '/calendario' },
-              { icon: '🎂', label: 'Aniversários', rota: '/calendario?aba=aniversarios' },
-              { icon: '🗓️', label: 'Eventos', rota: '/calendario' },
               { icon: '⚙️', label: 'Configurações', rota: '/configuracoes' },
               { icon: '✏️', label: 'Meu perfil', rota: '/editar-perfil' },
             ] : [
