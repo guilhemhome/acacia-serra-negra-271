@@ -315,7 +315,7 @@ export default function Dashboard() {
               <p style={{ ...sec, margin: 0 }}>Próximo evento</p>
               <button onClick={() => navigate('/calendario')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: 12, cursor: 'pointer', padding: 0 }}>Ver calendário →</button>
             </div>
-            <div onClick={() => navigate('/calendario')} style={{ background: 'rgba(255,255,255,0.95)', borderRadius: 16, padding: '14px 16px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer' }}>
+            <div onClick={() => navigate(`/calendario?evento=${proximoEvento.id}`)} style={{ background: 'rgba(255,255,255,0.95)', borderRadius: 16, padding: '14px 16px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer' }}>
               <div style={{ textAlign: 'center', minWidth: 44, background: '#f1f5f9', borderRadius: 10, padding: '8px 10px' }}>
                 <div style={{ fontSize: 20, fontWeight: 500, color: '#1a237e', lineHeight: 1 }}>
                   {proximoEvento.data_evento.split('T')[0].split('-')[2]}

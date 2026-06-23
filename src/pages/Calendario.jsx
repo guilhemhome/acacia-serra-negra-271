@@ -79,6 +79,13 @@ export default function Calendario() {
 
   useEffect(() => { init() }, [])
   useEffect(() => { carregarEventos() }, [filtroMes])
+  useEffect(() => {
+    const eventoId = new URLSearchParams(location.search).get('evento')
+    if (!eventoId) return
+    supabase.from('eventos').select('id, titulo').eq('id', eventoId).maybeSingle().then(({ data }) => {
+      if (data) verPresencas(data)
+    })
+  }, [])
 
   async function init() {
     const { data: { session } } = await supabase.auth.getSession()
