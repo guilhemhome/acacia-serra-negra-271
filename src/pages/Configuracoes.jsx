@@ -52,13 +52,8 @@ export default function Configuracoes() {
     try {
       const resp = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`)
       const data = await resp.json()
-      console.log('[DEBUG CEP] resposta ViaCEP:', data)
       if (!data.erro) {
-        setConfig(prev => {
-          const novo = { ...prev, rua: data.logradouro || prev.rua, cidade: data.localidade || prev.cidade, estado: data.uf || prev.estado }
-          console.log('[DEBUG CEP] novo config:', novo)
-          return novo
-        })
+        setConfig(prev => ({ ...prev, rua: data.logradouro || prev.rua, cidade: data.localidade || prev.cidade, estado: data.uf || prev.estado }))
       }
     } catch (e) {
       // Falha de rede — segue com preenchimento manual
