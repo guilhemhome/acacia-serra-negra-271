@@ -15,6 +15,11 @@ export default function Dashboard() {
   const [templates, setTemplates] = useState({})
   const [modalPresencas, setModalPresencas] = useState(null)
   const [listaPresencas, setListaPresencas] = useState({ confirmados: [], ausentes: [], pendentes: [] })
+  const [minhaPresenca, setMinhaPresenca] = useState(null)
+  const [justificativaAberta, setJustificativaAberta] = useState(false)
+  const [textoJustificativa, setTextoJustificativa] = useState('')
+  const [salvandoPresenca, setSalvandoPresenca] = useState(false)
+  const associadoIdRef = useRef(null)
 
   function hojeStr() { return new Date().toISOString().split('T')[0] }
   function daqui30() { const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString().split('T')[0] }
@@ -26,6 +31,25 @@ export default function Dashboard() {
     return Math.ceil((new Date(a, m - 1, d) - hoje) / 86400000)
   }
 
+  async function confirmarPresenca(eventoId, resposta, justificativa) {
+    const aid = associadoIdRef.current
+    if (!aid) { console.warn('associadoId nulo'); return }
+    setSalvandoPresenca(eventoId + resposta)
+    try {
+      await supabase.from('eventos_presencas').upsert({
+        evento_id: eventoId,
+        associado_id: aid,
+        resposta: resposta,
+        justificativa: justificativa || null,
+        confirmado_em: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'evento_id,associado_id' })
+      setMinhaPresenca({ resposta, justificativa })
+      setJustificativaAberta(false)
+      setTextoJustificativa('')
+    } catch (err) { console.error('Erro ao salvar presença:', err) }
+    setSalvandoPresenca(false)
+  }
   const CACHE_TTL = 5 * 60 * 1000 // 5 minutos
 
   const iniciado = useRef(false)
@@ -123,6 +147,7 @@ export default function Dashboard() {
     }
     const cargoMaconico = cargoAtual
     const cargoExibido = perfil === 'ADM' ? '' : cargoAtual
+    associadoIdRef.current = assoc?.id || null
     const usuarioObj = { email: user.email, perfil, nome, apelido, cargoAtual: cargoExibido, cargoMaconico, id_acacia: assoc?.id_acacia || '', email_assoc: assoc?.email || user.email }
     setGrauUsuario(grau)
     setUsuario(usuarioObj)
@@ -161,6 +186,8 @@ export default function Dashboard() {
       const respondidoIds = new Set((pres||[]).map(p => p.associados?.id).filter(Boolean))
       const pendList = (todosAtivos||[]).filter(m => !respondidoIds.has(m.id)).map(m => ({ nome: nomeModal({ associados: m }) }))
       setListaPresencas({ confirmados: confList, ausentes: ausList, pendentes: pendList })
+      const minhaResp = (pres||[]).find(p => p.associados?.id === assoc?.id)
+      setMinhaPresenca(minhaResp ? { resposta: minhaResp.resposta, justificativa: minhaResp.justificativa } : null)
     }
 
     const tObj = {}
@@ -334,6 +361,53 @@ export default function Dashboard() {
               <span style={{ fontSize: 11, color: '#1a237e', fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0 }}>
                 {diasEvento === 0 ? 'hoje' : diasEvento === 1 ? 'amanhã' : `em ${diasEvento} dias`}
               </span>
+            </div>
+
+            {/* Confirmação de presença direta (estilo like/deslike) */}
+            <div style={{ background: 'rgba(255,255,255,0.95)', borderRadius: 16, padding: '12px 16px', marginBottom: 20 }}>
+              {minhaPresenca ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  {minhaPresenca.resposta === 'presente' ? (
+                    <span style={{ fontSize: 12, color: '#2e7d32', background: '#e8f5e9', borderRadius: 20, padding: '4px 12px', fontWeight: 600 }}>👍 Presença confirmada</span>
+                  ) : (
+                    <span style={{ fontSize: 12, color: '#c62828', background: '#ffebee', borderRadius: 20, padding: '4px 12px', fontWeight: 600 }}>👎 Ausência justificada</span>
+                  )}
+                  <button onClick={() => setMinhaPresenca(null)}
+                    style={{ fontSize: 11, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>alterar</button>
+                </div>
+              ) : justificativaAberta ? (
+                <div>
+                  <textarea
+                    placeholder="Informe sua justificativa (obrigatório)..."
+                    value={textoJustificativa}
+                    onChange={e => setTextoJustificativa(e.target.value)}
+                    style={{ width: '100%', borderRadius: 8, border: '1px solid #e2e8f0', padding: '8px 10px', fontSize: 12, resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+                    rows={3}
+                  />
+                  <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+                    <button
+                      onClick={() => textoJustificativa.trim() && confirmarPresenca(proximoEvento.id, 'ausente', textoJustificativa.trim())}
+                      disabled={!textoJustificativa.trim() || salvandoPresenca === proximoEvento.id + 'ausente'}
+                      style={{ flex: 1, background: textoJustificativa.trim() ? '#c62828' : '#e2e8f0', color: textoJustificativa.trim() ? '#fff' : '#94a3b8', border: 'none', borderRadius: 8, padding: '8px 0', fontSize: 12, fontWeight: 600, cursor: textoJustificativa.trim() ? 'pointer' : 'default' }}>
+                      {salvandoPresenca === proximoEvento.id + 'ausente' ? 'Salvando...' : 'Confirmar ausência'}
+                    </button>
+                    <button onClick={() => { setJustificativaAberta(false); setTextoJustificativa('') }}
+                      style={{ background: '#f1f5f9', color: '#64748b', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, cursor: 'pointer' }}>Cancelar</button>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={() => confirmarPresenca(proximoEvento.id, 'presente', null)}
+                    disabled={salvandoPresenca === proximoEvento.id + 'presente'}
+                    style={{ flex: 1, background: '#e8f5e9', color: '#2e7d32', border: '1px solid #a5d6a7', borderRadius: 8, padding: '9px 0', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                    {salvandoPresenca === proximoEvento.id + 'presente' ? 'Salvando...' : '👍 Confirmar presença'}
+                  </button>
+                  <button onClick={() => setJustificativaAberta(true)}
+                    style={{ flex: 1, background: '#ffebee', color: '#c62828', border: '1px solid #ef9a9a', borderRadius: 8, padding: '9px 0', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                    👎 Não irei
+                  </button>
+                </div>
+              )}
             </div>
           </>
         )}
