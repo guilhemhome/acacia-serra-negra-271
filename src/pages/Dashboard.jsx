@@ -144,6 +144,7 @@ export default function Dashboard() {
         .select('resposta, justificativa, associados(id, nome_completo, apelido)')
         .eq('evento_id', proxEvento.id)
       const { data: cargosAtivos } = await supabase.from('cargos_historico').select('associado_id, cargo').eq('em_exercicio', true)
+      const { data: todosAtivos } = await supabase.from('associados').select('id, nome_completo, apelido').eq('status_cadastro', 'aprovado').eq('situacao', 'ativo')
       const cargoMap = {}
       ;(cargosAtivos||[]).forEach(c => { cargoMap[c.associado_id] = c.cargo })
       function nomeModal(p) {
@@ -157,7 +158,9 @@ export default function Dashboard() {
       setResumoPresencas({ confirmados, ausentes, total: ativos || 0 })
       const confList = (pres||[]).filter(p => p.resposta === 'presente').map(p => ({ nome: nomeModal(p) }))
       const ausList = (pres||[]).filter(p => p.resposta === 'ausente').map(p => ({ nome: nomeModal(p), motivo: p.justificativa || '' }))
-      setListaPresencas({ confirmados: confList, ausentes: ausList, pendentes: [] })
+      const respondidoIds = new Set((pres||[]).map(p => p.associados?.id).filter(Boolean))
+      const pendList = (todosAtivos||[]).filter(m => !respondidoIds.has(m.id)).map(m => ({ nome: nomeModal({ associados: m }) }))
+      setListaPresencas({ confirmados: confList, ausentes: ausList, pendentes: pendList })
     }
 
     const tObj = {}
@@ -395,7 +398,11 @@ export default function Dashboard() {
                   ))
               )}
               {modalPresencas === 'pendentes' && (
-                <p style={{ color:'#64748b', fontSize:13 }}>Lista de pendentes disponível no calendário.</p>
+                listaPresencas.pendentes.length === 0
+                  ? <p style={{ color:'#64748b', fontSize:13 }}>Ninguém pendente.</p>
+                  : listaPresencas.pendentes.map((p, i) => (
+                    <div key={i} style={{ padding:'8px 0', borderBottom:'1px solid #f1f5f9', fontSize:14, color:'#1e293b' }}>👤 {p.nome}</div>
+                  ))
               )}
             </div>
           </div>
