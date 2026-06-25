@@ -69,6 +69,7 @@ export default function Calendario() {
   const [modal, setModal] = useState(null)
   const [modalPresencas, setModalPresencas] = useState(null)
   const [presencas, setPresencas] = useState([])
+  const [naoResponderam, setNaoResponderam] = useState([])
   const [form, setForm] = useState({ titulo:'', tipo:'sessao_ordinaria', data_evento:'', hora:'', local:'', descricao:'', status:'ativo', visibilidade:'todos' })
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState('')
@@ -225,9 +226,13 @@ export default function Calendario() {
 
   async function verPresencas(ev) {
     const { data } = await supabase.from('eventos_presencas')
-      .select('resposta, justificativa, associados(nome_completo)')
+      .select('resposta, justificativa, associados(id, nome_completo)')
       .eq('evento_id', ev.id)
+    const { data: todosAtivos } = await supabase.from('associados').select('id, nome_completo').eq('status_cadastro', 'aprovado').eq('situacao', 'ativo')
+    const respondidoIds = new Set((data||[]).map(p => p.associados?.id).filter(Boolean))
+    const pendentes = (todosAtivos||[]).filter(m => !respondidoIds.has(m.id)).map(m => ({ associados: { nome_completo: m.nome_completo } }))
     setPresencas(data||[])
+    setNaoResponderam(pendentes)
     setModalPresencas(ev)
   }
 
@@ -694,7 +699,7 @@ export default function Calendario() {
                   <div style={{ fontSize:11, color:'#c62828' }}>Ausentes</div>
                 </div>
                 <div style={{ flex:1, textAlign:'center', background:'#f1f5f9', borderRadius:10, padding:'10px 4px' }}>
-                  <div style={{ fontSize:22, fontWeight:800, color:'#64748b' }}>{presencas.filter(p => !p.resposta || p.resposta === 'pendente').length}</div>
+                  <div style={{ fontSize:22, fontWeight:800, color:'#64748b' }}>{naoResponderam.length}</div>
                   <div style={{ fontSize:11, color:'#64748b' }}>Sem resposta</div>
                 </div>
               </div>
@@ -717,6 +722,16 @@ export default function Calendario() {
                 ) : null
               })}
 
+              {naoResponderam.length > 0 && (
+                <div style={{ marginBottom:14 }}>
+                  <p style={{ margin:'0 0 6px', fontWeight:700, color:'#64748b', fontSize:13 }}>Sem resposta ({naoResponderam.length})</p>
+                  {naoResponderam.map((p,i) => (
+                    <div key={i} style={{ padding:'8px 12px', background:'#f8fafc', borderRadius:8, marginBottom:4 }}>
+                      <div style={{ fontSize:14, color:'#1e293b', fontWeight:500 }}>{p.associados?.nome_completo || '-'}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
               {presencas.length === 0 && <p style={{ color:'#94a3b8', textAlign:'center' }}>Nenhuma resposta ainda.</p>}
 
               <button onClick={() => setModalPresencas(null)}
