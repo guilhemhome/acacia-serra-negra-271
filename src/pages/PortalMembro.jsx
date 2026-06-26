@@ -210,7 +210,7 @@ export default function PortalMembro() {
                       ) : (
                         <span style={{ fontSize:12, color:'#c62828', background:'#ffebee', borderRadius:20, padding:'4px 12px', fontWeight:600 }}>Ausência justificada</span>
                       )}
-                      <button onClick={() => { setPresencas(prev => ({ ...prev, [ev.id]: { resposta: null, justificativa: null } })) }}
+                      <button onClick={() => { setPresencas(prev => { const copia = { ...prev }; delete copia[ev.id]; return copia }) }}
                         style={{ fontSize:11, color:'#94a3b8', background:'none', border:'none', cursor:'pointer', padding:0 }}>alterar</button>
                     </div>
                   ) : justificativaAberta === ev.id ? (

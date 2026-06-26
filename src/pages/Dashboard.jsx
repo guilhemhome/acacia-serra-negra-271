@@ -338,6 +338,17 @@ export default function Dashboard() {
 
         </div>
 
+        {/* Banner pendencia de presenca */}
+        {proximoEvento && !minhaPresenca?.resposta && (
+          <div style={{ background:'#fff3e0', borderRadius:14, padding:'12px 16px', marginBottom:16, borderLeft:'4px solid #f59e0b', display:'flex', alignItems:'center', gap:10 }}>
+            <span style={{ fontSize:20 }}>⚠️</span>
+            <div>
+              <div style={{ fontSize:13, fontWeight:700, color:'#e65100' }}>Manifestação pendente</div>
+              <div style={{ fontSize:12, color:'#bf360c' }}>Confirme sua presença nos próximos eventos da loja.</div>
+            </div>
+          </div>
+        )}
+
         {/* Próximo evento compacto */}
         {proximoEvento && (
           <>
