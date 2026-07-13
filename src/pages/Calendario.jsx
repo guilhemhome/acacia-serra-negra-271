@@ -142,8 +142,10 @@ export default function Calendario() {
       }))
     } catch(e) { iniciacoes = [] }
     const aniv = (irmaos||[]).filter(a => a.data_nascimento && a.data_nascimento.split('-')[1] === mes)
+      .sort((a,b) => Number(a.data_nascimento.split('-')[2]) - Number(b.data_nascimento.split('-')[2]))
     setAniversariantes(aniv)
     const cas = (irmaos||[]).filter(a => a.data_casamento && a.data_casamento.split('-')[1] === mes)
+      .sort((a,b) => Number(a.data_casamento.split('-')[2]) - Number(b.data_casamento.split('-')[2]))
     setCasamentos(cas)
     const mac = []
     ;(iniciacoes||[]).forEach(ini => {
@@ -165,6 +167,7 @@ export default function Calendario() {
       .select('nome, data_nascimento, parentesco, associado_id, associados(nome_completo, tel_celular)')
       .not('data_nascimento','is',null)
     const fam = (deps||[]).filter(d => d.data_nascimento && d.data_nascimento.split('-')[1] === mes)
+      .sort((a,b) => Number(a.data_nascimento.split('-')[2]) - Number(b.data_nascimento.split('-')[2]))
     setFamiliares(fam)
   }
 
