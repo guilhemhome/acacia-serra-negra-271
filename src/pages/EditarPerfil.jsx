@@ -427,9 +427,8 @@ export default function EditarPerfil() {
                 ))}
                 <BtnSalvar onClick={salvarGraus} />
 
-                {/* Bodes do Asfalto — visível para membros Bodes, oculto para outros */}
-                {bodes.bodes_asfalto !== false || bodes._eraBode ? (
-                  <>
+                {/* Bodes do Asfalto — visível para todos */}
+                <>
                     <Secao titulo="🐐 Bodes do Asfalto" />
                     <div style={{ marginBottom:14 }}>
                       <label style={{ display:'flex', alignItems:'center', gap:10, cursor:'pointer' }}>
@@ -446,8 +445,7 @@ export default function EditarPerfil() {
                       </>
                     )}
                     <BtnSalvar onClick={salvarBodes} />
-                  </>
-                ) : null}
+                </>
               </div>
             )}
 
