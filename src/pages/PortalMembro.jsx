@@ -46,7 +46,7 @@ export default function PortalMembro() {
     if (!user) { setCarregando(false); return }
 
     const { data: assoc } = await supabase.from('associados')
-      .select('id, nome_completo, data_nascimento, bodes_asfalto, bodes_asfalto_numero, bodes_asfalto_data_admissao').eq('user_id', user.id).maybeSingle()
+      .select('id, nome_completo, data_nascimento, data_casamento, bodes_asfalto, bodes_asfalto_numero, bodes_asfalto_data_admissao').eq('user_id', user.id).maybeSingle()
     const { data: perfil } = await supabase.from('perfis_acesso')
       .select('perfil').eq('user_id', user.id).maybeSingle()
 
@@ -63,26 +63,56 @@ export default function PortalMembro() {
     if (tplI) setTplIrmao(tplI)
     if (tplD) setTplDependente(tplD)
 
-    // Detectar aniversario hoje
+    // Detectar datas especiais hoje
     const hoje = hojeStr()
     const [, mesHoje, diaHoje] = hoje.split('-')
-    const nascStr = (assoc?.data_nascimento || '').split('T')[0]
-    const [, mesNasc, diaNasc] = nascStr.split('-')
-    if (mesNasc === mesHoje && diaNasc === diaHoje) {
-      const msg = (tplI || '').replace('{nome}', assoc.nome_completo).replace('{loja}', 'Acácia de Serra Negra Nº 271')
-      setBannerAniv({ tipo: 'irmao', nome: assoc.nome_completo, tpl: msg })
-    } else {
-      const { data: deps } = await supabase.from('familiares')
-        .select('nome, data_nascimento, parentesco').eq('associado_id', assoc.id)
-      const depAniv = (deps||[]).find(d => {
-        const [, md, dd] = (d.data_nascimento||'').split('-')
-        return md === mesHoje && dd === diaHoje
-      })
-      if (depAniv) {
-        const msg = (tplD || '').replace('{nome_irmao}', assoc.nome_completo).replace('{parentesco}', depAniv.parentesco).replace('{nome_dependente}', depAniv.nome).replace('{loja}', 'Acácia de Serra Negra Nº 271')
-        setBannerAniv({ tipo: 'dependente', nome: depAniv.nome, nomePai: assoc.nome_completo, tpl: msg })
-      }
+    const anoHoje = hoje.split('-')[0]
+    function messDia(d) { const p = (d||'').split('T')[0].split('-'); return { m: p[1], d: p[2] } }
+    function ehHoje(d) { const {m,d: di} = messDia(d); return m === mesHoje && di === diaHoje }
+
+    const banners = []
+
+    // Aniversario do irmao
+    if (ehHoje(assoc?.data_nascimento)) {
+      const anos = Number(anoHoje) - Number((assoc.data_nascimento||'').split('-')[0])
+      const tplBase = tpls?.find(t => t.chave === 'aniversario_irmao_whatsapp')?.mensagem || tplIrmao
+      banners.push({ tipo: 'irmao', emoji: '🎂', titulo: `Feliz aniversário, ${assoc.nome_completo.split(' ')[0]}!`, sub: `Você completa ${anos} anos hoje!`, tpl: tplBase.replace('{nome}', assoc.nome_completo).replace('{loja}', 'Acácia de Serra Negra Nº 271') })
     }
+
+    // Aniversario de casamento
+    if (assoc?.data_casamento && ehHoje(assoc.data_casamento)) {
+      const anos = Number(anoHoje) - Number(assoc.data_casamento.split('-')[0])
+      const tplBase = tpls?.find(t => t.chave === 'aniversario_casamento')?.mensagem || `🌿 A Loja Maçônica Acácia de Serra Negra Nº 271 saúda o Ir∴ ${assoc.nome_completo} e sua família pelo ${anos}º aniversário de casamento! Que o G∴A∴D∴U∴ abençoe sempre esta união! 💍`
+      banners.push({ tipo: 'casamento', emoji: '💍', titulo: `Parabéns pelo aniversário de casamento!`, sub: `${anos} anos de união hoje!`, tpl: tplBase })
+    }
+
+    // Iniciacao maconica
+    const { data: iniciacoes } = await supabase.from('historico_graus')
+      .select('grau, data_concessao').eq('associado_id', assoc.id).eq('grau', 'aprendiz').maybeSingle()
+    if (iniciacoes?.data_concessao && ehHoje(iniciacoes.data_concessao)) {
+      const anos = Number(anoHoje) - Number(iniciacoes.data_concessao.split('-')[0])
+      const tplBase = tpls?.find(t => t.chave === 'aniversario_iniciacao')?.mensagem || `🌿 A Loja Maçônica Acácia de Serra Negra Nº 271 saúda o Ir∴ ${assoc.nome_completo} pelo ${anos}º aniversário de sua iniciação maçônica! Que o G∴A∴D∴U∴ continue iluminando sua jornada! ⚒️`
+      banners.push({ tipo: 'iniciacao', emoji: '⚒️', titulo: `Aniversário de Iniciação Maçônica!`, sub: `${anos} anos na Ordem hoje!`, tpl: tplBase })
+    }
+
+    // Bodes do Asfalto
+    if (assoc?.bodes_asfalto && assoc?.bodes_asfalto_data_admissao && ehHoje(assoc.bodes_asfalto_data_admissao)) {
+      const anos = Number(anoHoje) - Number(assoc.bodes_asfalto_data_admissao.split('-')[0])
+      const tplBase = tpls?.find(t => t.chave === 'aniversario_bodes')?.mensagem || `🐐 O Moto Clube Bodes do Asfalto saúda o Ir∴ ${assoc.nome_completo} pelo ${anos}º aniversário de admissão! Rumo aberto, irmão! 🏍️`
+      banners.push({ tipo: 'bodes', emoji: '🐐', titulo: `Aniversário nos Bodes do Asfalto!`, sub: `${anos} anos de admissão hoje!`, tpl: tplBase })
+    }
+
+    // Dependentes
+    const { data: deps } = await supabase.from('familiares')
+      .select('nome, data_nascimento, parentesco').eq('associado_id', assoc.id)
+    ;(deps||[]).forEach(dep => {
+      if (ehHoje(dep.data_nascimento)) {
+        const tplBase = tpls?.find(t => t.chave === 'aniversario_dependente_whatsapp')?.mensagem || tplDependente
+        banners.push({ tipo: 'dependente', emoji: '🎂', titulo: `Aniversário de ${dep.nome.split(' ')[0]}!`, sub: `${dep.parentesco} — feliz aniversário!`, tpl: tplBase.replace('{nome_irmao}', assoc.nome_completo).replace('{parentesco}', dep.parentesco).replace('{nome_dependente}', dep.nome).replace('{loja}', 'Acácia de Serra Negra Nº 271') })
+      }
+    })
+
+    if (banners.length > 0) setBannerAniv(banners)
 
     const { data: ch } = await supabase.from('cargos_historico')
       .select('cargo, associados(nome_completo)').eq('em_exercicio', true)
@@ -204,28 +234,25 @@ export default function PortalMembro() {
           </>
         )}
 
-        {/* Banner aniversario hoje */}
-        {bannerAniv && (
-          <div style={{ background:'#e8f5e9', borderRadius:14, padding:'14px 16px', marginBottom:16, borderLeft:'4px solid #43a047' }}>
+        {/* Banners de datas especiais hoje */}
+        {Array.isArray(bannerAniv) && bannerAniv.map((b, i) => (
+          <div key={i} style={{ background:'#e8f5e9', borderRadius:14, padding:'14px 16px', marginBottom:12, borderLeft:'4px solid #43a047' }}>
             <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:8 }}>
-              <span style={{ fontSize:24 }}>🎂</span>
+              <span style={{ fontSize:24 }}>{b.emoji}</span>
               <div>
-                {bannerAniv.tipo === 'irmao'
-                  ? <div style={{ fontSize:14, fontWeight:700, color:'#2e7d32' }}>Feliz aniversário, {bannerAniv.nome.split(' ')[0]}!</div>
-                  : <div style={{ fontSize:14, fontWeight:700, color:'#2e7d32' }}>Hoje é aniversário de {bannerAniv.nome}!</div>
-                }
-                <div style={{ fontSize:12, color:'#388e3c' }}>A loja preparou uma mensagem especial para você compartilhar.</div>
+                <div style={{ fontSize:14, fontWeight:700, color:'#2e7d32' }}>{b.titulo}</div>
+                <div style={{ fontSize:12, color:'#388e3c' }}>{b.sub}</div>
               </div>
             </div>
             <div style={{ background:'#f1f8e9', borderRadius:8, padding:'10px 12px', fontSize:12, color:'#33691e', marginBottom:8, whiteSpace:'pre-wrap', lineHeight:1.5 }}>
-              {bannerAniv.tpl}
+              {b.tpl}
             </div>
-            <button onClick={() => { navigator.clipboard.writeText(bannerAniv.tpl) }}
+            <button onClick={() => { navigator.clipboard.writeText(b.tpl) }}
               style={{ width:'100%', padding:'8px', borderRadius:8, border:'none', background:'#43a047', color:'#fff', fontWeight:700, fontSize:13, cursor:'pointer' }}>
               📋 Copiar mensagem
             </button>
           </div>
-        )}
+        ))}
 
         {/* Banner pendencia de presenca */}
         {eventos.length > 0 && !presencas[eventos[0].id]?.resposta && (
