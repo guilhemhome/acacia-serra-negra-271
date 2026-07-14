@@ -27,6 +27,9 @@ export default function PortalMembro() {
   const [textoJustificativa, setTextoJustificativa] = useState('')
   const [salvandoPresenca, setSalvandoPresenca] = useState(false)
   const [associadoId, setAssociadoId] = useState(null)
+  const [bannerAniv, setBannerAniv] = useState(null)
+  const [tplIrmao, setTplIrmao] = useState('🌿 A Loja Maçônica Acácia de Serra Negra Nº 271 saúda com fraternidade o Ir∴ {nome} que hoje completa mais um ano de vida. Que o G∴A∴D∴U∴ ilumine sempre sua jornada! 🎂')
+  const [tplDependente, setTplDependente] = useState('🌿 A Loja Maçônica Acácia de Serra Negra Nº 271 saúda o Ir∴ {nome_irmao} pelo aniversário de {parentesco} {nome_dependente}! Felicidades a toda a família! 🎂')
   const associadoIdRef = React.useRef(null)
 
   function hojeStr() { return new Date().toISOString().split('T')[0] }
