@@ -96,8 +96,12 @@ export default function PortalMembro() {
       .select('grau, data_concessao').eq('associado_id', assoc.id).eq('grau', 'aprendiz').maybeSingle()
     if (iniciacoes?.data_concessao && ehHoje(iniciacoes.data_concessao)) {
       const anos = Number(anoHoje) - Number(iniciacoes.data_concessao.split('-')[0])
-      const tplBase = tpls?.find(t => t.chave === 'aniversario_iniciacao')?.mensagem || `🌿 A Loja Maçônica Acácia de Serra Negra Nº 271 saúda o Ir∴ ${assoc.nome_completo} pelo ${anos}º aniversário de sua iniciação maçônica! Que o G∴A∴D∴U∴ continue iluminando sua jornada! ⚒️`
-      banners.push({ tipo: 'iniciacao', emoji: '⚒️', titulo: `Aniversário de Iniciação Maçônica!`, sub: `${anos} anos na Ordem hoje!`, tpl: tplBase })
+      const bodasMac = anos === 1 ? 'Um ano de Luz!' : anos === 5 ? 'Cinco anos de caminhada!' : anos === 10 ? 'Uma década na Ordem!' : anos === 25 ? 'Jubileu de Prata!' : anos === 50 ? 'Jubileu de Ouro!' : `${anos} anos de caminhada!`
+      const tplBase = (tpls?.find(t => t.chave === 'aniversario_iniciacao')?.mensagem || `🌿 A Loja Maçônica Acácia de Serra Negra Nº 271 saúda o Ir∴ {nome} pelo {anos}º aniversário de iniciação maçônica! {bodas_texto} Que o G∴A∴D∴U∴ continue iluminando sua jornada! ⚒️`)
+        .replace('{nome}', assoc.nome_completo)
+        .replace('{anos}', String(anos))
+        .replace('{bodas_texto}', bodasMac)
+      banners.push({ tipo: 'iniciacao', emoji: '⚒️', titulo: `Aniversário de Iniciação Maçônica!`, sub: `${anos} anos na Ordem — ${bodasMac}`, tpl: tplBase })
     }
 
     // Bodes do Asfalto
