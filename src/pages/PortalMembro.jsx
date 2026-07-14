@@ -43,7 +43,7 @@ export default function PortalMembro() {
     if (!user) { setCarregando(false); return }
 
     const { data: assoc } = await supabase.from('associados')
-      .select('id, nome_completo, bodes_asfalto, bodes_asfalto_numero, bodes_asfalto_data_admissao').eq('user_id', user.id).maybeSingle()
+      .select('id, nome_completo, data_nascimento, bodes_asfalto, bodes_asfalto_numero, bodes_asfalto_data_admissao').eq('user_id', user.id).maybeSingle()
     const { data: perfil } = await supabase.from('perfis_acesso')
       .select('perfil').eq('user_id', user.id).maybeSingle()
 
@@ -51,6 +51,35 @@ export default function PortalMembro() {
     setAssociadoId(assoc?.id || null)
     associadoIdRef.current = assoc?.id || null
     setEhBode(assoc?.bodes_asfalto === true)
+
+    // Buscar templates de aniversario
+    const { data: tpls } = await supabase.from('mensagens_templates')
+      .select('chave, conteudo').in('chave', ['aniversario_irmao_whatsapp', 'aniversario_dependente_whatsapp'])
+    const tplI = tpls?.find(t => t.chave === 'aniversario_irmao_whatsapp')?.conteudo
+    const tplD = tpls?.find(t => t.chave === 'aniversario_dependente_whatsapp')?.conteudo
+    if (tplI) setTplIrmao(tplI)
+    if (tplD) setTplDependente(tplD)
+
+    // Detectar aniversario hoje
+    const hoje = hojeStr()
+    const [, mesHoje, diaHoje] = hoje.split('-')
+    const nascStr = (assoc?.data_nascimento || '').split('T')[0]
+    const [, mesNasc, diaNasc] = nascStr.split('-')
+    if (mesNasc === mesHoje && diaNasc === diaHoje) {
+      const msg = (tplI || '').replace('{nome}', assoc.nome_completo).replace('{loja}', 'Acácia de Serra Negra Nº 271')
+      setBannerAniv({ tipo: 'irmao', nome: assoc.nome_completo, tpl: msg })
+    } else {
+      const { data: deps } = await supabase.from('familiares')
+        .select('nome, data_nascimento, parentesco').eq('associado_id', assoc.id)
+      const depAniv = (deps||[]).find(d => {
+        const [, md, dd] = (d.data_nascimento||'').split('-')
+        return md === mesHoje && dd === diaHoje
+      })
+      if (depAniv) {
+        const msg = (tplD || '').replace('{nome_irmao}', assoc.nome_completo).replace('{parentesco}', depAniv.parentesco).replace('{nome_dependente}', depAniv.nome).replace('{loja}', 'Acácia de Serra Negra Nº 271')
+        setBannerAniv({ tipo: 'dependente', nome: depAniv.nome, nomePai: assoc.nome_completo, tpl: msg })
+      }
+    }
 
     const { data: ch } = await supabase.from('cargos_historico')
       .select('cargo, associados(nome_completo)').eq('em_exercicio', true)
@@ -170,6 +199,29 @@ export default function PortalMembro() {
               ))}
             </div>
           </>
+        )}
+
+        {/* Banner aniversario hoje */}
+        {bannerAniv && (
+          <div style={{ background:'#e8f5e9', borderRadius:14, padding:'14px 16px', marginBottom:16, borderLeft:'4px solid #43a047' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:8 }}>
+              <span style={{ fontSize:24 }}>🎂</span>
+              <div>
+                {bannerAniv.tipo === 'irmao'
+                  ? <div style={{ fontSize:14, fontWeight:700, color:'#2e7d32' }}>Feliz aniversário, {bannerAniv.nome.split(' ')[0]}!</div>
+                  : <div style={{ fontSize:14, fontWeight:700, color:'#2e7d32' }}>Hoje é aniversário de {bannerAniv.nome}!</div>
+                }
+                <div style={{ fontSize:12, color:'#388e3c' }}>A loja preparou uma mensagem especial para você compartilhar.</div>
+              </div>
+            </div>
+            <div style={{ background:'#f1f8e9', borderRadius:8, padding:'10px 12px', fontSize:12, color:'#33691e', marginBottom:8, whiteSpace:'pre-wrap', lineHeight:1.5 }}>
+              {bannerAniv.tpl}
+            </div>
+            <button onClick={() => { navigator.clipboard.writeText(bannerAniv.tpl) }}
+              style={{ width:'100%', padding:'8px', borderRadius:8, border:'none', background:'#43a047', color:'#fff', fontWeight:700, fontSize:13, cursor:'pointer' }}>
+              📋 Copiar mensagem
+            </button>
+          </div>
         )}
 
         {/* Banner pendencia de presenca */}
