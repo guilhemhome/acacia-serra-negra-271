@@ -57,9 +57,9 @@ export default function PortalMembro() {
 
     // Buscar templates de aniversario
     const { data: tpls } = await supabase.from('mensagens_templates')
-      .select('chave, conteudo')
-    const tplI = tpls?.find(t => t.chave === 'aniversario_irmao_whatsapp')?.conteudo
-    const tplD = tpls?.find(t => t.chave === 'aniversario_dependente_whatsapp')?.conteudo
+      .select('chave, mensagem')
+    const tplI = tpls?.find(t => t.chave === 'aniversario_irmao_whatsapp')?.mensagem
+    const tplD = tpls?.find(t => t.chave === 'aniversario_dependente_whatsapp')?.mensagem
     if (tplI) setTplIrmao(tplI)
     if (tplD) setTplDependente(tplD)
 
