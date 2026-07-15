@@ -46,7 +46,7 @@ export default function PortalMembro() {
     if (!user) { setCarregando(false); return }
 
     const { data: assoc } = await supabase.from('associados')
-      .select('id, nome_completo, data_nascimento, data_casamento, bodes_asfalto, bodes_asfalto_numero, bodes_asfalto_data_admissao').eq('user_id', user.id).maybeSingle()
+      .select('id, nome_completo, data_nascimento, data_casamento, conjuge_nome, bodes_asfalto, bodes_asfalto_numero, bodes_asfalto_data_admissao').eq('user_id', user.id).maybeSingle()
     const { data: perfil } = await supabase.from('perfis_acesso')
       .select('perfil').eq('user_id', user.id).maybeSingle()
 
@@ -82,10 +82,11 @@ export default function PortalMembro() {
     // Aniversario de casamento
     if (assoc?.data_casamento && ehHoje(assoc.data_casamento)) {
       const anos = Number(anoHoje) - Number(assoc.data_casamento.split('-')[0])
-      const bodasTexto = anos === 1 ? 'Bodas de Papel' : anos === 2 ? 'Bodas de Algodão' : anos === 3 ? 'Bodas de Couro' : anos === 5 ? 'Bodas de Madeira' : anos === 7 ? 'Bodas de Lã' : anos === 10 ? 'Bodas de Estanho' : anos === 15 ? 'Bodas de Cristal' : anos === 20 ? 'Bodas de Porcelana' : anos === 25 ? 'Bodas de Prata' : anos === 30 ? 'Bodas de Pérola' : anos === 40 ? 'Bodas de Rubi' : anos === 50 ? 'Bodas de Ouro' : anos === 60 ? 'Bodas de Diamante' : `${anos} anos`
+      const bodasMap = {1:'Bodas de Papel',2:'Bodas de Algodão',3:'Bodas de Couro',4:'Bodas de Flores',5:'Bodas de Madeira',6:'Bodas de Doces',7:'Bodas de Lã',8:'Bodas de Papoula',9:'Bodas de Cerâmica',10:'Bodas de Estanho',11:'Bodas de Aço',12:'Bodas de Seda',13:'Bodas de Lírio',14:'Bodas de Marfim',15:'Bodas de Cristal',16:'Bodas de Turquesa',17:'Bodas de Rosa',18:'Bodas de Vidro',19:'Bodas de Cobre',20:'Bodas de Porcelana',21:'Bodas de Latão',22:'Bodas de Bronze',23:'Bodas de Esmeralda',24:'Bodas de Opala',25:'Bodas de Prata',30:'Bodas de Pérola',35:'Bodas de Coral',40:'Bodas de Rubi',45:'Bodas de Safira',50:'Bodas de Ouro',55:'Bodas de Esmeralda',60:'Bodas de Diamante',65:'Bodas de Platina',70:'Bodas de Platina'}
+      const bodasTexto = bodasMap[anos] || `${anos} anos juntos`
       const tplBase = (tpls?.find(t => t.chave === 'aniversario_casamento')?.mensagem || `🌿 A Loja Maçônica Acácia de Serra Negra Nº 271 saúda o Ir∴ {nome} e sua família pelo {anos}º aniversário de casamento! {bodas_texto} Que o G∴A∴D∴U∴ abençoe sempre esta união! 💍`)
         .replace('{nome}', assoc.nome_completo)
-        .replace('{e_esposa}', '')
+        .replace('{e_esposa}', assoc.conjuge_nome ? ` e ${assoc.conjuge_nome}` : '')
         .replace('{anos}', String(anos))
         .replace('{bodas_texto}', bodasTexto)
       banners.push({ tipo: 'casamento', emoji: '💍', titulo: `Parabéns pelo aniversário de casamento!`, sub: `${anos} anos de união — ${bodasTexto}!`, tpl: tplBase })
