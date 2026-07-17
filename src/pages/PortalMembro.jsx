@@ -144,12 +144,7 @@ export default function PortalMembro() {
 
     const { data: foiVMList } = await supabase.from('cargos_historico')
       .select('id, associado_id').eq('cargo', 'Venerável Mestre')
-    console.log('foiVMList:', JSON.stringify(foiVMList), 'assoc.id:', assoc?.id)
-    const foiVM = (foiVMList||[]).some(r => {
-      console.log('comparando:', r.associado_id, '===', assoc?.id, '->', r.associado_id === assoc?.id)
-      return r.associado_id === assoc?.id
-    })
-    console.log('foiVM resultado:', foiVM)
+    const foiVM = (foiVMList||[]).some(r => r.associado_id === assoc?.id)
     setMestreInstalado(foiVM)
 
     const { data: evs } = await supabase.from('eventos')
