@@ -16,6 +16,9 @@ export default function PortalMembro() {
   const navigate = useNavigate()
   const [usuario, setUsuario] = useState(null)
   const [cargos, setCargos] = useState([])
+  const [meuGrau, setMeuGrau] = useState('')
+  const [meuCargo, setMeuCargo] = useState('')
+  const [mestreInstalado, setMestreInstalado] = useState(false)
   const [eventos, setEventos] = useState([])
   const [aniversarios, setAniversarios] = useState([])
   const [avisos, setAvisos] = useState([])
@@ -128,6 +131,21 @@ export default function PortalMembro() {
       .select('cargo, associados(nome_completo)').eq('em_exercicio', true)
     setCargos(ch || [])
 
+    // Buscar grau, cargo proprio e mestre instalado
+    const { data: graus } = await supabase.from('historico_graus')
+      .select('grau, data_concessao').eq('associado_id', assoc.id).order('data_concessao', { ascending: false })
+    const grauMap = { aprendiz: 1, companheiro: 2, mestre: 3 }
+    const maiorGrau = (graus||[]).reduce((acc, g) => (grauMap[g.grau] || 0) > (grauMap[acc] || 0) ? g.grau : acc, '')
+    setMeuGrau(maiorGrau)
+
+    const { data: cargosProprio } = await supabase.from('cargos_historico')
+      .select('cargo').eq('associado_id', assoc.id).eq('em_exercicio', true).maybeSingle()
+    setMeuCargo(cargosProprio?.cargo || '')
+
+    const { data: foiVM } = await supabase.from('cargos_historico')
+      .select('id').eq('associado_id', assoc.id).eq('cargo', 'Venerável Mestre').limit(1).maybeSingle()
+    setMestreInstalado(!!foiVM)
+
     const { data: evs } = await supabase.from('eventos')
       .select('*').eq('status','ativo')
       .gte('data_evento', hojeStr())
@@ -184,6 +202,14 @@ export default function PortalMembro() {
   }
 
   const primeiroNome = usuario?.nome?.split(' ')[0] || ''
+  const grauLabel = { aprendiz: 'Aprendiz', companheiro: 'Companheiro', mestre: 'Mestre' }[meuGrau] || ''
+  const tituloMembro = meuCargo
+    ? `${meuCargo} ${primeiroNome}`
+    : mestreInstalado
+      ? `Mestre Instalado ${primeiroNome}`
+      : grauLabel
+        ? `${grauLabel} ${primeiroNome}`
+        : primeiroNome
   const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
   const sec = { color:'rgba(255,255,255,0.6)', fontSize:11, fontWeight:500, textTransform:'uppercase', letterSpacing:'0.06em', margin:'0 0 8px' }
 
@@ -202,7 +228,7 @@ export default function PortalMembro() {
           <button onClick={async () => { await supabase.auth.signOut(); navigate('/') }}
             style={{ position:'absolute', right:0, top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.15)', border:'none', borderRadius:8, color:'#fff', padding:'8px 12px', cursor:'pointer', fontSize:16, minWidth:44, minHeight:44 }}>↩</button>
           <img src="/logo-acacia.png" alt="Logo" style={{ width:64, height:64, borderRadius:'50%', border:'3px solid rgba(255,255,255,0.5)', objectFit:'cover', display:'block', margin:'0 auto 8px' }} />
-          <h1 style={{ color:'#fff', fontSize:'1.4rem', fontWeight:500, margin:'0 0 2px' }}>Olá, {primeiroNome}</h1>
+          <h1 style={{ color:'#fff', fontSize:'1.4rem', fontWeight:500, margin:'0 0 2px' }}>Olá, {tituloMembro}</h1>
           <p style={{ color:'rgba(255,255,255,0.65)', margin:0, fontSize:13 }}>{usuario?.perfil} · Acácia de Serra Negra Nº 271</p>
         </div>
 
