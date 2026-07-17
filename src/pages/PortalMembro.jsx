@@ -144,6 +144,7 @@ export default function PortalMembro() {
 
     const { data: foiVMList } = await supabase.from('cargos_historico')
       .select('id, associado_id').eq('cargo', 'Venerável Mestre')
+    console.log('foiVMList:', JSON.stringify(foiVMList), 'assoc.id:', assoc?.id)
     const foiVM = (foiVMList||[]).some(r => r.associado_id === assoc?.id)
     setMestreInstalado(foiVM)
 
