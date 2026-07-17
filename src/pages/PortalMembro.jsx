@@ -142,10 +142,10 @@ export default function PortalMembro() {
       .select('cargo').eq('associado_id', assoc.id).eq('em_exercicio', true).maybeSingle()
     setMeuCargo(cargosProprio?.cargo || '')
 
-    const { data: foiVM } = await supabase.from('cargos_historico')
-      .select('id').eq('associado_id', assoc.id).eq('cargo', 'Venerável Mestre').limit(1).maybeSingle()
-    console.log('foiVM:', JSON.stringify(foiVM), 'assoc.id:', assoc?.id)
-    setMestreInstalado(!!foiVM)
+    const { data: foiVMList } = await supabase.from('cargos_historico')
+      .select('id, associado_id').eq('cargo', 'Venerável Mestre')
+    const foiVM = (foiVMList||[]).some(r => r.associado_id === assoc?.id)
+    setMestreInstalado(foiVM)
 
     const { data: evs } = await supabase.from('eventos')
       .select('*').eq('status','ativo')
