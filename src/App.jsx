@@ -152,6 +152,7 @@ function App() {
 
         {/* Rotas para todos os perfis logados */}
         <Route path="/editar-perfil" element={<RotaProtegida modulo="/editar-perfil"><EditarPerfil /></RotaProtegida>} />
+        <Route path="/editar-perfil/:id" element={<RotaProtegida apenasAdm><EditarPerfil /></RotaProtegida>} />
         <Route path="/calendario" element={<RotaProtegida modulo="/calendario"><Calendario /></RotaProtegida>} />
         <Route path="/perfil/:id" element={<RotaProtegida modulo="/perfil/:id"><PerfilIrmao /></RotaProtegida>} />
 
