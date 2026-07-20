@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { DateInput } from '../components/DateInput'
 
@@ -15,11 +15,13 @@ const Input = ({ label, value, onChange, type='text' }) => (
 
 export default function EditarPerfil() {
   const navigate = useNavigate()
+  const { id: idParam } = useParams()
   const [aba, setAba] = useState(0)
   const [salvando, setSalvando] = useState(false)
   const [mensagem, setMensagem] = useState('')
   const [associadoId, setAssociadoId] = useState(null)
   const [statusCadastro, setStatusCadastro] = useState(null)
+  const [nomeAlvo, setNomeAlvo] = useState('')
 
   const [pessoal, setPessoal] = useState({ nome_completo:'', apelido:'', email:'', tel_celular:'', data_nascimento:'', nome_pai:'', nome_mae:'', profissao:'', empresa:'', estado_civil:'', data_casamento:'' })
   const [cpf, setCpf] = useState('')
@@ -65,7 +67,17 @@ export default function EditarPerfil() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { navigate('/'); return }
       const uid = session.user.id
-      const { data: assoc } = await supabase.from('associados').select('*').eq('user_id', uid).maybeSingle()
+      let assoc = null
+      if (idParam) {
+        const { data: perfilLogado } = await supabase.from('perfis_acesso').select('perfil').eq('user_id', uid).maybeSingle()
+        if (perfilLogado?.perfil !== 'ADM') { navigate('/dashboard'); return }
+        const { data: alvo } = await supabase.from('associados').select('*').eq('id', idParam).maybeSingle()
+        assoc = alvo
+        if (alvo) setNomeAlvo(alvo.nome_completo || '')
+      } else {
+        const { data: proprio } = await supabase.from('associados').select('*').eq('user_id', uid).maybeSingle()
+        assoc = proprio
+      }
       if (assoc) {
         setAssociadoId(assoc.id)
         setStatusCadastro(assoc.status_cadastro || null)
@@ -93,7 +105,7 @@ export default function EditarPerfil() {
       }
     }
     carregar()
-  }, [])
+  }, [idParam])
 
   function msg(texto) { setMensagem(texto); setTimeout(() => setMensagem(''), 3000) }
 
