@@ -125,6 +125,11 @@ export default function PerfilIrmao() {
                     ✏️ Alterar situação
                   </button>
                 )}
+                {isAdm && (
+                  <button onClick={() => navigate(`/editar-perfil/${id}`)} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 8, border: '1px solid #e2e8f0', background: '#f8fafc', color: '#4f46e5', cursor: 'pointer', fontWeight: 600 }}>
+                    📝 Editar perfil
+                  </button>
+                )}
               </div>
             </div>
             <div style={{ padding: 24 }}>
