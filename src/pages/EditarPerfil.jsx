@@ -235,7 +235,7 @@ export default function EditarPerfil() {
 
         <div style={{ position:'relative', textAlign:'center', marginBottom:24 }}>
           {statusCadastro !== 'pendente' ? (
-            <button onClick={() => navigate('/dashboard')}
+            <button onClick={() => navigate(idParam ? `/perfil/${idParam}` : '/dashboard')}
               style={{ position:'absolute', left:0, top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.15)', border:'none', borderRadius:8, color:'#fff', padding:'8px 14px', cursor:'pointer', fontSize:18 }}>←</button>
           ) : (
             <button onClick={async () => { await supabase.auth.signOut(); navigate('/') }}
@@ -244,9 +244,14 @@ export default function EditarPerfil() {
             </button>
           )}
           <img src="/logo-acacia.png" alt="Logo" style={{ width:64, height:64, borderRadius:'50%', border:'3px solid rgba(255,255,255,0.5)', objectFit:'cover', display:'block', margin:'0 auto 8px' }} />
-          <h1 style={{ color:'#fff', fontSize:'1.6rem', fontWeight:'bold', margin:0 }}>Meu Perfil</h1>
+          <h1 style={{ color:'#fff', fontSize:'1.6rem', fontWeight:'bold', margin:0 }}>{idParam ? 'Editar Perfil' : 'Meu Perfil'}</h1>
           <p style={{ color:'rgba(255,255,255,0.7)', margin:0, fontSize:14 }}>Acácia de Serra Negra Nº 271</p>
         </div>
+        {idParam && (
+          <div style={{ marginBottom:16, background:'#eef2ff', border:'1px solid #c7d2fe', borderLeft:'4px solid #4f46e5', borderRadius:12, padding:'12px 16px', textAlign:'center' }}>
+            <p style={{ margin:0, fontWeight:700, color:'#4338ca', fontSize:13 }}>✏️ Editando perfil de {nomeAlvo || 'carregando...'}</p>
+          </div>
+        )}
 
         {statusCadastro === 'pendente' && (
           <div style={{ marginBottom:16, background:'#FFF8E1', border:'1px solid #F9A825', borderLeft:'4px solid #F57F17', borderRadius:12, padding:'14px 16px' }}>
