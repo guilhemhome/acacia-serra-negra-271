@@ -126,6 +126,7 @@ export default function Calendario() {
     const { data: irmaos } = await supabase.from('associados')
       .select('id, nome_completo, data_nascimento, tel_celular, data_casamento, bodes_asfalto, bodes_asfalto_data_admissao')
       .eq('status_cadastro','aprovado')
+      .eq('situacao','ativo')
     // Buscar iniciações sem join — cruzar com irmaos pelo associado_id
     let iniciacoes = []
     try {
