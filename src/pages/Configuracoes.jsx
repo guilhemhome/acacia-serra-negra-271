@@ -100,12 +100,12 @@ export default function Configuracoes() {
       if (ps && ps.length > 0) {
         const { data: assocs } = await supabase
           .from('associados')
-          .select('id, user_id, nome_completo, email, cpf')
+          .select('id, user_id, nome_completo, email, cpf, situacao')
           .in('user_id', ps.map(p => p.user_id))
         const perfisComNome = ps.map(p => ({
           ...p,
           associados: assocs?.find(a => a.user_id === p.user_id) || null
-        }))
+        })).filter(p => !p.associados || p.associados.situacao === 'ativo')
         perfisComNome.sort((a, b) => (a.associados?.nome_completo || '').localeCompare(b.associados?.nome_completo || ''))
         setPerfis(perfisComNome)
       }
