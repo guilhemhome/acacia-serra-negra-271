@@ -75,7 +75,7 @@ export default function GestaoCargos() {
     const [{ data: c }, { data: e }, { data: a }] = await Promise.all([
       supabase.from('cargos').select('*').order('nome'),
       supabase.from('cargos_historico').select('*, associados(nome_completo, email)').eq('em_exercicio', true),
-      supabase.from('associados').select('id, nome_completo, email').eq('status_cadastro','aprovado').order('nome_completo')
+      supabase.from('associados').select('id, nome_completo, email').eq('status_cadastro','aprovado').eq('situacao','ativo').order('nome_completo')
     ])
     setCargos(c || [])
     setExercicio(e || [])
