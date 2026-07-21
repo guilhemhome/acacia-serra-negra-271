@@ -11,6 +11,7 @@ export default function Dashboard() {
   const [anivHoje, setAnivHoje] = useState(0)
   const [usuario, setUsuario] = useState({ email: '', perfil: 'Membro', nome: '', apelido: '', cargoAtual: '', cargoMaconico: '' })
   const [grauUsuario, setGrauUsuario] = useState(null)
+  const [mestreInstalado, setMestreInstalado] = useState(false)
   const [carregando, setCarregando] = useState(true)
   const [templates, setTemplates] = useState({})
   const [modalPresencas, setModalPresencas] = useState(null)
@@ -148,8 +149,17 @@ export default function Dashboard() {
     const cargoMaconico = cargoAtual
     const cargoExibido = perfil === 'ADM' ? '' : cargoAtual
     associadoIdRef.current = assoc?.id || null
+    let foiVM = false
+    if (assoc?.id) {
+      try {
+        const { data: foiVMList } = await supabase.from('cargos_historico')
+          .select('id, associado_id').eq('cargo', 'Venerável Mestre')
+        foiVM = (foiVMList||[]).some(r => r.associado_id === assoc.id)
+      } catch(e) { foiVM = false }
+    }
     const usuarioObj = { email: user.email, perfil, nome, apelido, cargoAtual: cargoExibido, cargoMaconico, id_acacia: assoc?.id_acacia || '', email_assoc: assoc?.email || user.email }
     setGrauUsuario(grau)
+    setMestreInstalado(foiVM)
     setUsuario(usuarioObj)
     setStats({ ativos: ativos || 0, pendentes: pendentes || 0 })
 
@@ -273,6 +283,7 @@ export default function Dashboard() {
   }
 
   const primeiroNome = usuario.nome.split(' ')[0] || usuario.email.split('@')[0].split('.')[0]
+  const grauLabelDash = { aprendiz: 'Aprendiz', companheiro: 'Companheiro', mestre: 'Mestre' }[grauUsuario] || ''
   const labelPerfil = { 'ADM': 'Administrador', 'Venerável Mestre': 'Venerável Mestre', 'Administrativo': 'Administrativo', 'Financeiro': 'Tesoureiro', 'Hospitalaria': 'Hospitaleiro', 'Total': 'Acesso Total' }[usuario.perfil] || 'Membro'
   const podeVerAniv = ['ADM', 'Venerável Mestre', 'Administrativo', 'Total'].includes(usuario.perfil)
   const podeVerFinanceiro = ['ADM', 'Venerável Mestre', 'Financeiro'].includes(usuario.perfil)
@@ -292,7 +303,7 @@ export default function Dashboard() {
           <button onClick={async () => { sessionStorage.clear(); await supabase.auth.signOut(); navigate('/') }}
             style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: 8, color: '#fff', padding: '8px 12px', cursor: 'pointer', fontSize: 16, minWidth: 44, minHeight: 44 }}>↩</button>
           <img src="/logo-acacia.png" alt="Logo" style={{ width: 64, height: 64, borderRadius: '50%', border: '3px solid rgba(255,255,255,0.5)', objectFit: 'cover', display: 'block', margin: '0 auto 8px' }} />
-          <h1 style={{ color: '#fff', fontSize: '1.4rem', fontWeight: 500, margin: '0 0 2px' }}>Olá, {usuario.cargoAtual ? `${usuario.cargoAtual} ${usuario.apelido}` : usuario.apelido}</h1>
+          <h1 style={{ color: '#fff', fontSize: '1.4rem', fontWeight: 500, margin: '0 0 2px' }}>Olá, {usuario.cargoAtual ? `${usuario.cargoAtual} ${usuario.apelido}` : mestreInstalado ? `Mestre Instalado ${usuario.apelido}` : grauLabelDash ? `${grauLabelDash} ${usuario.apelido}` : usuario.apelido}</h1>
           <p style={{ color:'rgba(255,255,255,0.75)', fontSize:12, margin:'0 0 1px' }}>{usuario.id_acacia ? `Nº ${usuario.id_acacia} · ` : ''}{usuario.email_assoc || usuario.email}</p>
           {usuario.perfil === 'ADM' && (
             <span style={{ display: 'inline-block', background: 'rgba(255,255,255,0.15)', color: '#fff', fontSize: 10, fontWeight: 600, letterSpacing: 0.5, padding: '2px 8px', borderRadius: 6, margin: '4px 0 4px', textTransform: 'uppercase' }}>Administrador</span>
