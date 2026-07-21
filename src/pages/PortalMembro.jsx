@@ -166,7 +166,7 @@ export default function PortalMembro() {
 
     const mesAtual = hojeStr().split('-')[1]
     const { data: irmaos } = await supabase.from('associados')
-      .select('nome_completo, data_nascimento').eq('status_cadastro','aprovado')
+      .select('nome_completo, data_nascimento').eq('status_cadastro','aprovado').eq('situacao','ativo')
     setAniversarios((irmaos||[]).filter(a => a.data_nascimento && a.data_nascimento.split('T')[0].split('-')[1] === mesAtual).slice(0,5))
 
     // tabela avisos ainda não implementada — ignorar erro
