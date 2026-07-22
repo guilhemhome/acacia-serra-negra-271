@@ -74,8 +74,8 @@ export default function GestaoCargos() {
     setLoading(true)
     const [{ data: c }, { data: e }, { data: a }] = await Promise.all([
       supabase.from('cargos').select('*').order('nome'),
-      supabase.from('cargos_historico').select('*, associados(nome_completo, email)').eq('em_exercicio', true),
-      supabase.from('associados').select('id, nome_completo, email').eq('status_cadastro','aprovado').eq('situacao','ativo').order('nome_completo')
+      supabase.from('cargos_historico').select('*, associados(nome_completo, email, conta_teste)').eq('em_exercicio', true),
+      supabase.from('associados').select('id, nome_completo, email, conta_teste').eq('status_cadastro','aprovado').eq('situacao','ativo').order('nome_completo')
     ])
     setCargos(c || [])
     setExercicio(e || [])
@@ -96,7 +96,9 @@ export default function GestaoCargos() {
       return
     }
     const cargo = atribuindo
-    const jaOcupa = exercicio.find(e => e.cargo === cargo)
+    const assocSelecionado = associados.find(a => a.id === formAtribuir.associado_id)
+    const ehTeste = assocSelecionado?.conta_teste === true
+    const jaOcupa = exercicio.find(e => e.cargo === cargo && (e.associados?.conta_teste === true) === ehTeste)
     if (jaOcupa) {
       await supabase.from('cargos_historico').update({ em_exercicio: false, data_fim: formAtribuir.data_inicio }).eq('id', jaOcupa.id)
     }
@@ -132,7 +134,9 @@ export default function GestaoCargos() {
   async function confirmarAlerta() {
     const { cargo, associado_id, data_inicio } = alertaCargo
     setAlertaCargo(null)
-    const jaOcupa = exercicio.find(e => e.cargo === cargo)
+    const assocSelecionado = associados.find(a => a.id === associado_id)
+    const ehTeste = assocSelecionado?.conta_teste === true
+    const jaOcupa = exercicio.find(e => e.cargo === cargo && (e.associados?.conta_teste === true) === ehTeste)
     if (jaOcupa) await supabase.from('cargos_historico').update({ em_exercicio: false, data_fim: data_inicio }).eq('id', jaOcupa.id)
     const cargoAnterior = exercicio.find(e => e.associado_id === associado_id)
     if (cargoAnterior) await supabase.from('cargos_historico').update({ em_exercicio: false, data_fim: data_inicio }).eq('id', cargoAnterior.id)
