@@ -63,23 +63,10 @@ function RotaProtegida({ children, modulo, apenasAdm }) {
             const { data: cargo } = await supabase.from('cargos_historico')
               .select('cargo').eq('associado_id', assoc.id).eq('em_exercicio', true).maybeSingle()
             if (cargo?.cargo) {
-              // Cargo ativo encontrado — usar como perfil
-              const cargoMap = {
-                'Venerável Mestre': 'Venerável Mestre',
-                'Secretário': 'Secretário',
-                'Tesoureiro': 'Financeiro',
-                'Chanceler': 'Administrativo',
-                'Hospitaleiro': 'Hospitalaria',
-                '1º Vigilante': 'Ritualística',
-                '2º Vigilante': 'Ritualística',
-                'Orador': 'Ritualística',
-                'Mestre de Cerimônias': 'Ritualística',
-                'Mestre de Harmonia': 'Ritualística',
-                'Porta-Estandarte': 'Ritualística',
-                'Guarda Interno': 'Ritualística',
-                'Guarda Externo': 'Ritualística',
-              }
-              const perfilDoCargo = cargoMap[cargo.cargo]
+              // Cargo ativo encontrado — usar o perfil_acesso cadastrado no cargo (dinamico)
+              const { data: cargoInfo } = await supabase.from('cargos')
+                .select('perfil_acesso').eq('nome', cargo.cargo).maybeSingle()
+              const perfilDoCargo = cargoInfo?.perfil_acesso
               if (perfilDoCargo && perfilDoCargo !== perfilAtual) {
                 // Sincronizar perfis_acesso automaticamente
                 await supabase.from('perfis_acesso')
