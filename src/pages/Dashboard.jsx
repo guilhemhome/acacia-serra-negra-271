@@ -140,14 +140,14 @@ export default function Dashboard() {
     const temCompanheiro = graus.some(g => g.grau === 'companheiro')
     const grau = temMestre ? 'mestre' : temCompanheiro ? 'companheiro' : 'aprendiz'
     let cargoAtual = ''
-    if (assoc?.id && perfil !== 'ADM') {
+    if (assoc?.id) {
       try {
         const { data: chDash } = await supabase.from('cargos_historico').select('cargo').eq('em_exercicio', true).eq('associado_id', assoc.id).maybeSingle()
         cargoAtual = chDash?.cargo || ''
       } catch(e) { cargoAtual = '' }
     }
     const cargoMaconico = cargoAtual
-    const cargoExibido = perfil === 'ADM' ? '' : cargoAtual
+    const cargoExibido = cargoAtual
     associadoIdRef.current = assoc?.id || null
     let foiVM = false
     if (assoc?.id) {
