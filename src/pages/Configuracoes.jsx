@@ -70,6 +70,7 @@ export default function Configuracoes() {
   const [salvandoPerm, setSalvandoPerm] = useState(false)
   const [secaoAberta, setSecaoAberta] = useState(null) // 'stats' | 'dados' | 'mensagens' | 'perfis'
   const [irmaoExpandido, setIrmaoExpandido] = useState(null)
+  const [perfisEditaveis, setPerfisEditaveis] = useState(['Venerável Mestre','Secretário','Financeiro','Administrativo','Membro','Ritualística','Hospitalaria'])
 
   useEffect(() => {
     async function carregar() {
@@ -119,6 +120,13 @@ export default function Configuracoes() {
         })
         setPermissoes(map)
       }
+      // Lista dinamica de perfis editaveis: padrao do sistema + perfis usados em cargos + perfis com permissao salva
+      const PERFIS_PADRAO = ['Venerável Mestre','Secretário','Financeiro','Administrativo','Membro','Ritualística','Hospitalaria']
+      const { data: cargosData } = await supabase.from('cargos').select('perfil_acesso')
+      const perfisDeCargos = (cargosData || []).map(c => c.perfil_acesso).filter(Boolean)
+      const perfisDePermissoes = (perms || []).map(p => p.perfil).filter(Boolean)
+      const todosPerfis = [...new Set([...PERFIS_PADRAO, ...perfisDeCargos, ...perfisDePermissoes])].filter(p => p !== 'ADM')
+      setPerfisEditaveis(todosPerfis)
     }
     carregar()
   }, [])
@@ -188,7 +196,6 @@ export default function Configuracoes() {
     { chave: '/templates-mensagens', nome: 'Templates Mensagens' },
     { chave: '/editar-perfil', nome: 'Editar Perfil' },
   ]
-  const PERFIS_EDITAVEIS = ['Venerável Mestre','Secretário','Financeiro','Administrativo','Membro','Ritualística','Hospitalaria']
   const COR_NIVEL = { total: '#16a34a', leitura: '#1d4ed8', bloqueado: '#dc2626' }
   const BG_NIVEL = { total: '#dcfce7', leitura: '#dbeafe', bloqueado: '#fee2e2' }
 
@@ -423,7 +430,7 @@ export default function Configuracoes() {
                     <tr style={{ background:'#1e293b' }}>
                       <th style={{ padding:'10px 12px', textAlign:'left', color:'#fff', fontSize:12, fontWeight:600, minWidth:150 }}>Modulo</th>
                       <th style={{ padding:'10px 8px', textAlign:'center', color:'#fff', fontSize:11, fontWeight:600, minWidth:70 }}>ADM</th>
-                      {PERFIS_EDITAVEIS.map(p => (
+                      {perfisEditaveis.map(p => (
                         <th key={p} style={{ padding:'10px 8px', textAlign:'center', color:'#fff', fontSize:11, fontWeight:600, minWidth:100, whiteSpace:'nowrap' }}>{p}</th>
                       ))}
                     </tr>
@@ -435,7 +442,7 @@ export default function Configuracoes() {
                         <td style={{ padding:'6px 8px', textAlign:'center' }}>
                           <span style={{ background:'#dcfce7', color:'#16a34a', padding:'3px 8px', borderRadius:6, fontSize:11, fontWeight:600 }}>Total</span>
                         </td>
-                        {PERFIS_EDITAVEIS.map(perf => {
+                        {perfisEditaveis.map(perf => {
                           const bloqueadoFixo = mod.chave === '/configuracoes'
                           const nivel = bloqueadoFixo ? 'bloqueado' : (permissoes[perf]?.[mod.chave] || 'bloqueado')
                           return (
