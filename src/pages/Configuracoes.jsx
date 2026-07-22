@@ -312,6 +312,23 @@ export default function Configuracoes() {
           )}
         </div>
 
+        {/* Gestão de Cargos — acordeao */}
+        <div style={{ background:'#fff', borderRadius:16, overflow:'hidden', boxShadow:'0 8px 32px rgba(0,0,0,0.2)', marginBottom:12 }}>
+          <div onClick={() => setSecaoAberta(secaoAberta === 'cargos' ? null : 'cargos')}
+            style={{ padding:'16px 24px', display:'flex', justifyContent:'space-between', alignItems:'center', cursor:'pointer' }}>
+            <span style={{ fontWeight:700, color:'#1e293b', fontSize:14 }}>⚙️ Gestão de Cargos</span>
+            <span style={{ fontSize:13, color:'#94a3b8', transform: secaoAberta === 'cargos' ? 'rotate(180deg)' : 'none', transition:'transform 0.15s' }}>▾</span>
+          </div>
+          {secaoAberta === 'cargos' && (
+            <div style={{ padding:'0 24px 24px' }}>
+              <button onClick={() => navigate('/gestao-cargos')}
+                style={{ width:'100%', padding:'12px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#1a237e,#283593)', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
+                Gestao de Cargos
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* Mensagens — acordeao */}
         <div style={{ background:'#fff', borderRadius:16, overflow:'hidden', boxShadow:'0 8px 32px rgba(0,0,0,0.2)', marginBottom:12 }}>
           <div onClick={() => setSecaoAberta(secaoAberta === 'mensagens' ? null : 'mensagens')}
@@ -321,10 +338,6 @@ export default function Configuracoes() {
           </div>
           {secaoAberta === 'mensagens' && (
             <div style={{ padding:'0 24px 24px' }}>
-              <button onClick={() => navigate('/gestao-cargos')}
-                style={{ width:'100%', padding:'12px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#1a237e,#283593)', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer', marginBottom:10 }}>
-                Gestao de Cargos
-              </button>
               <button onClick={() => navigate('/templates-mensagens')}
                 style={{ width:'100%', padding:'12px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#1e40af,#4f46e5)', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer' }}>
                 Editar Templates de Aniversario
