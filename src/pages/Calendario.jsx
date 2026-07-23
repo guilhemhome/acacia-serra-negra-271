@@ -230,12 +230,13 @@ export default function Calendario() {
 
   async function verPresencas(ev) {
     const { data } = await supabase.from('eventos_presencas')
-      .select('resposta, justificativa, associados(id, nome_completo)')
+      .select('resposta, justificativa, associados(id, nome_completo, situacao, conta_teste)')
       .eq('evento_id', ev.id)
-    const { data: todosAtivos } = await supabase.from('associados').select('id, nome_completo').eq('status_cadastro', 'aprovado').eq('situacao', 'ativo')
-    const respondidoIds = new Set((data||[]).map(p => p.associados?.id).filter(Boolean))
+    const dataReal = (data||[]).filter(p => p.associados?.situacao === 'ativo' && !p.associados?.conta_teste)
+    const { data: todosAtivos } = await supabase.from('associados').select('id, nome_completo').eq('status_cadastro', 'aprovado').eq('situacao', 'ativo').eq('conta_teste', false)
+    const respondidoIds = new Set(dataReal.map(p => p.associados?.id).filter(Boolean))
     const pendentes = (todosAtivos||[]).filter(m => !respondidoIds.has(m.id)).map(m => ({ associados: { nome_completo: m.nome_completo } }))
-    setPresencas(data||[])
+    setPresencas(dataReal)
     setNaoResponderam(pendentes)
     setModalPresencas(ev)
   }
