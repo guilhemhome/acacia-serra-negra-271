@@ -129,8 +129,8 @@ export default function Dashboard() {
       supabase.from('associados').select('*', { count: 'exact', head: true }).eq('status_cadastro', 'pendente'),
       supabase.from('eventos').select('*').eq('status', 'ativo').gte('data_evento', hojeStr()).order('data_evento').limit(10),
       supabase.from('mensagens_templates').select('chave, conteudo').in('chave', ['aniversario_irmao_whatsapp', 'aniversario_dependente_whatsapp']).then(r => ({ data: r.data || [], error: null })).catch(() => ({ data: [], error: null })),
-      supabase.from('associados').select('nome_completo, data_nascimento, tel_celular').eq('status_cadastro', 'aprovado').eq('situacao', 'ativo'),
-      supabase.from('familiares').select('nome, data_nascimento, parentesco, associados(nome_completo, tel_celular)').not('data_nascimento', 'is', null),
+      supabase.from('associados').select('nome_completo, data_nascimento, tel_celular').eq('status_cadastro', 'aprovado').eq('situacao', 'ativo').eq('conta_teste', false),
+      supabase.from('familiares').select('nome, data_nascimento, parentesco, associados(nome_completo, tel_celular, conta_teste)').not('data_nascimento', 'is', null),
     ])
 
     const perfil = p?.is_admin === true ? 'ADM' : (p?.perfil || 'Membro')
@@ -261,8 +261,9 @@ export default function Dashboard() {
         list.push({ nome: a.nome_completo, detalhe: 'Nascimento', dia: diaAniv(a.data_nascimento), data_nascimento: a.data_nascimento, tel: (a.tel_celular || '').replace(/D/g, ''), tipo: 'irmao', diasRestantes: diasParaAniv(a.data_nascimento) })
     })
     fams.forEach(f => {
+      const assocF = Array.isArray(f.associados) ? f.associados[0] : f.associados
+      if (assocF?.conta_teste) return
       if (dentroIntervalo(f.data_nascimento)) {
-        const assocF = Array.isArray(f.associados) ? f.associados[0] : f.associados
         list.push({ nome: f.nome, detalhe: f.parentesco, dia: diaAniv(f.data_nascimento), data_nascimento: f.data_nascimento, tel: (assocF?.tel_celular || '').replace(/D/g, ''), nomeIrmao: assocF?.nome_completo || '', parentesco: f.parentesco || '', tipo: 'familiar', diasRestantes: diasParaAniv(f.data_nascimento) })
       }
     })
