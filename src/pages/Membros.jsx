@@ -41,6 +41,7 @@ export default function Membros() {
     const { data, error } = await supabase
       .from('associados')
       .select('*')
+      .eq('conta_teste', false)
       .order('nome_completo', { ascending: true })
     if (!error) setMembros(data || [])
     setCarregando(false)
