@@ -127,6 +127,7 @@ export default function Calendario() {
       .select('id, nome_completo, data_nascimento, tel_celular, data_casamento, bodes_asfalto, bodes_asfalto_data_admissao')
       .eq('status_cadastro','aprovado')
       .eq('situacao','ativo')
+      .eq('conta_teste', false)
     // Buscar iniciações sem join — cruzar com irmaos pelo associado_id
     let iniciacoes = []
     try {
@@ -165,10 +166,12 @@ export default function Calendario() {
     mac.sort((x,y) => Number(x.data.split('-')[2]) - Number(y.data.split('-')[2]))
     setDatasMaconicas(mac)
     const { data: deps } = await supabase.from('familiares')
-      .select('nome, data_nascimento, parentesco, associado_id, associados(nome_completo, tel_celular)')
+      .select('nome, data_nascimento, parentesco, associado_id, associados(nome_completo, tel_celular, conta_teste)')
       .not('data_nascimento','is',null)
-    const fam = (deps||[]).filter(d => d.data_nascimento && d.data_nascimento.split('-')[1] === mes)
-      .sort((a,b) => Number(a.data_nascimento.split('-')[2]) - Number(b.data_nascimento.split('-')[2]))
+    const fam = (deps||[]).filter(d => {
+      const assocD = Array.isArray(d.associados) ? d.associados[0] : d.associados
+      return !assocD?.conta_teste && d.data_nascimento && d.data_nascimento.split('-')[1] === mes
+    }).sort((a,b) => Number(a.data_nascimento.split('-')[2]) - Number(b.data_nascimento.split('-')[2]))
     setFamiliares(fam)
   }
 
