@@ -101,7 +101,7 @@ export default function Configuracoes() {
       if (ps && ps.length > 0) {
         const { data: assocs } = await supabase
           .from('associados')
-          .select('id, user_id, nome_completo, email, cpf, situacao')
+          .select('id, user_id, nome_completo, email, cpf, situacao, conta_teste')
           .in('user_id', ps.map(p => p.user_id))
         const perfisComNome = ps.map(p => ({
           ...p,
@@ -158,6 +158,21 @@ export default function Configuracoes() {
     else {
       msg('Perfil atualizado! ✅')
       setPerfis(prev => prev.map(p => p.user_id === userId ? { ...p, perfil: novoPerfil } : p))
+    }
+  }
+  async function toggleContaTeste(assocId, userId, atual, nome) {
+    const novoValor = !atual
+    const acao = novoValor ? 'MARCAR' : 'DESMARCAR'
+    const aviso = novoValor
+      ? `Marcar "${nome}" como CONTA DE TESTE?\n\nContas de teste somem das listas vistas pelos irmãos (aniversários, presenças, membros).`
+      : `Remover "${nome}" da marcação de CONTA DE TESTE?\n\nEla voltará a aparecer normalmente em todas as listas.`
+    if (!window.confirm(aviso)) return
+    if (!assocId) { msg('Este usuário não tem associado vinculado.'); return }
+    const { error } = await supabase.from('associados').update({ conta_teste: novoValor }).eq('id', assocId)
+    if (error) msg('Erro ao ' + acao.toLowerCase() + ': ' + error.message)
+    else {
+      msg(novoValor ? 'Marcado como conta de teste ✅' : 'Removido da conta de teste ✅')
+      setPerfis(prev => prev.map(p => p.user_id === userId ? { ...p, associados: { ...p.associados, conta_teste: novoValor } } : p))
     }
   }
 
@@ -402,6 +417,12 @@ export default function Configuracoes() {
                         <button onClick={() => resetarSenha(p.associados?.email)}
                           style={{ flex:1, padding:'6px 0', borderRadius:8, border:'none', background:'#fef3c7', color:'#b45309', fontSize:12, fontWeight:600, cursor:'pointer' }}>
                           Resetar senha
+                        </button>
+                      </div>
+                      <div style={{ display:'flex', gap:8, marginTop:8 }}>
+                        <button onClick={() => toggleContaTeste(p.associados?.id, p.user_id, !!p.associados?.conta_teste, p.associados?.nome_completo || 'este usuário')}
+                          style={{ flex:1, padding:'6px 0', borderRadius:8, border:'none', background: p.associados?.conta_teste ? '#fee2e2' : '#f1f5f9', color: p.associados?.conta_teste ? '#b91c1c' : '#475569', fontSize:12, fontWeight:600, cursor:'pointer' }}>
+                          {p.associados?.conta_teste ? '🧪 Remover conta de teste' : '🧪 Marcar como conta de teste'}
                         </button>
                       </div>
                     </div>
