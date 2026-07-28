@@ -74,8 +74,8 @@ export default function Aprovacoes() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { navigate('/'); return }
       setUserIdLogado(session.user.id)
-      const { data: p } = await supabase.from('perfis_acesso').select('perfil').eq('user_id', session.user.id).maybeSingle()
-      setPerfilLogado(p?.perfil || 'Membro')
+      const { data: p } = await supabase.from('perfis_acesso').select('perfil, is_admin').eq('user_id', session.user.id).maybeSingle()
+      setPerfilLogado(p?.is_admin === true ? 'ADM' : (p?.perfil || 'Membro'))
       buscarCadastros()
     }
     verificarLogin()
