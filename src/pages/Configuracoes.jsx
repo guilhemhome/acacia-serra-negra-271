@@ -416,7 +416,6 @@ export default function Configuracoes() {
                       <option value="Administrativo">Administrativo</option>
                       <option value="Venerável Mestre">Venerável Mestre</option>
                       <option value="Total">Total</option>
-                      <option value="ADM">ADM</option>
                     </select>
                     <span style={{ fontSize:11, color:'#94a3b8', transform: expandido ? 'rotate(180deg)' : 'none', flexShrink:0 }}>▾</span>
                   </div>
