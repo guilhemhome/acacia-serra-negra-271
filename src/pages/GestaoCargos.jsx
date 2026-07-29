@@ -121,10 +121,7 @@ export default function GestaoCargos() {
     const novoPerfil = cargoObj?.perfil_acesso || 'Membro'
     const { data: assocUser } = await supabase.from('associados').select('user_id').eq('id', formAtribuir.associado_id).maybeSingle()
     if (assocUser?.user_id) {
-      const { data: perfilAtual } = await supabase.from('perfis_acesso').select('is_admin').eq('user_id', assocUser.user_id).maybeSingle()
-      if (!perfilAtual?.is_admin) {
-        await supabase.from('perfis_acesso').upsert({ user_id: assocUser.user_id, perfil: novoPerfil }, { onConflict: 'user_id' })
-      }
+      await supabase.from('perfis_acesso').upsert({ user_id: assocUser.user_id, perfil: novoPerfil }, { onConflict: 'user_id' })
     }
     setMsg('✅ Cargo atribuído com sucesso! Nível de acesso atualizado para: ' + novoPerfil)
     setAtribuindo(null)
@@ -147,10 +144,7 @@ export default function GestaoCargos() {
     const novoPerfil = cargoObj?.perfil_acesso || 'Membro'
     const { data: assocUser } = await supabase.from('associados').select('user_id').eq('id', associado_id).maybeSingle()
     if (assocUser?.user_id) {
-      const { data: perfilAtual } = await supabase.from('perfis_acesso').select('is_admin').eq('user_id', assocUser.user_id).maybeSingle()
-      if (!perfilAtual?.is_admin) {
-        await supabase.from('perfis_acesso').upsert({ user_id: assocUser.user_id, perfil: novoPerfil }, { onConflict: 'user_id' })
-      }
+      await supabase.from('perfis_acesso').upsert({ user_id: assocUser.user_id, perfil: novoPerfil }, { onConflict: 'user_id' })
     }
     setMsg('Cargo atribuido! Nivel de acesso: ' + novoPerfil)
     setAtribuindo(null)
