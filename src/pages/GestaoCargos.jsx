@@ -49,9 +49,11 @@ export default function GestaoCargos() {
   async function init() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return navigate('/')
-    const { data: perfil } = await supabase.from('perfis_acesso').select('perfil').eq('user_id', user.id).maybeSingle()
-    if (!perfil || !['ADM','Venerável Mestre'].includes(perfil.perfil)) { navigate('/dashboard'); return }
-    setNivelAcesso(perfil.perfil)
+    const { data: perfil } = await supabase.from('perfis_acesso').select('perfil, is_admin').eq('user_id', user.id).maybeSingle()
+    const ehAdmin = perfil?.is_admin === true
+    const ehVeneravel = perfil?.perfil === 'Venerável Mestre'
+    if (!perfil || (!ehAdmin && !ehVeneravel)) { navigate('/dashboard'); return }
+    setNivelAcesso(ehAdmin ? 'ADM' : perfil.perfil)
     await garantirCargosIniciais()
     await carregar()
   }
