@@ -406,7 +406,7 @@ export default function Configuracoes() {
                     <span style={{ fontWeight:600, color:'#1e293b', fontSize:13, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', flex:1, minWidth:0 }}>
                       {p.associados?.nome_completo || '—'}
                     </span>
-                    <select value={p.perfil} onClick={e => e.stopPropagation()} onChange={e => alterarPerfil(p.user_id, e.target.value)}
+                    <select value={p.perfil} translate="no" onClick={e => e.stopPropagation()} onChange={e => alterarPerfil(p.user_id, e.target.value)}
                       style={{ padding:'5px 8px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:12, background:'#fff', cursor:'pointer', flexShrink:0 }}>
                       <option value="Membro">Membro</option>
                       <option value="Ritualística">Ritualística</option>
