@@ -320,7 +320,7 @@ export default function Calendario() {
           {/* Filtro */}
           <div style={{ background:'rgba(255,255,255,0.1)', borderRadius:12, padding:'12px 16px', marginBottom:16, display:'flex', alignItems:'center', gap:12 }}>
             <span style={{ color:'rgba(255,255,255,0.8)', fontSize:14, whiteSpace:'nowrap' }}>📅</span>
-            <select value={filtroMes} onChange={e => setFiltroMes(e.target.value)}
+            <select value={filtroMes} translate="no" onChange={e => setFiltroMes(e.target.value)}
               style={{ flex:1, padding:'8px 12px', borderRadius:8, border:'none', fontSize:14, background:'#fff', cursor:'pointer' }}>
               {meses.map(m => <option key={m.val} value={m.val}>{m.label}</option>)}
             </select>
@@ -631,13 +631,13 @@ export default function Calendario() {
                 style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1px solid #ccc', fontSize:14, marginBottom:12, boxSizing:'border-box' }} />
 
               <label style={{ display:'block', marginBottom:4, fontWeight:600, color:'#333', fontSize:14 }}>Tipo</label>
-              <select value={form.tipo} onChange={e => setForm({...form,tipo:e.target.value})}
+              <select value={form.tipo} translate="no" onChange={e => setForm({...form,tipo:e.target.value})}
                 style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1px solid #ccc', fontSize:14, marginBottom:12, boxSizing:'border-box' }}>
                 {TIPOS.map(t => <option key={t.value} value={t.value}>{t.emoji} {t.label}</option>)}
               </select>
 
               <label style={{ display:'block', marginBottom:4, fontWeight:600, color:'#333', fontSize:14 }}>Visível para</label>
-              <select value={form.visibilidade} onChange={e => setForm({...form,visibilidade:e.target.value})}
+              <select value={form.visibilidade} translate="no" onChange={e => setForm({...form,visibilidade:e.target.value})}
                 style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1px solid #ccc', fontSize:14, marginBottom:12, boxSizing:'border-box' }}>
                 {VISIBILIDADE.map(v => <option key={v.value} value={v.value}>{v.emoji} {v.label}</option>)}
               </select>
@@ -666,7 +666,7 @@ export default function Calendario() {
                 placeholder="Informações adicionais..." />
 
               <label style={{ display:'block', marginBottom:4, fontWeight:600, color:'#333', fontSize:14 }}>Status</label>
-              <select value={form.status} onChange={e => setForm({...form,status:e.target.value})}
+              <select value={form.status} translate="no" onChange={e => setForm({...form,status:e.target.value})}
                 style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1px solid #ccc', fontSize:14, marginBottom:16, boxSizing:'border-box' }}>
                 <option value="ativo">🟡 Agendado</option>
                 <option value="realizado">🟢 Realizado</option>

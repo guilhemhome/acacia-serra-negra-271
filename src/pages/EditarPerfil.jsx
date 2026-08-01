@@ -302,7 +302,7 @@ export default function EditarPerfil() {
                 <Input label="Profissão" value={pessoal.profissao} onChange={v => setPessoal({...pessoal, profissao:v})} />
                 <div style={{ marginTop:12 }}>
                   <label style={{ fontSize:13, color:'#64748b', display:'block', marginBottom:4 }}>Estado civil</label>
-                  <select value={pessoal.estado_civil} onChange={e => setPessoal({...pessoal, estado_civil:e.target.value, data_casamento: e.target.value !== 'Casado' && e.target.value !== 'União Estável' ? '' : pessoal.data_casamento})}
+                  <select value={pessoal.estado_civil} translate="no" onChange={e => setPessoal({...pessoal, estado_civil:e.target.value, data_casamento: e.target.value !== 'Casado' && e.target.value !== 'União Estável' ? '' : pessoal.data_casamento})}
                     style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1px solid #cbd5e1', fontSize:14, color:'#1e293b', background:'#fff' }}>
                     <option value="">Selecione...</option>
                     <option value="Solteiro">Solteiro(a)</option>
@@ -326,7 +326,7 @@ export default function EditarPerfil() {
                 <Input label="Nome" value={novoFamiliar.nome} onChange={v => setNovoFamiliar({...novoFamiliar, nome:v})} />
                 <div style={{ marginBottom:14 }}>
                   <label style={{ display:'block', fontSize:12, fontWeight:600, color:'#64748b', marginBottom:4, textTransform:'uppercase', letterSpacing:0.5 }}>Parentesco</label>
-                  <select value={novoFamiliar.parentesco} onChange={e => setNovoFamiliar({...novoFamiliar, parentesco:e.target.value})}
+                  <select value={novoFamiliar.parentesco} translate="no" onChange={e => setNovoFamiliar({...novoFamiliar, parentesco:e.target.value})}
                     style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box' }}>
                     <option value="">Selecione...</option>
                     <option value="esposa">Esposa</option>
@@ -346,7 +346,7 @@ export default function EditarPerfil() {
                       <div style={{ padding:'12px 14px' }}>
                         <input value={editFamiliarForm.nome} onChange={e => setEditFamiliarForm({...editFamiliarForm, nome:e.target.value})}
                           placeholder="Nome" style={{ width:'100%', padding:'8px 10px', borderRadius:6, border:'1px solid #cbd5e1', fontSize:14, marginBottom:8, boxSizing:'border-box' }} />
-                        <select value={editFamiliarForm.parentesco} onChange={e => setEditFamiliarForm({...editFamiliarForm, parentesco:e.target.value})}
+                        <select value={editFamiliarForm.parentesco} translate="no" onChange={e => setEditFamiliarForm({...editFamiliarForm, parentesco:e.target.value})}
                           style={{ width:'100%', padding:'8px 10px', borderRadius:6, border:'1px solid #cbd5e1', fontSize:14, marginBottom:8, boxSizing:'border-box' }}>
                           <option value="">Selecione...</option>
                           <option value="esposa">Esposa</option>
@@ -471,7 +471,7 @@ export default function EditarPerfil() {
                 <Secao titulo="Adicionar grau filosófico" />
                 <div style={{ marginBottom:14 }}>
                   <label style={{ display:'block', fontSize:12, fontWeight:600, color:'#64748b', marginBottom:4, textTransform:'uppercase', letterSpacing:0.5 }}>Grau</label>
-                  <select value={novoFilosofico.grau} onChange={e => setNovoFilosofico({...novoFilosofico, grau:e.target.value})}
+                  <select value={novoFilosofico.grau} translate="no" onChange={e => setNovoFilosofico({...novoFilosofico, grau:e.target.value})}
                     style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box' }}>
                     <option value="">Selecione...</option>
                     <option value="Capitular">Capitular</option>
@@ -491,7 +491,7 @@ export default function EditarPerfil() {
                   <div key={f.id} style={{ background:'#f8fafc', borderRadius:8, marginBottom:8, border:'1px solid #e2e8f0', overflow:'hidden' }}>
                     {editandoFilosofico === f.id ? (
                       <div style={{ padding:'12px 14px' }}>
-                        <select value={editFilosoficoForm.grau} onChange={e => setEditFilosoficoForm({...editFilosoficoForm, grau:e.target.value})}
+                        <select value={editFilosoficoForm.grau} translate="no" onChange={e => setEditFilosoficoForm({...editFilosoficoForm, grau:e.target.value})}
                           style={{ width:'100%', padding:'8px 10px', borderRadius:6, border:'1px solid #cbd5e1', fontSize:14, marginBottom:8, boxSizing:'border-box' }}>
                           <option value="">Selecione...</option>
                           <option value="Capitular">Capitular</option>

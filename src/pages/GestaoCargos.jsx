@@ -313,7 +313,7 @@ export default function GestaoCargos() {
                             </div>
                             {atribuindo === cargo.nome && (
                               <div style={{ background:'#f8fafc', padding:'12px 16px', borderTop:'1px solid #f1f5f9', borderLeft:'4px solid #1a237e' }}>
-                                <select value={formAtribuir.associado_id} onChange={e => setFormAtribuir({...formAtribuir, associado_id:e.target.value})}
+                                <select value={formAtribuir.associado_id} translate="no" onChange={e => setFormAtribuir({...formAtribuir, associado_id:e.target.value})}
                                   style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, marginBottom:8, boxSizing:'border-box' }}>
                                   <option value="">Selecione o irmão...</option>
                                   {associados.map(a => <option key={a.id} value={a.id}>{a.nome_completo}</option>)}
