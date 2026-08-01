@@ -174,6 +174,13 @@ export default function Configuracoes() {
     else {
       msg(novoValor ? 'ADM concedido' : 'ADM revogado')
       setPerfis(prev => prev.map(p => p.user_id === userId ? { ...p, is_admin: novoValor } : p))
+      const { data: { user: userAtual } } = await supabase.auth.getUser()
+      await supabase.from('log_alteracoes_acesso').insert({
+        user_id: userId, nome: nome, campo: 'is_admin',
+        valor_anterior: atual, valor_novo: novoValor,
+        alterado_por_user_id: userAtual?.id || null,
+        alterado_por_nome: userAtual?.email || null
+      })
     }
   }
   async function toggleContaTeste(assocId, userId, atual, nome) {
@@ -189,6 +196,13 @@ export default function Configuracoes() {
     else {
       msg(novoValor ? 'Marcado como conta de teste ✅' : 'Removido da conta de teste ✅')
       setPerfis(prev => prev.map(p => p.user_id === userId ? { ...p, associados: { ...p.associados, conta_teste: novoValor } } : p))
+      const { data: { user: userAtual } } = await supabase.auth.getUser()
+      await supabase.from('log_alteracoes_acesso').insert({
+        associado_id: assocId, user_id: userId, nome: nome, campo: 'conta_teste',
+        valor_anterior: atual, valor_novo: novoValor,
+        alterado_por_user_id: userAtual?.id || null,
+        alterado_por_nome: userAtual?.email || null
+      })
     }
   }
 
@@ -475,7 +489,7 @@ export default function Configuracoes() {
                       <th style={{ padding:'10px 12px', textAlign:'left', color:'#fff', fontSize:12, fontWeight:600, minWidth:150 }}>Modulo</th>
                       <th style={{ padding:'10px 8px', textAlign:'center', color:'#fff', fontSize:11, fontWeight:600, minWidth:70 }}>ADM</th>
                       {perfisEditaveis.map(p => (
-                        <th key={p} style={{ padding:'10px 8px', textAlign:'center', color:'#fff', fontSize:11, fontWeight:600, minWidth:100, whiteSpace:'nowrap' }}>{p}</th>
+                        <th key={p} translate="no" style={{ padding:'10px 8px', textAlign:'center', color:'#fff', fontSize:11, fontWeight:600, minWidth:100, whiteSpace:'nowrap' }}>{p}</th>
                       ))}
                     </tr>
                   </thead>
