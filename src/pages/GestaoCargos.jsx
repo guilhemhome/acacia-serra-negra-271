@@ -291,7 +291,7 @@ export default function GestaoCargos() {
                           <div key={cargo.id}>
                             <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 16px', borderTop:'1px solid #f1f5f9', borderLeft: t ? '4px solid #1a237e' : '4px solid #e2e8f0', background: t ? '#f8faff' : '#fff' }}>
                               <div style={{ flex:1, minWidth:0, display:'flex', alignItems:'center', gap:8, flexWrap:'nowrap', overflow:'hidden' }}>
-                                <span style={{ fontSize:14, fontWeight:700, color:'#0f172a', flexShrink:0 }}>{cargo.nome}</span>
+                                <span translate="no" style={{ fontSize:14, fontWeight:700, color:'#0f172a', flexShrink:0 }}>{cargo.nome}</span>
                                 {t
                                   ? <span style={{ fontSize:12, color:'#1a237e', fontWeight:500, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{t.associados?.nome_completo} · <span style={{ color:'#475569' }}>desde {fmt(t.data_inicio)}</span></span>
                                   : <span style={{ fontSize:12, color:'#94a3b8', fontStyle:'italic', flexShrink:0 }}>Cargo vago</span>
@@ -343,15 +343,20 @@ export default function GestaoCargos() {
             {/* Criar novo */}
             <div style={{ background:'#fff', borderRadius:12, padding:16, marginBottom:16, boxShadow:'0 2px 8px rgba(0,0,0,0.1)' }}>
               <p style={{ margin:'0 0 10px', fontWeight:700, color:'#1a237e' }}>➕ Criar novo cargo</p>
+              <label style={{ display:'block', fontSize:12, fontWeight:600, color:'#64748b', marginBottom:4 }}>Nome do cargo</label>
               <input value={novoCargo} onChange={e => setNovoCargo(e.target.value)}
                 placeholder="Nome do cargo..."
                 style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, marginBottom:8, boxSizing:'border-box' }} />
+              <label style={{ display:'block', fontSize:12, fontWeight:600, color:'#64748b', marginBottom:4 }}>Categoria</label>
               <input value={novaCategoria} onChange={e => setNovaCategoria(e.target.value)}
-                list="lista-categorias" placeholder="Categoria (ex: Administração) — digite uma nova se quiser"
-                style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, marginBottom:8, boxSizing:'border-box' }} />
+                list="lista-categorias" placeholder="Categoria (ex: Administração)"
+                style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box' }} />
+              <p style={{ margin:'4px 0 8px', fontSize:11, color:'#94a3b8' }}>💡 Digite para ver sugestões existentes, ou escreva uma categoria nova</p>
+              <label style={{ display:'block', fontSize:12, fontWeight:600, color:'#64748b', marginBottom:4 }}>Nível de acesso</label>
               <input value={novoPerfilAcesso} onChange={e => setNovoPerfilAcesso(e.target.value)}
                 list="lista-perfis" placeholder="Nível de acesso (ex: Administrativo)"
-                style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, marginBottom:8, boxSizing:'border-box' }} />
+                style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box' }} />
+              <p style={{ margin:'4px 0 8px', fontSize:11, color:'#94a3b8' }}>💡 Digite para ver sugestões existentes, ou escreva um nível novo</p>
               <datalist id="lista-categorias">
                 {categoriasExistentes().map(cat => <option key={cat} value={cat} />)}
               </datalist>
@@ -368,15 +373,20 @@ export default function GestaoCargos() {
                 <div key={c.id} style={{ background:'#fff', borderRadius:12, padding:'12px 14px', boxShadow:'0 2px 8px rgba(0,0,0,0.08)' }}>
                   {editandoCargo === c.id ? (
                     <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                      <label style={{ fontSize:12, fontWeight:600, color:'#64748b' }}>Nome do cargo</label>
                       <input value={editNome} onChange={e => setEditNome(e.target.value)}
                         placeholder="Nome do cargo"
                         style={{ width:'100%', padding:'8px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box' }} />
+                      <label style={{ fontSize:12, fontWeight:600, color:'#64748b' }}>Categoria</label>
                       <input value={editCategoria} onChange={e => setEditCategoria(e.target.value)}
                         list="lista-categorias" placeholder="Categoria"
                         style={{ width:'100%', padding:'8px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box' }} />
+                      <p style={{ margin:'-4px 0 0', fontSize:11, color:'#94a3b8' }}>💡 Digite para ver sugestões, ou escreva uma nova</p>
+                      <label style={{ fontSize:12, fontWeight:600, color:'#64748b' }}>Nível de acesso</label>
                       <input value={editPerfilAcesso} onChange={e => setEditPerfilAcesso(e.target.value)}
                         list="lista-perfis" placeholder="Nível de acesso"
                         style={{ width:'100%', padding:'8px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box' }} />
+                      <p style={{ margin:'-4px 0 0', fontSize:11, color:'#94a3b8' }}>💡 Digite para ver sugestões, ou escreva um novo</p>
                       <div style={{ display:'flex', gap:8 }}>
                         <button onClick={() => salvarEdicao(c.id)}
                           style={{ flex:1, padding:'10px', borderRadius:8, border:'none', background:'#1a237e', color:'#fff', fontWeight:700, cursor:'pointer', minHeight:44 }}>💾 Salvar</button>
