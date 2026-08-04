@@ -278,7 +278,7 @@ export default function GestaoCargos() {
                   <div onClick={() => setAbasAbertas(prev => prev.includes(categoria) ? prev.filter(x => x !== categoria) : [...prev, categoria])}
                     style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 16px', cursor:'pointer', background: aberto ? '#1a237e' : '#f8fafc' }}>
                     <span style={{ fontSize:16 }}>{icone}</span>
-                    <span style={{ flex:1, fontSize:16, fontWeight:700, color: aberto ? '#fff' : '#1a237e', letterSpacing:'0.01em' }}>{categoria}</span>
+                    <span translate="no" style={{ flex:1, fontSize:16, fontWeight:700, color: aberto ? '#fff' : '#1a237e', letterSpacing:'0.01em' }}>{categoria}</span>
                     {preenchidos > 0 && <span style={{ fontSize:11, padding:'2px 8px', borderRadius:20, background: aberto ? 'rgba(255,255,255,0.2)' : '#dbeafe', color: aberto ? '#fff' : '#1d4ed8', fontWeight:600 }}>{preenchidos} ✓</span>}
                     {vagos > 0 && <span style={{ fontSize:11, padding:'2px 8px', borderRadius:20, background: aberto ? 'rgba(255,255,255,0.1)' : '#f1f5f9', color: aberto ? 'rgba(255,255,255,0.7)' : '#64748b', fontWeight:600 }}>{vagos} vagos</span>}
                     <span style={{ color: aberto ? '#fff' : '#94a3b8', fontSize:16, transform: aberto ? 'rotate(180deg)' : 'none', display:'inline-block', transition:'transform 0.2s' }}>▾</span>
@@ -377,16 +377,22 @@ export default function GestaoCargos() {
                       <input value={editNome} onChange={e => setEditNome(e.target.value)}
                         placeholder="Nome do cargo"
                         style={{ width:'100%', padding:'8px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box' }} />
-                      <label style={{ fontSize:12, fontWeight:600, color:'#64748b' }}>Categoria</label>
-                      <input value={editCategoria} onChange={e => setEditCategoria(e.target.value)}
-                        list="lista-categorias" placeholder="Categoria"
-                        style={{ width:'100%', padding:'8px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box' }} />
-                      <p style={{ margin:'-4px 0 0', fontSize:11, color:'#94a3b8' }}>💡 Digite para ver sugestões, ou escreva uma nova</p>
-                      <label style={{ fontSize:12, fontWeight:600, color:'#64748b' }}>Nível de acesso</label>
-                      <input value={editPerfilAcesso} onChange={e => setEditPerfilAcesso(e.target.value)}
-                        list="lista-perfis" placeholder="Nível de acesso"
-                        style={{ width:'100%', padding:'8px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box' }} />
-                      <p style={{ margin:'-4px 0 0', fontSize:11, color:'#94a3b8' }}>💡 Digite para ver sugestões, ou escreva um novo</p>
+                      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+                        <div>
+                          <label style={{ fontSize:12, fontWeight:600, color:'#64748b' }}>Categoria</label>
+                          <input value={editCategoria} onChange={e => setEditCategoria(e.target.value)}
+                            list="lista-categorias" placeholder="Categoria"
+                            style={{ width:'100%', padding:'8px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box' }} />
+                          <p style={{ margin:'2px 0 0', fontSize:10, color:'#94a3b8' }}>💡 Digite para ver sugestões</p>
+                        </div>
+                        <div>
+                          <label style={{ fontSize:12, fontWeight:600, color:'#64748b' }}>Nível de acesso</label>
+                          <input value={editPerfilAcesso} onChange={e => setEditPerfilAcesso(e.target.value)}
+                            list="lista-perfis" placeholder="Nível de acesso"
+                            style={{ width:'100%', padding:'8px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box' }} />
+                          <p style={{ margin:'2px 0 0', fontSize:10, color:'#94a3b8' }}>💡 Digite para ver sugestões</p>
+                        </div>
+                      </div>
                       <div style={{ display:'flex', gap:8 }}>
                         <button onClick={() => salvarEdicao(c.id)}
                           style={{ flex:1, padding:'10px', borderRadius:8, border:'none', background:'#1a237e', color:'#fff', fontWeight:700, cursor:'pointer', minHeight:44 }}>💾 Salvar</button>
