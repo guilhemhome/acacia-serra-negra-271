@@ -60,7 +60,7 @@ export default function Oficiais() {
               <div key={grupo.id} style={{ borderRadius:12, overflow:'hidden', border:'1px solid #cbd5e1' }}>
                 <div onClick={() => setGruposAbertos(prev => prev.includes(grupo.id) ? prev.filter(x => x !== grupo.id) : [...prev, grupo.id])}
                   style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 16px', cursor:'pointer', background: aberto ? '#1a237e' : '#f8fafc' }}>
-                  <span style={{ flex:1, fontSize:15, fontWeight:700, color: aberto ? '#fff' : '#1a237e' }}>{grupo.label}</span>
+                  <span translate="no" style={{ flex:1, fontSize:15, fontWeight:700, color: aberto ? '#fff' : '#1a237e' }}>{grupo.label}</span>
                   <span style={{ fontSize:11, padding:'2px 8px', borderRadius:20, background: aberto ? 'rgba(255,255,255,0.2)' : '#dbeafe', color: aberto ? '#fff' : '#1d4ed8', fontWeight:600 }}>{cargosDoGrupo.length} oficial{cargosDoGrupo.length>1?'is':''}</span>
                   <span style={{ color: aberto ? '#fff' : '#94a3b8', fontSize:16, display:'inline-block', transform: aberto ? 'rotate(180deg)' : 'none', transition:'transform 0.2s' }}>▾</span>
                 </div>
@@ -69,7 +69,7 @@ export default function Oficiais() {
                     {cargosDoGrupo.map((c, idx) => (
                       <div key={idx} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 16px', borderTop:'1px solid #f1f5f9', borderLeft:'4px solid #1a237e' }}>
                         <div style={{ flex:1 }}>
-                          <span style={{ fontSize:13, fontWeight:700, color:'#0f172a' }}>{c.cargo}</span>
+                          <span translate="no" style={{ fontSize:13, fontWeight:700, color:'#0f172a' }}>{c.cargo}</span>
                           <span style={{ fontSize:12, color:'#1a237e', fontWeight:500, marginLeft:8 }}>{c.associados?.nome_completo || '—'}</span>
                         </div>
                       </div>

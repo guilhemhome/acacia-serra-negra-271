@@ -182,7 +182,7 @@ export default function PerfilIrmao() {
                 <Secao titulo="Endereços" />
                 {enderecos.map((e, i) => (
                   <div key={i} style={{ padding: '10px 14px', background: '#f8fafc', borderRadius: 8, marginBottom: 8 }}>
-                    <p style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase' }}>{e.tipo}</p>
+                    <p translate="no" style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase' }}>{e.tipo}</p>
                     <p style={{ margin: 0, fontSize: 14, color: '#1e293b' }}>{e.logradouro}, {e.numero} {e.complemento && `— ${e.complemento}`}</p>
                     <p style={{ margin: 0, fontSize: 13, color: '#64748b' }}>{e.bairro} — {e.cidade}/{e.uf} — CEP {e.cep}</p>
                   </div>
@@ -193,8 +193,8 @@ export default function PerfilIrmao() {
                 {familiares.map((f, i) => (
                   <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', background: '#f8fafc', borderRadius: 8, marginBottom: 8 }}>
                     <div>
-                      <p style={{ margin: 0, fontWeight: 600, color: '#1e293b' }}>{f.nome}</p>
-                      <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>{f.parentesco}</p>
+                      <p translate="no" style={{ margin: 0, fontWeight: 600, color: '#1e293b' }}>{f.nome}</p>
+                      <p translate="no" style={{ margin: 0, fontSize: 12, color: '#64748b' }}>{f.parentesco}</p>
                     </div>
                     <p style={{ margin: 0, fontSize: 13, color: '#64748b' }}>{fmt(f.data_nascimento)}</p>
                   </div>

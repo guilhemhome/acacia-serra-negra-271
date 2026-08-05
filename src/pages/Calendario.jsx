@@ -556,7 +556,7 @@ export default function Calendario() {
                 return (
                   <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 14px', background:'#f8fafc', borderRadius:8, marginBottom:8 }}>
                     <div>
-                      <p style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{f.nome}</p>
+                      <p translate="no" style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{f.nome}</p>
                       <p style={{ margin:0, fontSize:12, color:'#64748b' }}>{f.parentesco} do Ir. {f.associados?.nome_completo} — Dia {d}/{m}</p>
                     </div>
                     {podeEnviarWhatsApp && (<a href={`https://wa.me/55${(Array.isArray(f.associados) ? f.associados[0]?.tel_celular : f.associados?.tel_celular||'').replace(/\D/g,'')}?text=${encodeURIComponent(tplDependente.replace('{nome_irmao}', Array.isArray(f.associados)?f.associados[0]?.nome_completo:f.associados?.nome_completo||'').replace('{parentesco}',f.parentesco||'').replace('{nome_dependente}',f.nome||'').replace('{loja}','Acácia de Serra Negra Nº 271'))}`} target="_blank" rel="noreferrer"
@@ -604,7 +604,7 @@ export default function Calendario() {
                 return (
                   <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 14px', background:'#f8fafc', borderRadius:8, marginBottom:8 }}>
                     <div>
-                      <p style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{item.nome}</p>
+                      <p translate="no" style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{item.nome}</p>
                       <p style={{ margin:0, fontSize:12, color:'#64748b' }}>{emoji} {item.tipo} — Dia {d}/{m} — {item.anos} {item.anos === 1 ? 'ano' : 'anos'}</p>
                     </div>
                     {podeEnviarWhatsApp && (<a href={`https://wa.me/55${(item.tel_celular||'').replace(/\D/g,'')}?text=${encodeURIComponent(emoji + ' A Loja Acácia de Serra Negra Nº 271 saúda o Ir∴ ' + item.nome + ' pelos ' + item.anos + ' anos de ' + item.tipo + '! Que o G∴A∴D∴U∴ ilumine sempre sua jornada fraterna! ⚒️')}`} target="_blank" rel="noreferrer"

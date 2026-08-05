@@ -369,7 +369,7 @@ export default function EditarPerfil() {
                     ) : (
                       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 14px' }}>
                         <div>
-                          <p style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{f.nome}</p>
+                          <p translate="no" style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{f.nome}</p>
                           <p style={{ margin:0, fontSize:12, color:'#64748b' }}>{f.parentesco} {f.data_nascimento ? '· '+f.data_nascimento.split('T')[0].split('-').reverse().join('/') : ''}</p>
                         </div>
                         <div style={{ display:'flex', gap:8, alignItems:'center', flexShrink:0 }}>
@@ -516,7 +516,7 @@ export default function EditarPerfil() {
                     ) : (
                       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 14px' }}>
                         <div>
-                          <p style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{f.grau}</p>
+                          <p translate="no" style={{ margin:0, fontWeight:600, color:'#1e293b' }}>{f.grau}</p>
                           <p style={{ margin:0, fontSize:12, color:'#64748b' }}>{f.loja} {f.data_concessao ? '· '+f.data_concessao.split('T')[0].split('-').reverse().join('/') : ''}</p>
                         </div>
                         <div style={{ display:'flex', gap:8, alignItems:'center' }}>

@@ -247,7 +247,7 @@ export default function PortalMembro() {
               style={{ background: c.emBreve ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.12)', border:'none', borderRadius:16, padding:'16px 14px', cursor: c.emBreve ? 'default' : 'pointer', textAlign:'left', position:'relative' }}>
               {c.emBreve && <span style={{ position:'absolute', top:8, right:8, fontSize:9, background:'rgba(255,255,255,0.2)', color:'rgba(255,255,255,0.6)', borderRadius:10, padding:'2px 6px' }}>em breve</span>}
               <div style={{ fontSize:22, marginBottom:6 }}>{c.icon}</div>
-              <div style={{ color: c.emBreve ? 'rgba(255,255,255,0.5)' : '#fff', fontSize:13, fontWeight:600, lineHeight:1.2 }}>{c.label}</div>
+              <div translate="no" style={{ color: c.emBreve ? 'rgba(255,255,255,0.5)' : '#fff', fontSize:13, fontWeight:600, lineHeight:1.2 }}>{c.label}</div>
               <div style={{ color:'rgba(255,255,255,0.4)', fontSize:11, marginTop:3 }}>{c.sub}</div>
             </button>
           ))}
@@ -260,8 +260,8 @@ export default function PortalMembro() {
             <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:20 }}>
               {avisos.map((av, i) => (
                 <div key={i} style={{ background:'rgba(255,255,255,0.95)', borderRadius:14, padding:'14px 16px', borderLeft:'4px solid #f59e0b' }}>
-                  <div style={{ fontSize:13, fontWeight:700, color:'#1e293b', marginBottom:4 }}>{av.titulo}</div>
-                  <div style={{ fontSize:12, color:'#475569', lineHeight:1.5 }}>{av.conteudo}</div>
+                  <div translate="no" style={{ fontSize:13, fontWeight:700, color:'#1e293b', marginBottom:4 }}>{av.titulo}</div>
+                  <div translate="no" style={{ fontSize:12, color:'#475569', lineHeight:1.5 }}>{av.conteudo}</div>
                   <div style={{ fontSize:11, color:'#94a3b8', marginTop:6 }}>
                     {av.associados?.nome_completo} · {fmt(av.created_at)}
                   </div>
@@ -277,8 +277,8 @@ export default function PortalMembro() {
             <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:8 }}>
               <span style={{ fontSize:24 }}>{b.emoji}</span>
               <div>
-                <div style={{ fontSize:14, fontWeight:700, color:'#2e7d32' }}>{b.titulo}</div>
-                <div style={{ fontSize:12, color:'#388e3c' }}>{b.sub}</div>
+                <div translate="no" style={{ fontSize:14, fontWeight:700, color:'#2e7d32' }}>{b.titulo}</div>
+                <div translate="no" style={{ fontSize:12, color:'#388e3c' }}>{b.sub}</div>
               </div>
             </div>
             <div style={{ background:'#f1f8e9', borderRadius:8, padding:'10px 12px', fontSize:12, color:'#33691e', marginBottom:8, whiteSpace:'pre-wrap', lineHeight:1.5 }}>
@@ -318,7 +318,7 @@ export default function PortalMembro() {
                       <div style={{ fontSize:9, color:'#94a3b8', textTransform:'uppercase' }}>{MESES[parseInt(ev.data_evento.split('-')[1])-1]}</div>
                     </div>
                     <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ fontSize:13, fontWeight:600, color:'#1e293b', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{ev.titulo}</div>
+                      <div translate="no" style={{ fontSize:13, fontWeight:600, color:'#1e293b', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{ev.titulo}</div>
                       <div style={{ fontSize:11, color:'#64748b' }}>{ev.hora || '20:00'}</div>
                     </div>
                   </div>

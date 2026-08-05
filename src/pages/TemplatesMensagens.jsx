@@ -82,7 +82,7 @@ export default function TemplatesMensagens() {
                   style={{ background: selecionado?.id === t.id ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.08)',
                     border: selecionado?.id === t.id ? '2px solid rgba(255,255,255,0.6)' : '2px solid transparent',
                     borderRadius:10, padding:'12px 16px', marginBottom:8, cursor:'pointer', transition:'all 0.2s' }}>
-                  <div style={{ color:'#fff', fontWeight:'bold', fontSize:15 }}>{t.titulo}</div>
+                  <div translate="no" style={{ color:'#fff', fontWeight:'bold', fontSize:15 }}>{t.titulo}</div>
                   <div style={{ color:'rgba(255,255,255,0.5)', fontSize:12, marginTop:2 }}>chave: {t.chave}</div>
                 </div>
               ))}
