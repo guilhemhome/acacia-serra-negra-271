@@ -403,8 +403,8 @@ export default function GestaoCargos() {
                   ) : (
                     <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
                       <div>
-                        <p style={{ margin:0, fontWeight:600, color:'#1e293b', fontSize:14 }}>{c.nome}</p>
-                        <p style={{ margin:'2px 0 0', fontSize:11, color:'#94a3b8' }}>{c.categoria || 'Outros'} · {c.perfil_acesso || 'Membro'}</p>
+                        <p translate="no" style={{ margin:0, fontWeight:600, color:'#1e293b', fontSize:14 }}>{c.nome}</p>
+                        <p translate="no" style={{ margin:'2px 0 0', fontSize:11, color:'#94a3b8' }}>{c.categoria || 'Outros'} · {c.perfil_acesso || 'Membro'}</p>
                       </div>
                       <div style={{ display:'flex', gap:8, flexShrink:0 }}>
                         <button onClick={() => iniciarEdicao(c)}
