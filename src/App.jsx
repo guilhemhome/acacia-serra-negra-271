@@ -81,7 +81,7 @@ function RotaProtegida({ children, modulo, apenasAdm }) {
 
         if (!ativo) return
         setPerfil(perfilAtual)
-        if (perfilAtual === 'ADM') { setNivel('total'); return }
+        if (perfilAtual === 'ADM' || perfilAtual === 'Total') { setNivel('total'); return }
         if (!modulo) { setNivel('total'); return }
         const { data: perm } = await supabase.from('permissoes_perfil')
           .select('nivel').eq('perfil', perfilAtual).eq('modulo', modulo).maybeSingle()
