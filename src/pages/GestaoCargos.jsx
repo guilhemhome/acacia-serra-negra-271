@@ -247,8 +247,13 @@ export default function GestaoCargos() {
           <button onClick={() => navigate('/configuracoes')}
             style={{ position:'absolute', left:0, top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.15)', border:'none', borderRadius:8, color:'#fff', padding:'8px 14px', cursor:'pointer', fontSize:18 }}>←</button>
           <img src="/logo-acacia.png" alt="Logo" style={{ width:64, height:64, borderRadius:'50%', border:'3px solid rgba(255,255,255,0.5)', objectFit:'cover', display:'block', margin:'0 auto 8px' }} />
-          <h1 style={{ color:'#fff', fontSize:'1.6rem', fontWeight:'bold', margin:0 }}>Gestão de Cargos</h1>
+          <h1 translate="no" style={{ color:'#fff', fontSize:'1.6rem', fontWeight:'bold', margin:0 }}>Gestão de Cargos</h1>
           <p style={{ color:'rgba(255,255,255,0.7)', margin:0, fontSize:14 }}>Acácia de Serra Negra Nº 271</p>
+          {nivelAcesso && (
+            <span translate="no" style={{ display:'inline-block', background:'rgba(255,255,255,0.15)', color:'#fff', fontSize:10, fontWeight:600, letterSpacing:0.5, padding:'2px 8px', borderRadius:6, margin:'4px 0 0', textTransform:'uppercase' }}>
+              {nivelAcesso === 'ADM' ? 'Administrador' : nivelAcesso}
+            </span>
+          )}
         </div>
 
         {msg && <div style={{ background:'rgba(255,255,255,0.15)', color:'#fff', borderRadius:10, padding:'10px 16px', marginBottom:16, textAlign:'center', fontWeight:600 }}>{msg}</div>}
