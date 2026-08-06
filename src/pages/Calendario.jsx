@@ -296,7 +296,7 @@ export default function Calendario() {
 
         {/* Header */}
         <div style={{ position:'relative', textAlign:'center', marginBottom:24 }}>
-          <button onClick={() => navigate('/dashboard')}
+          <button onClick={() => navigate(-1)}
             style={{ position:'absolute', left:0, top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.15)', border:'none', borderRadius:8, color:'#fff', padding:'8px 14px', cursor:'pointer', fontSize:18 }}>←</button>
           <img src="/logo-acacia.png" alt="Logo" style={{ width:64, height:64, borderRadius:'50%', border:'3px solid rgba(255,255,255,0.5)', objectFit:'cover', display:'block', margin:'0 auto 8px' }} />
           <h1 style={{ color:'#fff', fontSize:'1.6rem', fontWeight:'bold', margin:0 }}>Calendário</h1>

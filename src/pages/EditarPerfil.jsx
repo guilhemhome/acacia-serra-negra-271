@@ -235,7 +235,7 @@ export default function EditarPerfil() {
 
         <div style={{ position:'relative', textAlign:'center', marginBottom:24 }}>
           {statusCadastro !== 'pendente' ? (
-            <button onClick={() => navigate(idParam ? `/perfil/${idParam}` : '/dashboard')}
+            <button onClick={() => navigate(idParam ? `/perfil/${idParam}` : -1)}
               style={{ position:'absolute', left:0, top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.15)', border:'none', borderRadius:8, color:'#fff', padding:'8px 14px', cursor:'pointer', fontSize:18 }}>←</button>
           ) : (
             <button onClick={async () => { await supabase.auth.signOut(); navigate('/') }}
