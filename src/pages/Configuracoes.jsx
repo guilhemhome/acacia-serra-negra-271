@@ -486,7 +486,7 @@ export default function Configuracoes() {
                 <table style={{ width:'100%', borderCollapse:'collapse', minWidth:750 }}>
                   <thead>
                     <tr style={{ background:'#1e293b' }}>
-                      <th style={{ padding:'10px 12px', textAlign:'left', color:'#fff', fontSize:12, fontWeight:600, minWidth:150 }}>Modulo</th>
+                      <th style={{ padding:'10px 12px', textAlign:'left', color:'#fff', fontSize:12, fontWeight:600, minWidth:150, position:'sticky', left:0, background:'#1e293b', zIndex:2 }}>Modulo</th>
                       <th style={{ padding:'10px 8px', textAlign:'center', color:'#fff', fontSize:11, fontWeight:600, minWidth:70 }}>ADM</th>
                       {perfisEditaveis.map(p => (
                         <th key={p} translate="no" style={{ padding:'10px 8px', textAlign:'center', color:'#fff', fontSize:11, fontWeight:600, minWidth:100, whiteSpace:'nowrap' }}>{p}</th>
@@ -496,7 +496,7 @@ export default function Configuracoes() {
                   <tbody>
                     {MODULOS.map((mod, mi) => (
                       <tr key={mod.chave} style={{ background: mi % 2 === 0 ? '#f8fafc' : '#fff', borderBottom:'1px solid #e2e8f0' }}>
-                        <td style={{ padding:'8px 12px', fontSize:13, fontWeight:500, color:'#1e293b' }}>{mod.nome}</td>
+                        <td style={{ padding:'8px 12px', fontSize:13, fontWeight:500, color:'#1e293b', position:'sticky', left:0, background: mi % 2 === 0 ? '#f8fafc' : '#fff', zIndex:1 }}>{mod.nome}</td>
                         <td style={{ padding:'6px 8px', textAlign:'center' }}>
                           <span style={{ background:'#dcfce7', color:'#16a34a', padding:'3px 8px', borderRadius:6, fontSize:11, fontWeight:600 }}>Total</span>
                         </td>
