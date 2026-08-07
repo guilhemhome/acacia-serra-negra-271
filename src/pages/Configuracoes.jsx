@@ -236,7 +236,6 @@ export default function Configuracoes() {
     { chave: 'presencas', nome: 'Presenças (painel)' },
     { chave: '/aprovacoes', nome: 'Aprovações' },
     { chave: '/calendario', nome: 'Calendário' },
-    { chave: '/configuracoes', nome: 'Configurações' },
     { chave: '/membro', nome: 'Portal do Membro' },
     { chave: '/templates-mensagens', nome: 'Templates Mensagens' },
     { chave: '/editar-perfil', nome: 'Editar Perfil' },
