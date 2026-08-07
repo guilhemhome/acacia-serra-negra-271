@@ -480,14 +480,14 @@ export default function Configuracoes() {
                   {salvandoPerm ? 'Salvando...' : 'Salvar Permissoes'}
                 </button>
               </div>
-              <div style={{ overflowX:'auto' }}>
+              <div style={{ overflowX:'auto', overflowY:'auto', maxHeight:500 }}>
                 <table style={{ width:'100%', borderCollapse:'collapse', minWidth:750 }}>
                   <thead>
                     <tr style={{ background:'#1e293b' }}>
-                      <th style={{ padding:'10px 12px', textAlign:'left', color:'#fff', fontSize:12, fontWeight:600, minWidth:150, position:'sticky', left:0, background:'#1e293b', zIndex:2 }}>Modulo</th>
-                      <th style={{ padding:'10px 8px', textAlign:'center', color:'#fff', fontSize:11, fontWeight:600, minWidth:70 }}>ADM</th>
+                      <th style={{ padding:'10px 12px', textAlign:'left', color:'#fff', fontSize:12, fontWeight:600, minWidth:150, position:'sticky', left:0, top:0, background:'#1e293b', zIndex:3 }}>Modulo</th>
+                      <th style={{ padding:'10px 8px', textAlign:'center', color:'#fff', fontSize:11, fontWeight:600, minWidth:70, position:'sticky', top:0, background:'#1e293b', zIndex:2 }}>ADM</th>
                       {perfisEditaveis.map(p => (
-                        <th key={p} translate="no" style={{ padding:'10px 8px', textAlign:'center', color:'#fff', fontSize:11, fontWeight:600, minWidth:100, whiteSpace:'nowrap' }}>{p}</th>
+                        <th key={p} translate="no" style={{ padding:'10px 8px', textAlign:'center', color:'#fff', fontSize:11, fontWeight:600, minWidth:100, whiteSpace:'nowrap', position:'sticky', top:0, background:'#1e293b', zIndex:2 }}>{p}</th>
                       ))}
                     </tr>
                   </thead>
