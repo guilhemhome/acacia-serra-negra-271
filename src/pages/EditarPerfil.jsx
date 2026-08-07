@@ -57,6 +57,7 @@ export default function EditarPerfil() {
   const [editFamiliarForm, setEditFamiliarForm] = useState({ nome:'', parentesco:'', data_nascimento:'' })
   const [graus, setGraus] = useState({ aprendiz:{ data:'', loja:'' }, companheiro:{ data:'', loja:'' }, mestre:{ data:'', loja:'' } })
   const [bodes, setBodes] = useState({ bodes_asfalto:false, bodes_asfalto_numero:'', bodes_asfalto_data_admissao:'' })
+  const [vmInstalacao, setVmInstalacao] = useState({ data_instalacao_vm:'', loja_instalacao:'' })
   const [filosoficos, setFilosoficos] = useState([])
   const [novoFilosofico, setNovoFilosofico] = useState({ grau:'', loja:'', data_concessao:'', observacoes:'' })
   const [editandoFilosofico, setEditandoFilosofico] = useState(null)
@@ -84,6 +85,7 @@ export default function EditarPerfil() {
         setPessoal({ nome_completo: assoc.nome_completo||'', apelido: assoc.apelido||'', email: assoc.email||'', tel_celular: assoc.tel_celular||'', data_nascimento: assoc.data_nascimento||'', nome_pai: assoc.nome_pai||'', nome_mae: assoc.nome_mae||'', profissao: assoc.profissao||'', empresa: assoc.empresa||'', estado_civil: assoc.estado_civil||'', data_casamento: assoc.data_casamento||'' })
         setCpf(assoc.cpf || '')
         setBodes({ bodes_asfalto: assoc.bodes_asfalto||false, bodes_asfalto_numero: assoc.bodes_asfalto_numero||'', bodes_asfalto_data_admissao: assoc.bodes_asfalto_data_admissao||'', _eraBode: assoc.bodes_asfalto||false })
+        setVmInstalacao({ data_instalacao_vm: assoc.data_instalacao_vm||'', loja_instalacao: assoc.loja_instalacao||'' })
         const { data: fams } = await supabase.from('familiares').select('*').eq('associado_id', assoc.id)
         if (fams) setFamiliares(fams)
         const { data: ends } = await supabase.from('enderecos').select('*').eq('associado_id', assoc.id)
@@ -190,6 +192,16 @@ export default function EditarPerfil() {
     }).eq('id', associadoId)
     if (error) msg('Erro ao salvar: ' + error.message)
     else msg('Dados dos Bodes salvos! ✅')
+    setSalvando(false)
+  }
+  async function salvarVmInstalacao() {
+    setSalvando(true)
+    const { error } = await supabase.from('associados').update({
+      data_instalacao_vm: vmInstalacao.data_instalacao_vm || null,
+      loja_instalacao: vmInstalacao.loja_instalacao || null
+    }).eq('id', associadoId)
+    if (error) msg('Erro ao salvar: ' + error.message)
+    else msg('Dados de instalação salvos! ✅')
     setSalvando(false)
   }
   async function adicionarFilosofico() {
@@ -443,6 +455,11 @@ export default function EditarPerfil() {
                   </div>
                 ))}
                 <BtnSalvar onClick={salvarGraus} />
+
+                <Secao titulo="🎖️ Instalação como Venerável Mestre" />
+                <DateInput label="Data de instalação" value={vmInstalacao.data_instalacao_vm} onChange={v => setVmInstalacao({...vmInstalacao, data_instalacao_vm:v})} />
+                <Input label="Loja onde foi instalado" value={vmInstalacao.loja_instalacao} onChange={v => setVmInstalacao({...vmInstalacao, loja_instalacao:v})} />
+                <BtnSalvar onClick={salvarVmInstalacao} />
 
                 {/* Bodes do Asfalto — visível para todos */}
                 <>
