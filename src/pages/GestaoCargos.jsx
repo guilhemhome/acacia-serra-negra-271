@@ -350,7 +350,7 @@ export default function GestaoCargos() {
               <p style={{ margin:'0 0 10px', fontWeight:700, color:'#1a237e' }}>➕ Criar novo cargo</p>
               <label style={{ display:'block', fontSize:12, fontWeight:600, color:'#64748b', marginBottom:4 }}>Nome do cargo</label>
               <input value={novoCargo} onChange={e => setNovoCargo(e.target.value)}
-                placeholder="Nome do cargo..."
+                placeholder="Nome do cargo..." translate="no"
                 style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, marginBottom:8, boxSizing:'border-box' }} />
               <label style={{ display:'block', fontSize:12, fontWeight:600, color:'#64748b', marginBottom:4 }}>Categoria</label>
               <input value={novaCategoria} onChange={e => setNovaCategoria(e.target.value)}
@@ -380,7 +380,7 @@ export default function GestaoCargos() {
                     <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
                       <label style={{ fontSize:12, fontWeight:600, color:'#64748b' }}>Nome do cargo</label>
                       <input value={editNome} onChange={e => setEditNome(e.target.value)}
-                        placeholder="Nome do cargo"
+                        placeholder="Nome do cargo" translate="no"
                         style={{ width:'100%', padding:'8px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box' }} />
                       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
                         <div>
