@@ -308,10 +308,10 @@ export default function Dashboard() {
           <img src="/logo-acacia.png" alt="Logo" style={{ width: 64, height: 64, borderRadius: '50%', border: '3px solid rgba(255,255,255,0.5)', objectFit: 'cover', display: 'block', margin: '0 auto 8px' }} />
           <h1 style={{ color: '#fff', fontSize: '1.4rem', fontWeight: 500, margin: '0 0 2px' }}>Olá, {usuario.cargoAtual ? `${usuario.cargoAtual} ${usuario.apelido}` : mestreInstalado ? `Mestre Instalado ${usuario.apelido}` : grauLabelDash ? `${grauLabelDash} ${usuario.apelido}` : usuario.apelido}</h1>
           <p style={{ color:'rgba(255,255,255,0.75)', fontSize:12, margin:'0 0 1px' }}>{usuario.id_acacia ? `Nº ${usuario.id_acacia} · ` : ''}{usuario.email_assoc || usuario.email}</p>
-          {usuario.perfil === 'ADM' && (
-            <span style={{ display: 'inline-block', background: 'rgba(255,255,255,0.15)', color: '#fff', fontSize: 10, fontWeight: 600, letterSpacing: 0.5, padding: '2px 8px', borderRadius: 6, margin: '4px 0 4px', textTransform: 'uppercase' }}>Administrador</span>
+          {usuario.perfil && (
+            <span translate="no" style={{ display: 'inline-block', background: 'rgba(255,255,255,0.15)', color: '#fff', fontSize: 10, fontWeight: 600, letterSpacing: 0.5, padding: '2px 8px', borderRadius: 6, margin: '4px 0 4px', textTransform: 'uppercase' }}>{usuario.perfil === 'ADM' ? 'Administrador' : usuario.perfil}</span>
           )}
-          {usuario.perfil === 'ADM' && usuario.cargoMaconico && <p style={{ color:'rgba(255,255,255,0.55)', fontSize:11, margin:'0' }}>Cargo na loja: {usuario.cargoMaconico}</p>}
+          {usuario.cargoMaconico && <p translate="no" style={{ color:'rgba(255,255,255,0.55)', fontSize:11, margin:'0' }}>Cargo na loja: {usuario.cargoMaconico}</p>}
         </div>
 
         {/* Cards visão geral */}
