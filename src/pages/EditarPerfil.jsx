@@ -344,6 +344,8 @@ export default function EditarPerfil() {
                     <option value="esposa">Esposa</option>
                     <option value="filho">Filho</option>
                     <option value="filha">Filha</option>
+                    <option value="enteado">Enteado</option>
+                    <option value="enteada">Enteada</option>
                   </select>
                 </div>
                 <DateInput label="Data de nascimento" value={novoFamiliar.data_nascimento} onChange={v => setNovoFamiliar({...novoFamiliar, data_nascimento:v})} />
@@ -365,6 +367,8 @@ export default function EditarPerfil() {
                           <option value="esposo">Esposo</option>
                           <option value="filho">Filho</option>
                           <option value="filha">Filha</option>
+                          <option value="enteado">Enteado</option>
+                          <option value="enteada">Enteada</option>
                           <option value="pai">Pai</option>
                           <option value="mãe">Mãe</option>
                           <option value="outro">Outro</option>
