@@ -260,7 +260,7 @@ export default function GestaoCargos() {
 
         {/* Abas */}
         <div style={{ display:'flex', gap:8, marginBottom:20 }}>
-          {[['atual','⚒️ Cargos Atuais'],['gerenciar','⚙️ Gerenciar Lista']].map(([k,l]) => (
+          {[['atual','⚒️ Cargos Atuais'],['gerenciar','⚙️ Gerenciar Cargos']].map(([k,l]) => (
             <button key={k} onClick={() => setAba(k)}
               style={{ flex:1, padding:'10px', borderRadius:10, border:'none', fontWeight:700, fontSize:14, cursor:'pointer',
                 background: aba===k ? '#fff' : 'rgba(255,255,255,0.15)',
