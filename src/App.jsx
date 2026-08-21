@@ -16,6 +16,7 @@ import EditarPerfil from './pages/EditarPerfil'
 import Dashboard from './pages/Dashboard'
 import PortalMembro from './pages/PortalMembro'
 import Oficiais from './pages/Oficiais'
+import BodesAsfalto from './pages/BodesAsfalto'
 
 const PERFIS_MEMBRO = ['Membro', 'Ritualística', 'Hospitalaria']
 
@@ -61,7 +62,33 @@ function RotaProtegida({ children, modulo, apenasAdm }) {
         const { data: perm } = await supabase.from('permissoes_perfil')
           .select('nivel').eq('perfil', perfilAtual).eq('modulo', modulo).maybeSingle()
         if (!ativo) return
-        setNivel(perm?.nivel || 'bloqueado')
+        let nivelFinal = perm?.nivel || 'bloqueado'
+
+        // Modulo Bodes do Asfalto: acesso aditivo, sem depender do perfil principal (que rege
+        // a loja). Cargo dos Bodes = acesso total ao modulo. Apenas bodes_asfalto=true (sem
+        // cargo) = acesso de leitura (visao simplificada, controlada dentro da propria pagina).
+        if (modulo === '/bodes-asfalto' && nivelFinal === 'bloqueado') {
+          const { data: meuAssocBodes } = await supabase.from('associados')
+            .select('id, bodes_asfalto').eq('user_id', session.user.id).maybeSingle()
+          if (!ativo) return
+          if (meuAssocBodes?.id) {
+            const { data: cargosBodes } = await supabase.from('cargos').select('nome').eq('categoria', 'Bodes do Asfalto')
+            const nomesCargosBodes = (cargosBodes || []).map(c => c.nome)
+            if (!ativo) return
+            let temCargoBodes = false
+            if (nomesCargosBodes.length > 0) {
+              const { data: meuCargoBodes } = await supabase.from('cargos_historico')
+                .select('id').eq('associado_id', meuAssocBodes.id).eq('em_exercicio', true)
+                .in('cargo', nomesCargosBodes).maybeSingle()
+              if (!ativo) return
+              temCargoBodes = !!meuCargoBodes
+            }
+            if (temCargoBodes) nivelFinal = 'total'
+            else if (meuAssocBodes.bodes_asfalto === true) nivelFinal = 'leitura'
+          }
+        }
+
+        setNivel(nivelFinal)
       } catch(e) {
         if (!ativo) return
         console.error('RotaProtegida erro:', e.message)
@@ -123,6 +150,7 @@ function App() {
         <Route path="/aprovacoes" element={<RotaProtegida modulo="/aprovacoes"><Aprovacoes /></RotaProtegida>} />
         <Route path="/membros" element={<RotaProtegida modulo="/membros"><Membros /></RotaProtegida>} />
         <Route path="/templates-mensagens" element={<RotaProtegida modulo="/templates-mensagens"><TemplatesMensagens /></RotaProtegida>} />
+        <Route path="/bodes-asfalto" element={<RotaProtegida modulo="/bodes-asfalto"><BodesAsfalto /></RotaProtegida>} />
         <Route path="/gestao-cargos" element={<RotaProtegida apenasAdm><GestaoCargos /></RotaProtegida>} />
 
         {/* Configuracoes somente ADM */}

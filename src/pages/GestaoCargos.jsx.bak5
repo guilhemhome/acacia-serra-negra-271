@@ -92,16 +92,8 @@ export default function GestaoCargos() {
 
   async function atribuir() {
     if (!formAtribuir.associado_id || !formAtribuir.data_inicio) { setMsg('Preencha o irmão e a data de início.'); return }
-    // Cargos da loja e cargos dos Bodes do Asfalto sao grupos independentes: um irmao pode
-    // ocupar 1 cargo da loja E 1 cargo dos Bodes ao mesmo tempo, sem um encerrar o outro.
-    const novoCargoObj = cargos.find(c => c.nome === atribuindo)
-    const novoEhBodes = novoCargoObj?.categoria === 'Bodes do Asfalto'
-    const mesmoGrupo = (nomeCargo) => {
-      const cat = cargos.find(c => c.nome === nomeCargo)?.categoria
-      return (cat === 'Bodes do Asfalto') === novoEhBodes
-    }
-    // Verificar se o irmão já ocupa algum cargo NO MESMO GRUPO (loja ou Bodes)
-    const cargoAtual = exercicio.find(e => e.associado_id === formAtribuir.associado_id && mesmoGrupo(e.cargo))
+    // Verificar se o irmão já ocupa algum cargo
+    const cargoAtual = exercicio.find(e => e.associado_id === formAtribuir.associado_id)
     if (cargoAtual) {
       setAlertaCargo({ cargoAtual: cargoAtual.cargo, associado_id: formAtribuir.associado_id, data_inicio: formAtribuir.data_inicio, cargo: atribuindo })
       return
@@ -113,13 +105,13 @@ export default function GestaoCargos() {
     if (jaOcupa) {
       await supabase.from('cargos_historico').update({ em_exercicio: false, data_fim: formAtribuir.data_inicio }).eq('id', jaOcupa.id)
     }
-    // Encerrar cargo anterior do MESMO GRUPO (loja ou Bodes) apenas — nao mexe no outro grupo
-    const cargoAnteriorAssoc = exercicio.find(e => e.associado_id === formAtribuir.associado_id && mesmoGrupo(e.cargo))
+    const cargoAnteriorAssoc = exercicio.find(e => e.associado_id === formAtribuir.associado_id)
     if (cargoAnteriorAssoc) {
       await supabase.from('cargos_historico').update({ em_exercicio: false, data_fim: formAtribuir.data_inicio }).eq('id', cargoAnteriorAssoc.id)
     }
-    // Garantia extra: desativar qualquer duplicata remanescente do MESMO cargo especifico
+    // Garantia extra: desativar qualquer duplicata remanescente
     await supabase.from('cargos_historico').update({ em_exercicio: false }).eq('cargo', cargo).eq('em_exercicio', true)
+    await supabase.from('cargos_historico').update({ em_exercicio: false }).eq('associado_id', formAtribuir.associado_id).eq('em_exercicio', true)
     await supabase.from('cargos_historico').insert({
       associado_id: formAtribuir.associado_id,
       cargo,
@@ -127,21 +119,13 @@ export default function GestaoCargos() {
       em_exercicio: true
     })
     // Atualizar nível de acesso automaticamente (usando perfil_acesso cadastrado no cargo)
-    // EXCECAO: cargos da categoria "Bodes do Asfalto" NUNCA sobrescrevem o perfil principal
-    // do irmao (que rege o acesso a loja). O acesso ao modulo dos Bodes e concedido via
-    // cargos_historico, checado separadamente em RotaProtegida.
     const cargoObj = cargos.find(c => c.nome === cargo)
-    const ehCargoBodes = cargoObj?.categoria === 'Bodes do Asfalto'
     const novoPerfil = cargoObj?.perfil_acesso || 'Membro'
-    if (!ehCargoBodes) {
-      const { data: assocUser } = await supabase.from('associados').select('user_id').eq('id', formAtribuir.associado_id).maybeSingle()
-      if (assocUser?.user_id) {
-        await supabase.from('perfis_acesso').upsert({ user_id: assocUser.user_id, perfil: novoPerfil }, { onConflict: 'user_id' })
-      }
+    const { data: assocUser } = await supabase.from('associados').select('user_id').eq('id', formAtribuir.associado_id).maybeSingle()
+    if (assocUser?.user_id) {
+      await supabase.from('perfis_acesso').upsert({ user_id: assocUser.user_id, perfil: novoPerfil }, { onConflict: 'user_id' })
     }
-    setMsg(ehCargoBodes
-      ? '✅ Cargo dos Bodes atribuído! O acesso do irmão à loja não foi alterado.'
-      : '✅ Cargo atribuído com sucesso! Nível de acesso atualizado para: ' + novoPerfil)
+    setMsg('✅ Cargo atribuído com sucesso! Nível de acesso atualizado para: ' + novoPerfil)
     setAtribuindo(null)
     setFormAtribuir({ associado_id:'', data_inicio:'' })
     await carregar()
@@ -151,32 +135,20 @@ export default function GestaoCargos() {
   async function confirmarAlerta() {
     const { cargo, associado_id, data_inicio } = alertaCargo
     setAlertaCargo(null)
-    const cargoObjNovo = cargos.find(c => c.nome === cargo)
-    const novoEhBodes = cargoObjNovo?.categoria === 'Bodes do Asfalto'
-    const mesmoGrupo = (nomeCargo) => {
-      const cat = cargos.find(c => c.nome === nomeCargo)?.categoria
-      return (cat === 'Bodes do Asfalto') === novoEhBodes
-    }
     const assocSelecionado = associados.find(a => a.id === associado_id)
     const ehTeste = assocSelecionado?.conta_teste === true
     const jaOcupa = exercicio.find(e => e.cargo === cargo && (e.associados?.conta_teste === true) === ehTeste)
     if (jaOcupa) await supabase.from('cargos_historico').update({ em_exercicio: false, data_fim: data_inicio }).eq('id', jaOcupa.id)
-    // Encerrar cargo anterior do MESMO GRUPO (loja ou Bodes) apenas
-    const cargoAnterior = exercicio.find(e => e.associado_id === associado_id && mesmoGrupo(e.cargo))
+    const cargoAnterior = exercicio.find(e => e.associado_id === associado_id)
     if (cargoAnterior) await supabase.from('cargos_historico').update({ em_exercicio: false, data_fim: data_inicio }).eq('id', cargoAnterior.id)
     await supabase.from('cargos_historico').insert({ associado_id, cargo, data_inicio, em_exercicio: true })
     const cargoObj = cargos.find(c => c.nome === cargo)
-    const ehCargoBodes = cargoObj?.categoria === 'Bodes do Asfalto'
     const novoPerfil = cargoObj?.perfil_acesso || 'Membro'
-    if (!ehCargoBodes) {
-      const { data: assocUser } = await supabase.from('associados').select('user_id').eq('id', associado_id).maybeSingle()
-      if (assocUser?.user_id) {
-        await supabase.from('perfis_acesso').upsert({ user_id: assocUser.user_id, perfil: novoPerfil }, { onConflict: 'user_id' })
-      }
+    const { data: assocUser } = await supabase.from('associados').select('user_id').eq('id', associado_id).maybeSingle()
+    if (assocUser?.user_id) {
+      await supabase.from('perfis_acesso').upsert({ user_id: assocUser.user_id, perfil: novoPerfil }, { onConflict: 'user_id' })
     }
-    setMsg(ehCargoBodes
-      ? 'Cargo dos Bodes atribuido! O acesso a loja nao foi alterado.'
-      : 'Cargo atribuido! Nivel de acesso: ' + novoPerfil)
+    setMsg('Cargo atribuido! Nivel de acesso: ' + novoPerfil)
     setAtribuindo(null)
     setFormAtribuir({ associado_id: '', data_inicio: '' })
     await carregar()
@@ -275,20 +247,15 @@ export default function GestaoCargos() {
           <button onClick={() => navigate('/configuracoes')}
             style={{ position:'absolute', left:0, top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.15)', border:'none', borderRadius:8, color:'#fff', padding:'8px 14px', cursor:'pointer', fontSize:18 }}>←</button>
           <img src="/logo-acacia.png" alt="Logo" style={{ width:64, height:64, borderRadius:'50%', border:'3px solid rgba(255,255,255,0.5)', objectFit:'cover', display:'block', margin:'0 auto 8px' }} />
-          <h1 translate="no" style={{ color:'#fff', fontSize:'1.6rem', fontWeight:'bold', margin:0 }}>Gestão de Cargos</h1>
+          <h1 style={{ color:'#fff', fontSize:'1.6rem', fontWeight:'bold', margin:0 }}>Gestão de Cargos</h1>
           <p style={{ color:'rgba(255,255,255,0.7)', margin:0, fontSize:14 }}>Acácia de Serra Negra Nº 271</p>
-          {nivelAcesso && (
-            <span translate="no" style={{ display:'inline-block', background:'rgba(255,255,255,0.15)', color:'#fff', fontSize:10, fontWeight:600, letterSpacing:0.5, padding:'2px 8px', borderRadius:6, margin:'4px 0 0', textTransform:'uppercase' }}>
-              {nivelAcesso === 'ADM' ? 'Administrador' : nivelAcesso}
-            </span>
-          )}
         </div>
 
         {msg && <div style={{ background:'rgba(255,255,255,0.15)', color:'#fff', borderRadius:10, padding:'10px 16px', marginBottom:16, textAlign:'center', fontWeight:600 }}>{msg}</div>}
 
         {/* Abas */}
         <div style={{ display:'flex', gap:8, marginBottom:20 }}>
-          {[['atual','⚒️ Cargos Atuais'],['gerenciar','⚙️ Gerenciar Cargos']].map(([k,l]) => (
+          {[['atual','⚒️ Cargos Atuais'],['gerenciar','⚙️ Gerenciar Lista']].map(([k,l]) => (
             <button key={k} onClick={() => setAba(k)}
               style={{ flex:1, padding:'10px', borderRadius:10, border:'none', fontWeight:700, fontSize:14, cursor:'pointer',
                 background: aba===k ? '#fff' : 'rgba(255,255,255,0.15)',
@@ -311,7 +278,7 @@ export default function GestaoCargos() {
                   <div onClick={() => setAbasAbertas(prev => prev.includes(categoria) ? prev.filter(x => x !== categoria) : [...prev, categoria])}
                     style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 16px', cursor:'pointer', background: aberto ? '#1a237e' : '#f8fafc' }}>
                     <span style={{ fontSize:16 }}>{icone}</span>
-                    <span translate="no" style={{ flex:1, fontSize:16, fontWeight:700, color: aberto ? '#fff' : '#1a237e', letterSpacing:'0.01em' }}>{categoria}</span>
+                    <span style={{ flex:1, fontSize:16, fontWeight:700, color: aberto ? '#fff' : '#1a237e', letterSpacing:'0.01em' }}>{categoria}</span>
                     {preenchidos > 0 && <span style={{ fontSize:11, padding:'2px 8px', borderRadius:20, background: aberto ? 'rgba(255,255,255,0.2)' : '#dbeafe', color: aberto ? '#fff' : '#1d4ed8', fontWeight:600 }}>{preenchidos} ✓</span>}
                     {vagos > 0 && <span style={{ fontSize:11, padding:'2px 8px', borderRadius:20, background: aberto ? 'rgba(255,255,255,0.1)' : '#f1f5f9', color: aberto ? 'rgba(255,255,255,0.7)' : '#64748b', fontWeight:600 }}>{vagos} vagos</span>}
                     <span style={{ color: aberto ? '#fff' : '#94a3b8', fontSize:16, transform: aberto ? 'rotate(180deg)' : 'none', display:'inline-block', transition:'transform 0.2s' }}>▾</span>
@@ -378,7 +345,7 @@ export default function GestaoCargos() {
               <p style={{ margin:'0 0 10px', fontWeight:700, color:'#1a237e' }}>➕ Criar novo cargo</p>
               <label style={{ display:'block', fontSize:12, fontWeight:600, color:'#64748b', marginBottom:4 }}>Nome do cargo</label>
               <input value={novoCargo} onChange={e => setNovoCargo(e.target.value)}
-                placeholder="Nome do cargo..." translate="no"
+                placeholder="Nome do cargo..."
                 style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, marginBottom:8, boxSizing:'border-box' }} />
               <label style={{ display:'block', fontSize:12, fontWeight:600, color:'#64748b', marginBottom:4 }}>Categoria</label>
               <input value={novaCategoria} onChange={e => setNovaCategoria(e.target.value)}
@@ -408,24 +375,18 @@ export default function GestaoCargos() {
                     <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
                       <label style={{ fontSize:12, fontWeight:600, color:'#64748b' }}>Nome do cargo</label>
                       <input value={editNome} onChange={e => setEditNome(e.target.value)}
-                        placeholder="Nome do cargo" translate="no"
+                        placeholder="Nome do cargo"
                         style={{ width:'100%', padding:'8px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box' }} />
-                      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
-                        <div>
-                          <label style={{ fontSize:12, fontWeight:600, color:'#64748b' }}>Categoria</label>
-                          <input value={editCategoria} onChange={e => setEditCategoria(e.target.value)}
-                            list="lista-categorias" placeholder="Categoria"
-                            style={{ width:'100%', padding:'8px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box' }} />
-                          <p style={{ margin:'2px 0 0', fontSize:10, color:'#94a3b8' }}>💡 Digite para ver sugestões</p>
-                        </div>
-                        <div>
-                          <label style={{ fontSize:12, fontWeight:600, color:'#64748b' }}>Nível de acesso</label>
-                          <input value={editPerfilAcesso} onChange={e => setEditPerfilAcesso(e.target.value)}
-                            list="lista-perfis" placeholder="Nível de acesso"
-                            style={{ width:'100%', padding:'8px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box' }} />
-                          <p style={{ margin:'2px 0 0', fontSize:10, color:'#94a3b8' }}>💡 Digite para ver sugestões</p>
-                        </div>
-                      </div>
+                      <label style={{ fontSize:12, fontWeight:600, color:'#64748b' }}>Categoria</label>
+                      <input value={editCategoria} onChange={e => setEditCategoria(e.target.value)}
+                        list="lista-categorias" placeholder="Categoria"
+                        style={{ width:'100%', padding:'8px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box' }} />
+                      <p style={{ margin:'-4px 0 0', fontSize:11, color:'#94a3b8' }}>💡 Digite para ver sugestões, ou escreva uma nova</p>
+                      <label style={{ fontSize:12, fontWeight:600, color:'#64748b' }}>Nível de acesso</label>
+                      <input value={editPerfilAcesso} onChange={e => setEditPerfilAcesso(e.target.value)}
+                        list="lista-perfis" placeholder="Nível de acesso"
+                        style={{ width:'100%', padding:'8px 12px', borderRadius:8, border:'1.5px solid #e2e8f0', fontSize:14, boxSizing:'border-box' }} />
+                      <p style={{ margin:'-4px 0 0', fontSize:11, color:'#94a3b8' }}>💡 Digite para ver sugestões, ou escreva um novo</p>
                       <div style={{ display:'flex', gap:8 }}>
                         <button onClick={() => salvarEdicao(c.id)}
                           style={{ flex:1, padding:'10px', borderRadius:8, border:'none', background:'#1a237e', color:'#fff', fontWeight:700, cursor:'pointer', minHeight:44 }}>💾 Salvar</button>
@@ -436,8 +397,8 @@ export default function GestaoCargos() {
                   ) : (
                     <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
                       <div>
-                        <p translate="no" style={{ margin:0, fontWeight:600, color:'#1e293b', fontSize:14 }}>{c.nome}</p>
-                        <p translate="no" style={{ margin:'2px 0 0', fontSize:11, color:'#94a3b8' }}>{c.categoria || 'Outros'} · {c.perfil_acesso || 'Membro'}</p>
+                        <p style={{ margin:0, fontWeight:600, color:'#1e293b', fontSize:14 }}>{c.nome}</p>
+                        <p style={{ margin:'2px 0 0', fontSize:11, color:'#94a3b8' }}>{c.categoria || 'Outros'} · {c.perfil_acesso || 'Membro'}</p>
                       </div>
                       <div style={{ display:'flex', gap:8, flexShrink:0 }}>
                         <button onClick={() => iniciarEdicao(c)}

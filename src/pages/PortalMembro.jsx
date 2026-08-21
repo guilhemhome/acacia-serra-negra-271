@@ -31,6 +31,7 @@ export default function PortalMembro() {
   const [salvandoPresenca, setSalvandoPresenca] = useState(false)
   const [associadoId, setAssociadoId] = useState(null)
   const [bannerAniv, setBannerAniv] = useState(null)
+  const [bodesStatus, setBodesStatus] = useState(null)
   const [tplIrmao, setTplIrmao] = useState('🌿 A Loja Maçônica Acácia de Serra Negra Nº 271 saúda com fraternidade o Ir∴ {nome} que hoje completa mais um ano de vida. Que o G∴A∴D∴U∴ ilumine sempre sua jornada! 🎂')
   const [tplDependente, setTplDependente] = useState('🌿 A Loja Maçônica Acácia de Serra Negra Nº 271 saúda o Ir∴ {nome_irmao} pelo aniversário de {parentesco} {nome_dependente}! Felicidades a toda a família! 🎂')
   const associadoIdRef = React.useRef(null)
@@ -57,6 +58,26 @@ export default function PortalMembro() {
     setAssociadoId(assoc?.id || null)
     associadoIdRef.current = assoc?.id || null
     setEhBode(assoc?.bodes_asfalto === true)
+
+    // Status pessoal de presenca nos Bodes do Asfalto (somente para quem tem bodes_asfalto=true)
+    if (assoc?.bodes_asfalto === true && assoc?.id) {
+      try {
+        const anoAtualBodes = hojeStr().split('-')[0]
+        const { data: atasAno } = await supabase.from('bodes_atas')
+          .select('id').gte('data', `${anoAtualBodes}-01-01`).lte('data', `${anoAtualBodes}-12-31`)
+        const atasIds = (atasAno || []).map(a => a.id)
+        let presencasCount = 0
+        if (atasIds.length > 0) {
+          const { count } = await supabase.from('bodes_presencas')
+            .select('id', { count: 'exact', head: true })
+            .eq('membro_tipo', 'associado').eq('membro_id', assoc.id).in('ata_id', atasIds)
+          presencasCount = count || 0
+        }
+        const { data: cfgMin } = await supabase.from('bodes_config').select('valor').eq('chave', 'presencas_minimas_ano').maybeSingle()
+        const minimoBodes = parseInt(cfgMin?.valor || '2', 10)
+        setBodesStatus({ presencas: presencasCount, minimo: minimoBodes })
+      } catch(e) { console.error('Erro ao calcular status Bodes:', e) }
+    }
 
     // Buscar templates de aniversario
     const { data: tpls } = await supabase.from('mensagens_templates')
@@ -241,11 +262,14 @@ export default function PortalMembro() {
             { icon:'⚒️', label:'Quadro de Oficiais', sub:'Cargos da loja', rota:'/oficiais' },
             { icon:'📅', label:'Calendário', sub:'Próximos eventos', rota:'/calendario' },
             { icon:'💰', label:'Financeiro', sub:'Minha situação', rota:null, emBreve:true },
-            ...(ehBode ? [{ icon:'🏍️', label:'Bodes do Asfalto', sub:'Área do motoclub', rota:null, emBreve:true }] : []),
+            ...(ehBode ? [{ icon:'🏍️', label:'Bodes do Asfalto', sub:'Área do motoclube', rota:'/bodes-asfalto',
+              badge: bodesStatus ? `${bodesStatus.presencas}/${bodesStatus.minimo}` : null,
+              badgeOk: bodesStatus ? bodesStatus.presencas >= bodesStatus.minimo : true }] : []),
           ].map((c, i) => (
             <button key={i} onClick={() => !c.emBreve && c.rota && navigate(c.rota)}
               style={{ background: c.emBreve ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.12)', border:'none', borderRadius:16, padding:'16px 14px', cursor: c.emBreve ? 'default' : 'pointer', textAlign:'left', position:'relative' }}>
               {c.emBreve && <span style={{ position:'absolute', top:8, right:8, fontSize:9, background:'rgba(255,255,255,0.2)', color:'rgba(255,255,255,0.6)', borderRadius:10, padding:'2px 6px' }}>em breve</span>}
+              {c.badge && <span style={{ position:'absolute', top:8, right:8, fontSize:9, fontWeight:700, background: c.badgeOk ? 'rgba(67,160,71,0.9)' : 'rgba(245,158,11,0.9)', color:'#fff', borderRadius:10, padding:'2px 7px' }}>{c.badge}</span>}
               <div style={{ fontSize:22, marginBottom:6 }}>{c.icon}</div>
               <div translate="no" style={{ color: c.emBreve ? 'rgba(255,255,255,0.5)' : '#fff', fontSize:13, fontWeight:600, lineHeight:1.2 }}>{c.label}</div>
               <div style={{ color:'rgba(255,255,255,0.4)', fontSize:11, marginTop:3 }}>{c.sub}</div>
