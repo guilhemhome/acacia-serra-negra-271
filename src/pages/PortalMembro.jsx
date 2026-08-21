@@ -159,9 +159,15 @@ export default function PortalMembro() {
     const maiorGrau = (graus||[]).reduce((acc, g) => (grauMap[g.grau] || 0) > (grauMap[acc] || 0) ? g.grau : acc, '')
     setMeuGrau(maiorGrau)
 
-    const { data: cargosProprio } = await supabase.from('cargos_historico')
-      .select('cargo').eq('associado_id', assoc.id).eq('em_exercicio', true).maybeSingle()
-    setMeuCargo(cargosProprio?.cargo || '')
+    // Titulo da saudacao reflete apenas cargo da LOJA, nunca cargo dos Bodes do Asfalto
+    // (que tem sua propria exibicao dentro do modulo). Usa lista (nao maybeSingle) porque
+    // uma pessoa pode ter 1 cargo de loja + 1 cargo dos Bodes ativos ao mesmo tempo.
+    const { data: meusCargosAtivos } = await supabase.from('cargos_historico')
+      .select('cargo').eq('associado_id', assoc.id).eq('em_exercicio', true)
+    const { data: cargosBodesList } = await supabase.from('cargos').select('nome').eq('categoria', 'Bodes do Asfalto')
+    const nomesBodes = new Set((cargosBodesList || []).map(c => c.nome))
+    const cargoLojaAtivo = (meusCargosAtivos || []).find(c => !nomesBodes.has(c.cargo))
+    setMeuCargo(cargoLojaAtivo?.cargo || '')
 
     const { data: foiVMList } = await supabase.from('cargos_historico')
       .select('id, associado_id').eq('cargo', 'Venerável Mestre')
