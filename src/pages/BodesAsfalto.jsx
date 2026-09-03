@@ -57,6 +57,9 @@ export default function BodesAsfalto() {
       .select('id, bodes_asfalto').eq('user_id', session.user.id).maybeSingle()
     if (!assoc) { navigate('/membro'); return }
     setMeuAssocId(assoc.id)
+    const { data: perfilAcesso } = await supabase.from('perfis_acesso')
+      .select('is_admin').eq('user_id', session.user.id).maybeSingle()
+    const souAdmSistema = perfilAcesso?.is_admin === true
 
     const { data: cargosBodes } = await supabase.from('cargos').select('nome').eq('categoria', 'Bodes do Asfalto')
     const nomesCargos = (cargosBodes || []).map(c => c.nome)
@@ -67,10 +70,10 @@ export default function BodesAsfalto() {
         .in('cargo', nomesCargos).maybeSingle()
       cargoAtivo = meuCargo?.cargo || ''
     }
-    setMeuCargoBodes(cargoAtivo)
-    setEhGestor(!!cargoAtivo)
+    setMeuCargoBodes(cargoAtivo || (souAdmSistema ? 'Administrador' : ''))
+    setEhGestor(!!cargoAtivo || souAdmSistema)
 
-    if (cargoAtivo) {
+    if (cargoAtivo || souAdmSistema) {
       await carregarMembros()
       await carregarFinanceiro()
       await carregarAtas()
