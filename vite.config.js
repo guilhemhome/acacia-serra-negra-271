@@ -10,6 +10,10 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: {
+        clientsClaim: true,
+        skipWaiting: true
+      },
       includeAssets: ['logo-acacia.png'],
       manifest: {
         name: 'Acácia de Serra Negra 271',
