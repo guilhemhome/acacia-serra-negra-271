@@ -9,7 +9,7 @@ export default function Dashboard() {
   const [resumoPresencas, setResumoPresencas] = useState(null)
   const [aniversarios, setAniversarios] = useState([])
   const [anivHoje, setAnivHoje] = useState(0)
-  const [usuario, setUsuario] = useState({ email: '', perfil: 'Membro', nome: '', apelido: '', cargoAtual: '', cargoMaconico: '' })
+  const [usuario, setUsuario] = useState({ email: '', perfil: '', nome: '', apelido: '', cargoAtual: '', cargoMaconico: '' })
   const [grauUsuario, setGrauUsuario] = useState(null)
   const [mestreInstalado, setMestreInstalado] = useState(false)
   const [carregando, setCarregando] = useState(true)
