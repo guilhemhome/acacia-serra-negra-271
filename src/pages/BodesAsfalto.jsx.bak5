@@ -14,7 +14,6 @@ export default function BodesAsfalto() {
   const [carregando, setCarregando] = useState(true)
   const [meuAssocId, setMeuAssocId] = useState(null)
   const [ehGestor, setEhGestor] = useState(false)
-  const [destinoVoltar, setDestinoVoltar] = useState('/membro')
   const [meuCargoBodes, setMeuCargoBodes] = useState('')
   const [aba, setAba] = useState('membros')
   const [msg, setMsg] = useState('')
@@ -59,11 +58,8 @@ export default function BodesAsfalto() {
     if (!assoc) { navigate('/membro'); return }
     setMeuAssocId(assoc.id)
     const { data: perfilAcesso } = await supabase.from('perfis_acesso')
-      .select('perfil, is_admin').eq('user_id', session.user.id).maybeSingle()
+      .select('is_admin').eq('user_id', session.user.id).maybeSingle()
     const souAdmSistema = perfilAcesso?.is_admin === true
-    const PERFIS_MEMBRO = ['Membro', 'Ritualística', 'Hospitalaria']
-    const meuPerfilLoja = perfilAcesso?.perfil || 'Membro'
-    setDestinoVoltar(souAdmSistema || !PERFIS_MEMBRO.includes(meuPerfilLoja) ? '/dashboard' : '/membro')
 
     const { data: cargosBodes } = await supabase.from('cargos').select('nome').eq('categoria', 'Bodes do Asfalto')
     const nomesCargos = (cargosBodes || []).map(c => c.nome)
@@ -353,7 +349,7 @@ export default function BodesAsfalto() {
 
         {/* Header */}
         <div style={{ position:'relative', textAlign:'center', marginBottom:24 }}>
-          <button onClick={() => navigate(destinoVoltar)}
+          <button onClick={() => navigate('/membro')}
             style={{ position:'absolute', left:0, top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,0.15)', border:'none', borderRadius:8, color:'#fff', padding:'8px 14px', cursor:'pointer', fontSize:18 }}>←</button>
           <div style={{ fontSize:40, marginBottom:4 }}>🏍️</div>
           <h1 style={{ color:'#fff', fontSize:'1.5rem', fontWeight:'bold', margin:0 }}>Bodes do Asfalto</h1>
